@@ -29,15 +29,15 @@ export default function ProductPage({ params }: ProductPageProps) {
         <Header />
         <main className="flex-1 max-w-7xl mx-auto px-4 py-16 w-full">
           <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+            <h1 className="text-3xl md:text-4xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
               Product Not Found
             </h1>
-            <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+            <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-8">
               The product you're looking for doesn't exist or has been removed.
             </p>
             <Link
               href="/"
-              className="inline-block py-3 px-8 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+              className="inline-block py-3 px-8 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
             >
               BACK TO HOME
             </Link>
@@ -84,7 +84,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       <main className="flex-1">
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 text-sm font-[family-name:var(--font-montserrat)] text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm font-[family-name:var(--font-nunito)] text-muted-foreground">
             <Link href="/" className="hover:text-gold-dark transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <Link href={`/category/${product.category}`} className="hover:text-gold-dark transition-colors capitalize">
