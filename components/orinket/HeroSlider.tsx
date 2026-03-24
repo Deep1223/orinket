@@ -63,15 +63,15 @@ export default function HeroSlider() {
           />
           <div className="absolute inset-0 bg-black/20" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-            <p className="text-sm md:text-base tracking-[0.3em] mb-3 font-[family-name:var(--font-montserrat)] uppercase">
+            <p className="text-sm md:text-base tracking-[0.3em] mb-3 font-[family-name:var(--font-nunito)] uppercase">
               {slide.subtitle}
             </p>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[0.15em] mb-8 font-[family-name:var(--font-cormorant)]">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[0.15em] mb-8 font-[family-name:var(--font-nunito)]">
               {slide.title}
             </h2>
             <Link
               href={slide.href}
-              className="px-8 py-3 border-2 border-white text-white text-sm tracking-[0.2em] hover:bg-white hover:text-foreground transition-all duration-300 font-[family-name:var(--font-montserrat)]"
+              className="px-8 py-3 border-2 border-white text-white text-sm tracking-[0.2em] hover:bg-white hover:text-foreground transition-all duration-300 font-[family-name:var(--font-nunito)]"
             >
               {slide.cta}
             </Link>

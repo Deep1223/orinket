@@ -34,15 +34,15 @@ export default function Header() {
   }
 
   return (
-    <header className="w-full sticky top-0 z-40 bg-white">
+    <header className="w-full relative z-40 bg-white">
       {/* Top Banner */}
-      <div className="bg-[#2d2d2d] text-white text-center py-2 px-4 text-xs md:text-sm font-[family-name:var(--font-montserrat)] tracking-wide">
+      <div className="bg-[#2d2d2d] text-white text-center py-2 px-4 text-xs md:text-sm font-[family-name:var(--font-nunito)] tracking-wide">
         <span className="hidden md:inline">BUY 2 AT Rs.1898 | USE CODE : EXTRA100 | BUY 3 AT Rs.2,999 | BUY 4 AT Rs.3,499 | BUY 6 AT Rs.4,999</span>
         <span className="md:hidden">BUY 2 AT Rs.1898 | USE CODE : EXTRA100</span>
       </div>
 
       {/* Secondary Banner */}
-      <div className="bg-gold-light text-gold-dark text-center py-2 px-4 text-xs md:text-sm font-[family-name:var(--font-montserrat)]">
+      <div className="bg-gold-light text-gold-dark text-center py-2 px-4 text-xs md:text-sm font-[family-name:var(--font-nunito)]">
         <span>FREE STUDS worth Rs.1495 on orders above Rs.2999</span>
       </div>
 
@@ -78,7 +78,7 @@ export default function Header() {
               <Link href="/wishlist" className="p-2 hover:text-gold-dark transition-colors hidden md:block relative">
                 <Heart className="w-5 h-5" />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-montserrat)]">
+                  <span                 className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)]">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -88,7 +88,7 @@ export default function Header() {
               </Link>
               <Link href="/cart" className="p-2 hover:text-gold-dark transition-colors relative">
                 <ShoppingBag className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-montserrat)]">
+                <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)]">
                   {cartCount}
                 </span>
               </Link>
@@ -101,7 +101,7 @@ export default function Header() {
               <Link
                 key={category.name}
                 href={category.href}
-                className="text-xs font-[family-name:var(--font-montserrat)] tracking-wider text-foreground hover:text-gold-dark transition-colors whitespace-nowrap"
+                className="text-xs font-[family-name:var(--font-nunito)] tracking-wider text-foreground hover:text-gold-dark transition-colors whitespace-nowrap"
               >
                 {category.name}
               </Link>
@@ -122,13 +122,13 @@ export default function Header() {
                   placeholder="Search for necklaces, earrings, bracelets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-border rounded-sm focus:outline-none focus:border-gold font-[family-name:var(--font-montserrat)] text-sm"
+                  className="w-full pl-12 pr-4 py-3 border border-border rounded-sm focus:outline-none focus:border-gold font-[family-name:var(--font-nunito)] text-sm"
                   autoFocus
                 />
               </div>
               <button 
                 type="submit"
-                className="px-6 py-3 bg-foreground text-white text-sm font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+                className="px-6 py-3 bg-foreground text-white text-sm font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
               >
                 SEARCH
               </button>
@@ -160,7 +160,7 @@ export default function Header() {
                 <Link
                   key={category.name}
                   href={category.href}
-                  className="text-lg font-[family-name:var(--font-montserrat)] tracking-wider py-2 border-b border-border"
+                  className="text-lg font-[family-name:var(--font-nunito)] tracking-wider py-2 border-b border-border"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {category.name}
@@ -170,11 +170,11 @@ export default function Header() {
             <div className="mt-8 flex items-center gap-6">
               <Link href="/wishlist" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
                 <Heart className="w-5 h-5" />
-                <span className="font-[family-name:var(--font-montserrat)]">Wishlist</span>
+                <span className="font-[family-name:var(--font-nunito)]">Wishlist</span>
               </Link>
               <Link href="/account" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
                 <User className="w-5 h-5" />
-                <span className="font-[family-name:var(--font-montserrat)]">Account</span>
+                <span className="font-[family-name:var(--font-nunito)]">Account</span>
               </Link>
             </div>
           </div>

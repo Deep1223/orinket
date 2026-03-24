@@ -54,7 +54,7 @@ function SearchContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for necklaces, earrings, bracelets..."
-                  className="w-full pl-12 pr-4 py-4 border border-border bg-white font-[family-name:var(--font-montserrat)] text-sm focus:outline-none focus:border-gold"
+                  className="w-full pl-12 pr-4 py-4 border border-border bg-white font-[family-name:var(--font-nunito)] text-sm focus:outline-none focus:border-gold"
                 />
                 {searchQuery && (
                   <button
@@ -76,7 +76,7 @@ function SearchContent() {
             <div>
               {searchQuery ? (
                 <>
-                  <h1 className="text-2xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground">
+                  <h1 className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground">
                     Search results for "{searchQuery}"
                   </h1>
                   <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mt-1">

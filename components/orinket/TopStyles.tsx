@@ -127,21 +127,22 @@ export default function TopStyles() {
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-8 font-[family-name:var(--font-cormorant)]">
+          <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-8 font-[family-name:var(--font-nunito)] animate-fadeIn">
             ORINKET TOP STYLES
           </h2>
           
           {/* Category Tabs */}
           <div className="flex flex-wrap justify-center gap-2 md:gap-4">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 text-xs md:text-sm tracking-wider font-[family-name:var(--font-montserrat)] transition-all ${
+                className={`px-4 py-2 text-xs md:text-sm tracking-wider font-[family-name:var(--font-nunito)] transition-all duration-300 animate-slideUp hover:shadow-sm ${
                   activeCategory === category
-                    ? "bg-foreground text-background"
+                    ? "bg-foreground text-background shadow-md"
                     : "bg-transparent text-foreground hover:bg-cream"
                 }`}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 {category}
               </button>
@@ -151,8 +152,8 @@ export default function TopStyles() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {filteredProducts.slice(0, 8).map((product) => (
-            <div key={product.id} className="group relative">
+          {filteredProducts.slice(0, 8).map((product, index) => (
+            <div key={product.id} className="group relative animate-slideUp" style={{ animationDelay: `${index * 75}ms` }}>
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden bg-cream mb-4">
                 <Image
@@ -174,12 +175,12 @@ export default function TopStyles() {
                 </button>
 
                 {/* Discount Badge */}
-                <span className="absolute top-3 left-3 bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)]">
+                <span className="absolute top-3 left-3 bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)]">
                   {product.discount}% OFF
                 </span>
 
                 {/* Quick Add Button */}
-                <button className="absolute bottom-0 left-0 right-0 bg-foreground text-background py-3 text-sm tracking-wider font-[family-name:var(--font-montserrat)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button className="absolute bottom-0 left-0 right-0 bg-foreground text-background py-3 text-sm tracking-wider font-[family-name:var(--font-nunito)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <ShoppingBag className="w-4 h-4" />
                   ADD TO BAG
                 </button>
@@ -187,10 +188,10 @@ export default function TopStyles() {
 
               {/* Product Info */}
               <Link href={`/product/${product.id}`} className="block">
-                <h3 className="text-sm md:text-base font-medium mb-2 font-[family-name:var(--font-cormorant)] group-hover:text-gold-dark transition-colors line-clamp-2">
+                <h3 className="text-sm md:text-base font-medium mb-2 font-[family-name:var(--font-nunito)] group-hover:text-gold-dark transition-colors line-clamp-2">
                   {product.name}
                 </h3>
-                <div className="flex items-center gap-2 font-[family-name:var(--font-montserrat)]">
+                <div className="flex items-center gap-2 font-[family-name:var(--font-nunito)]">
                   <span className="text-sm font-medium">{formatPrice(product.price)}</span>
                   <span className="text-xs text-muted-foreground line-through">
                     {formatPrice(product.originalPrice)}
@@ -205,7 +206,7 @@ export default function TopStyles() {
         <div className="text-center mt-12">
           <Link
             href="/collections/all"
-            className="inline-block px-8 py-3 border border-foreground text-foreground text-sm tracking-[0.2em] hover:bg-foreground hover:text-background transition-all font-[family-name:var(--font-montserrat)]"
+            className="inline-block px-8 py-3 border border-foreground text-foreground text-sm tracking-[0.2em] hover:bg-foreground hover:text-background transition-all duration-300 font-[family-name:var(--font-nunito)] animate-slideUp hover:shadow-lg" style={{ animationDelay: "600ms" }}
           >
             VIEW ALL
           </Link>

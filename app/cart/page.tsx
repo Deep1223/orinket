@@ -21,15 +21,15 @@ export default function CartPage() {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center px-4 py-16">
             <ShoppingBag className="w-16 h-16 mx-auto mb-6 text-muted-foreground" />
-            <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+            <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
               Your Bag is Empty
             </h1>
-            <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+            <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-8">
               Looks like you haven't added anything to your bag yet.
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               CONTINUE SHOPPING
@@ -47,7 +47,7 @@ export default function CartPage() {
 
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-8">
+          <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-8">
             Shopping Bag ({cartItems.length} {cartItems.length === 1 ? "item" : "items"})
           </h1>
 
@@ -72,7 +72,7 @@ export default function CartPage() {
                   <div className="flex-1 flex flex-col">
                     <div className="flex justify-between">
                       <Link href={`/product/${item.id}`}>
-                        <h3 className="font-[family-name:var(--font-montserrat)] text-foreground hover:text-gold-dark transition-colors">
+                        <h3 className="font-[family-name:var(--font-nunito)] text-foreground hover:text-gold-dark transition-colors">
                           {item.name}
                         </h3>
                       </Link>
