@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Montserrat } from 'next/font/google'
+import { Cormorant_Garamond, Nunito_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { CartProvider } from '@/context/CartContext'
 import './globals.css'
@@ -10,10 +10,10 @@ const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant'
 });
 
-const montserrat = Montserrat({ 
+const nunitoSans = Nunito_Sans({ 
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-montserrat'
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-nunito'
 });
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cormorant.variable} ${montserrat.variable} font-sans antialiased`}>
+      <body className={`${cormorant.variable} ${nunitoSans.variable} font-sans antialiased`}>
         <CartProvider>
           {children}
         </CartProvider>

@@ -32,7 +32,7 @@ export default function BlogSection() {
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-12 text-center font-[family-name:var(--font-cormorant)]">
+        <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-12 text-center font-[family-name:var(--font-nunito)]">
           BLOGS
         </h2>
 
@@ -52,14 +52,14 @@ export default function BlogSection() {
                 />
               </div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm text-gold font-[family-name:var(--font-montserrat)]">
+                <span className="text-sm text-gold font-[family-name:var(--font-nunito)]">
                   {blog.date}
                 </span>
               </div>
-              <h3 className="text-lg md:text-xl font-[family-name:var(--font-cormorant)] mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
+              <h3 className="text-lg md:text-xl font-[family-name:var(--font-nunito)] mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
                 {blog.title}
               </h3>
-              <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] line-clamp-2">
+              <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] line-clamp-2">
                 {blog.excerpt}
               </p>
             </Link>
@@ -69,7 +69,7 @@ export default function BlogSection() {
         <div className="text-center mt-12">
           <Link
             href="/blog"
-            className="inline-block px-8 py-3 border border-foreground text-foreground text-sm tracking-[0.2em] hover:bg-foreground hover:text-background transition-all font-[family-name:var(--font-montserrat)]"
+            className="inline-block px-8 py-3 border border-foreground text-foreground text-sm tracking-[0.2em] hover:bg-foreground hover:text-background transition-all font-[family-name:var(--font-nunito)]"
           >
             READ MORE
           </Link>
