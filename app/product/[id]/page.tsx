@@ -9,7 +9,6 @@ import Footer from "@/components/orinket/Footer"
 import ProductCard from "@/components/orinket/ProductCard"
 import { useCart } from "@/context/CartContext"
 import { getProductById, products } from "@/data/products"
-import { notFound } from "next/navigation"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -21,10 +20,32 @@ export default function ProductPage({ params }: ProductPageProps) {
   
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [activeTab, setActiveTab] = useState("specifications")
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart()
 
   if (!product) {
-    notFound()
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 max-w-7xl mx-auto px-4 py-16 w-full">
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+              Product Not Found
+            </h1>
+            <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+              The product you're looking for doesn't exist or has been removed.
+            </p>
+            <Link
+              href="/"
+              className="inline-block py-3 px-8 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+            >
+              BACK TO HOME
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   const inWishlist = isInWishlist(product.id)
@@ -258,23 +279,156 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </div>
               </div>
 
-              {/* Product Details */}
+              {/* Tabs Section */}
               <div className="border-t border-border pt-6">
-                <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
-                  PRODUCT DETAILS
-                </h3>
-                <ul className="space-y-2">
-                  {product.details.map((detail, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
-                      <span className="w-1.5 h-1.5 bg-gold rounded-full" />
-                      {detail}
-                    </li>
+                {/* Tab Navigation */}
+                <div className="flex gap-6 mb-6 border-b border-border">
+                  {["specifications", "material", "shipping", "size"].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`pb-4 font-[family-name:var(--font-montserrat)] text-sm font-semibold tracking-wider transition-colors ${
+                        activeTab === tab
+                          ? "text-foreground border-b-2 border-gold -mb-6 pb-4"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab === "specifications" && "SPECIFICATIONS"}
+                      {tab === "material" && "MATERIAL & CARE"}
+                      {tab === "shipping" && "SHIPPING INFO"}
+                      {tab === "size" && "SIZE GUIDE"}
+                    </button>
                   ))}
-                </ul>
+                </div>
+
+                {/* Tab Content */}
+                {activeTab === "specifications" && (
+                  <div>
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                      PRODUCT DETAILS
+                    </h3>
+                    <ul className="space-y-3">
+                      {product.details.map((detail, index) => (
+                        <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                          <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {activeTab === "material" && (
+                  <div>
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                      MATERIAL
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mb-6">
+                      {product.material}
+                    </p>
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                      CARE INSTRUCTIONS
+                    </h3>
+                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Keep away from water, perfume, and harsh chemicals
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Store in a cool, dry place
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Clean with a soft, dry cloth
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Avoid extreme temperatures
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {activeTab === "shipping" && (
+                  <div>
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                      SHIPPING INFORMATION
+                    </h3>
+                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Free shipping on all orders across India
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Delivery within 5-7 business days
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        30 days easy returns and exchanges
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
+                        Secure packaging and insured shipment
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {activeTab === "size" && (
+                  <div>
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                      SIZE GUIDE
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mb-4">
+                      Most of our jewelry pieces are adjustable or one size fits all. For rings, please refer to your ring size chart.
+                    </p>
+                    <table className="w-full text-sm font-[family-name:var(--font-montserrat)]">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-2 text-foreground font-semibold">Type</th>
+                          <th className="text-left py-2 text-foreground font-semibold">Size</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-border">
+                          <td className="py-2 text-muted-foreground">Bracelets</td>
+                          <td className="py-2 text-muted-foreground">One size fits most (adjustable)</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="py-2 text-muted-foreground">Necklaces</td>
+                          <td className="py-2 text-muted-foreground">16-18 inches (adjustable)</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 text-muted-foreground">Rings</td>
+                          <td className="py-2 text-muted-foreground">Multiple sizes available</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Complete Your Look Section */}
+        {relatedProducts.length > 0 && (
+          <div className="max-w-7xl mx-auto px-4 py-12 border-t border-border">
+            <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground text-center mb-2">
+              Complete Your Look
+            </h2>
+            <p className="text-center text-muted-foreground font-[family-name:var(--font-montserrat)] text-sm mb-8">
+              Explore complementary pieces to complete your style
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {relatedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
