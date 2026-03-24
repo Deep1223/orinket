@@ -75,15 +75,15 @@ export default function WishlistPage() {
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground">
+            <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground animate-fadeIn">
               My Wishlist ({wishlistItems.length} {wishlistItems.length === 1 ? "item" : "items"})
             </h1>
           </div>
 
           {/* Wishlist Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {wishlistItems.map((item) => (
-              <div key={item.id} className="group relative">
+            {wishlistItems.map((item, index) => (
+              <div key={item.id} className="group relative animate-slideUp" style={{ animationDelay: `${index * 75}ms` }}>
                 <Link href={`/product/${item.id}`} className="block">
                   <div className="relative overflow-hidden bg-cream-dark rounded-sm">
                     <div className="aspect-square relative">
