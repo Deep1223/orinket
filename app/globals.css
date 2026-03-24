@@ -46,6 +46,11 @@
   --cream-dark: oklch(0.94 0.02 85);
 }
 
+@theme inline {
+  --font-sans: 'Nunito Sans', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

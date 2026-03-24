@@ -59,17 +59,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.isNew && (
-            <span className="bg-foreground text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider animate-slideInLeft">
+            <span className="bg-foreground text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft">
               NEW
             </span>
           )}
           {product.isBestseller && (
-            <span className="bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider animate-slideInLeft" style={{ animationDelay: "50ms" }}>
+            <span className="bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft" style={{ animationDelay: "50ms" }}>
               BESTSELLER
             </span>
           )}
           {product.discount && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider animate-slideInLeft" style={{ animationDelay: "100ms" }}>
+            <span className="bg-red-500 text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft" style={{ animationDelay: "100ms" }}>
               -{product.discount}%
             </span>
           )}
@@ -99,7 +99,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
           <button
             onClick={handleAddToCart}
-            className="w-full py-3 bg-foreground text-white text-sm font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-all duration-300"
+            className="w-full py-3 bg-foreground text-white text-sm font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-all duration-300"
           >
             ADD TO BAG
           </button>
@@ -109,17 +109,17 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Product Info */}
       <div className="mt-4 text-center flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-gold">
+          <h3 className="text-sm font-[family-name:var(--font-nunito)] text-foreground mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-gold">
             {product.name}
           </h3>
         </div>
         <div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-base font-semibold font-[family-name:var(--font-montserrat)] text-foreground transition-colors duration-300 group-hover:text-gold">
+            <span className="text-base font-semibold font-[family-name:var(--font-nunito)] text-foreground transition-colors duration-300 group-hover:text-gold">
               Rs.{product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-montserrat)]">
+              <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-nunito)]">
                 Rs.{product.originalPrice.toLocaleString()}
               </span>
             )}
@@ -138,7 +138,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </svg>
               ))}
             </div>
-            <span className="text-xs text-muted-foreground font-[family-name:var(--font-montserrat)]">
+            <span className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">
               ({product.reviews})
             </span>
           </div>

@@ -49,7 +49,7 @@ export default function Footer() {
               <h3 className="text-2xl font-light tracking-[0.1em] mb-2 font-[family-name:var(--font-cormorant)]">
                 JOIN THE ORINKET FAMILY
               </h3>
-              <p className="text-white/70 font-[family-name:var(--font-montserrat)] text-sm">
+              <p className="text-white/70 font-[family-name:var(--font-nunito)] text-sm">
                 Subscribe for exclusive offers, new arrivals & styling tips
               </p>
             </div>
@@ -59,12 +59,12 @@ export default function Footer() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-gold font-[family-name:var(--font-montserrat)] text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-gold font-[family-name:var(--font-nunito)] text-sm"
                 />
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gold text-white text-sm tracking-wider hover:bg-gold-dark transition-colors font-[family-name:var(--font-montserrat)]"
+                className="px-6 py-3 bg-gold text-white text-sm tracking-wider hover:bg-gold-dark transition-colors font-[family-name:var(--font-nunito)]"
               >
                 SUBSCRIBE
               </button>
@@ -83,7 +83,7 @@ export default function Footer() {
                 ORINKET
               </h2>
             </Link>
-            <p className="text-white/70 text-sm font-[family-name:var(--font-montserrat)] mb-6 leading-relaxed">
+            <p className="text-white/70 text-sm font-[family-name:var(--font-nunito)] mb-6 leading-relaxed">
               Everyday demi-fine jewellery. Premium quality, accessible luxury.
             </p>
             <div className="flex gap-4">
@@ -104,7 +104,7 @@ export default function Footer() {
 
           {/* Shop Links */}
           <div>
-            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-montserrat)]">
+            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-nunito)]">
               SHOP
             </h4>
             <ul className="space-y-3">
@@ -112,7 +112,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-montserrat)]"
+                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-nunito)]"
                   >
                     {link.name}
                   </Link>
@@ -123,7 +123,7 @@ export default function Footer() {
 
           {/* Company Links */}
           <div>
-            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-montserrat)]">
+            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-nunito)]">
               COMPANY
             </h4>
             <ul className="space-y-3">
@@ -131,7 +131,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-montserrat)]"
+                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-nunito)]"
                   >
                     {link.name}
                   </Link>
@@ -142,7 +142,7 @@ export default function Footer() {
 
           {/* Support Links */}
           <div>
-            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-montserrat)]">
+            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-nunito)]">
               SUPPORT
             </h4>
             <ul className="space-y-3">
@@ -150,7 +150,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-montserrat)]"
+                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-nunito)]"
                   >
                     {link.name}
                   </Link>
@@ -161,7 +161,7 @@ export default function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-montserrat)]">
+            <h4 className="text-sm tracking-wider mb-4 font-[family-name:var(--font-nunito)]">
               LEGAL
             </h4>
             <ul className="space-y-3">
@@ -169,7 +169,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-montserrat)]"
+                    className="text-white/70 text-sm hover:text-white transition-colors font-[family-name:var(--font-nunito)]"
                   >
                     {link.name}
                   </Link>
@@ -184,18 +184,18 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/50 text-sm font-[family-name:var(--font-montserrat)]">
+            <p className="text-white/50 text-sm font-[family-name:var(--font-nunito)]">
               &copy; {new Date().getFullYear()} Orinket. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
-              <span className="text-white/50 text-sm font-[family-name:var(--font-montserrat)]">
+              <span className="text-white/50 text-sm font-[family-name:var(--font-nunito)]">
                 We accept:
               </span>
               <div className="flex gap-2">
                 {["Visa", "Mastercard", "UPI", "PayTM"].map((payment) => (
                   <span
                     key={payment}
-                    className="px-2 py-1 bg-white/10 text-white/70 text-xs font-[family-name:var(--font-montserrat)]"
+                    className="px-2 py-1 bg-white/10 text-white/70 text-xs font-[family-name:var(--font-nunito)]"
                   >
                     {payment}
                   </span>
