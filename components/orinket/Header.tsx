@@ -34,7 +34,7 @@ export default function Header() {
   }
 
   return (
-    <header className="w-full sticky top-0 z-40 bg-white">
+    <header className="w-full relative z-40 bg-white">
       {/* Top Banner */}
       <div className="bg-[#2d2d2d] text-white text-center py-2 px-4 text-xs md:text-sm font-[family-name:var(--font-nunito)] tracking-wide">
         <span className="hidden md:inline">BUY 2 AT Rs.1898 | USE CODE : EXTRA100 | BUY 3 AT Rs.2,999 | BUY 4 AT Rs.3,499 | BUY 6 AT Rs.4,999</span>
