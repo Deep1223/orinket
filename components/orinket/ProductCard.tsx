@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingBag } from "lucide-react"
+import { Heart, ShoppingBag, Star } from "lucide-react"
 import { useCart } from "@/context/CartContext"
 import type { Product } from "@/data/dummyProducts"
 
@@ -41,101 +41,117 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0
+
   return (
     <Link href={`/product/${product.id}`} className="group block h-full">
-      <div className="relative overflow-hidden bg-cream-dark rounded-sm h-full flex flex-col transition-all duration-300 hover:shadow-lg animate-fadeIn">
+      <div className="relative overflow-hidden rounded-2xl h-full flex flex-col transition-all duration-500 hover:shadow-2xl bg-white hover:-translate-y-1 animate-fadeIn border border-gray-100">
         {/* Product Image */}
-        <div className="aspect-square relative overflow-hidden">
+        <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          {/* Overlay effect on hover */}
-          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+          {/* Subtle overlay on hover */}
+          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-3 transition-opacity duration-300" />
         </div>
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        {/* Premium Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {product.isNew && (
-            <span className="bg-foreground text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft">
-              NEW
+            <span className="bg-white/95 backdrop-blur-md text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-gray-200 animate-slideInLeft">
+              ✨ NEW
             </span>
           )}
           {product.isBestseller && (
-            <span className="bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft" style={{ animationDelay: "50ms" }}>
-              BESTSELLER
+            <span className="bg-gray-900/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-slideInLeft" style={{ animationDelay: "50ms" }}>
+              ⭐ BESTSELLER
+            </span>
+          )}
+          {discount > 0 && (
+            <span className="bg-red-500/95 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+              {discount}% OFF
             </span>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-x-2 group-hover:translate-x-0">
+        <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
           <button
             onClick={handleWishlist}
-            className={`p-2 rounded-full shadow-md transition-all duration-300 transform hover:scale-110 ${
-              inWishlist ? "bg-gold text-white" : "bg-white hover:bg-gold hover:text-white"
+            className={`p-2.5 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
+              inWishlist 
+                ? "bg-red-500 text-white" 
+                : "bg-white/95 hover:bg-red-500 hover:text-white text-gray-600"
             }`}
             aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={`w-4 h-4 transition-all duration-300 ${inWishlist ? "fill-current scale-110" : ""}`} />
+            <Heart className={`w-5 h-5 transition-all duration-300 ${inWishlist ? "fill-current" : ""}`} />
           </button>
           <button
             onClick={handleAddToCart}
-            className="p-2 bg-white rounded-full shadow-md hover:bg-gold hover:text-white transition-all duration-300 transform hover:scale-110"
+            className="p-2.5 bg-white/95 backdrop-blur-md rounded-full shadow-lg hover:bg-gray-900 hover:text-white text-gray-600 transition-all duration-300 transform hover:scale-110"
             aria-label="Add to cart"
           >
-            <ShoppingBag className="w-4 h-4 transition-all duration-300" />
+            <ShoppingBag className="w-5 h-5 transition-all duration-300" />
           </button>
         </div>
 
         {/* Quick Add Button */}
-        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
           <button
             onClick={handleAddToCart}
-            className="w-full py-3 bg-foreground text-white text-sm font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-all duration-300"
+            className="w-full py-3.5 bg-gradient-to-r from-gray-900 to-black text-white text-sm font-semibold font-[family-name:var(--font-nunito)] tracking-wider hover:from-gray-800 hover:to-gray-900 transition-all duration-300 flex items-center justify-center gap-2"
           >
+            <ShoppingBag className="w-4 h-4" />
             ADD TO BAG
           </button>
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="mt-4 text-center flex-1 flex flex-col justify-between">
+      {/* Product Info - Premium Spacing */}
+      <div className="mt-5 px-1 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-[family-name:var(--font-nunito)] text-foreground mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-gold">
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-gray-900 mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-yellow-700 leading-tight">
             {product.name}
           </h3>
         </div>
         <div>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-base font-semibold font-[family-name:var(--font-nunito)] text-foreground transition-colors duration-300 group-hover:text-gold">
-              Rs.{product.price.toLocaleString()}
+          {/* Rating */}
+          {product.rating && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 transition-all duration-300 ${
+                      i < Math.floor(product.rating!)
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-gray-600 font-medium">
+                {product.rating}
+              </span>
+              <span className="text-xs text-gray-500">
+                ({product.reviews || 0})
+              </span>
+            </div>
+          )}
+          {/* Price Display */}
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-gray-900">
+              ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-nunito)]">
-                Rs.{product.originalPrice.toLocaleString()}
+              <span className="text-sm text-gray-500 line-through font-[family-name:var(--font-nunito)]">
+                ₹{product.originalPrice.toLocaleString()}
               </span>
             )}
-          </div>
-          {/* Rating */}
-          <div className="flex items-center justify-center gap-1">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`w-3 h-3 transition-all duration-300 ${i < Math.floor(product.rating || 0) ? "text-gold" : "text-gray-300"}`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">
-              ({product.reviews || 0})
-            </span>
           </div>
         </div>
       </div>
