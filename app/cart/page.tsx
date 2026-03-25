@@ -86,17 +86,17 @@ export default function CartPage() {
                     </div>
 
                     {item.variant && (
-                      <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mt-1">
+                      <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] mt-1">
                         {item.variant}
                       </p>
                     )}
 
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="font-semibold font-[family-name:var(--font-montserrat)]">
+                      <span className="font-semibold font-[family-name:var(--font-nunito)]">
                         Rs.{item.price.toLocaleString()}
                       </span>
                       {item.originalPrice && (
-                        <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-montserrat)]">
+                        <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-nunito)]">
                           Rs.{item.originalPrice.toLocaleString()}
                         </span>
                       )}
@@ -112,7 +112,7 @@ export default function CartPage() {
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="w-10 text-center text-sm font-[family-name:var(--font-montserrat)]">
+                        <span className="w-10 text-center text-sm font-[family-name:var(--font-nunito)]">
                           {item.quantity}
                         </span>
                         <button
@@ -125,7 +125,7 @@ export default function CartPage() {
                       </div>
 
                       {/* Subtotal */}
-                      <span className="font-semibold font-[family-name:var(--font-montserrat)]">
+                      <span className="font-semibold font-[family-name:var(--font-nunito)]">
                         Rs.{(item.price * item.quantity).toLocaleString()}
                       </span>
                     </div>
@@ -136,7 +136,7 @@ export default function CartPage() {
               {/* Clear Cart */}
               <button
                 onClick={clearCart}
-                className="text-sm text-muted-foreground hover:text-red-500 transition-colors font-[family-name:var(--font-montserrat)]"
+                className="text-sm text-muted-foreground hover:text-red-500 transition-colors font-[family-name:var(--font-nunito)]"
               >
                 Clear all items
               </button>
@@ -145,7 +145,7 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-cream p-6 rounded-sm sticky top-32">
-                <h2 className="text-lg font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-6">
+                <h2 className="text-lg font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-6">
                   Order Summary
                 </h2>
 
@@ -155,16 +155,16 @@ export default function CartPage() {
                     <input
                       type="text"
                       placeholder="Enter coupon code"
-                      className="flex-1 px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
+                      className="flex-1 px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold"
                     />
-                    <button className="px-4 py-3 bg-foreground text-white text-sm font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors">
+                    <button className="px-4 py-3 bg-foreground text-white text-sm font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors">
                       APPLY
                     </button>
                   </div>
                 </div>
 
                 {/* Summary Details */}
-                <div className="space-y-3 text-sm font-[family-name:var(--font-montserrat)]">
+                <div className="space-y-3 text-sm font-[family-name:var(--font-nunito)]">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>Rs.{cartTotal.toLocaleString()}</span>
@@ -193,7 +193,7 @@ export default function CartPage() {
                 {/* Free Shipping Notice */}
                 {shipping > 0 && (
                   <div className="mt-4 p-3 bg-gold-light/50 rounded-sm">
-                    <p className="text-xs text-center font-[family-name:var(--font-montserrat)] text-foreground">
+                    <p className="text-xs text-center font-[family-name:var(--font-nunito)] text-foreground">
                       Add Rs.{(2999 - cartTotal).toLocaleString()} more for FREE shipping
                     </p>
                   </div>
@@ -202,7 +202,7 @@ export default function CartPage() {
                 {/* Checkout Button */}
                 <Link
                   href="/checkout"
-                  className="w-full mt-6 py-4 bg-gold text-white text-center font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors block"
+                  className="w-full mt-6 py-4 bg-gold text-white text-center font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors block"
                 >
                   PROCEED TO CHECKOUT
                 </Link>
@@ -210,7 +210,7 @@ export default function CartPage() {
                 {/* Continue Shopping */}
                 <Link
                   href="/"
-                  className="w-full mt-3 py-3 border border-foreground text-foreground text-center font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-foreground hover:text-white transition-colors block text-sm"
+                  className="w-full mt-3 py-3 border border-foreground text-foreground text-center font-[family-name:var(--font-nunito)] tracking-wider hover:bg-foreground hover:text-white transition-colors block text-sm"
                 >
                   CONTINUE SHOPPING
                 </Link>
@@ -219,19 +219,19 @@ export default function CartPage() {
                 <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
                   <div className="text-center">
                     <Truck className="w-5 h-5 mx-auto mb-1 text-gold" />
-                    <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                    <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                       Free Ship
                     </p>
                   </div>
                   <div className="text-center">
                     <RotateCcw className="w-5 h-5 mx-auto mb-1 text-gold" />
-                    <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                    <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                       Easy Return
                     </p>
                   </div>
                   <div className="text-center">
                     <Shield className="w-5 h-5 mx-auto mb-1 text-gold" />
-                    <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                    <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                       Secure
                     </p>
                   </div>
@@ -246,3 +246,4 @@ export default function CartPage() {
     </div>
   )
 }
+

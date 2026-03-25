@@ -8,7 +8,7 @@ import { ChevronLeft, Lock, Truck, Shield, RotateCcw } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { useCart } from "@/context/CartContext"
-import { getProductById } from "@/data/products"
+import { getProductById } from "@/data/dummyProducts"
 
 type CheckoutStep = "shipping" | "payment" | "confirm"
 
@@ -84,7 +84,7 @@ function CheckoutContent() {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center px-4 py-16">
-            <h1 className="text-2xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+            <h1 className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
               No items to checkout
             </h1>
             <Link
@@ -109,7 +109,7 @@ function CheckoutContent() {
             <ChevronLeft className="w-4 h-4" />
             BACK TO CART
           </Link>
-          <h1 className="text-xl font-[family-name:var(--font-cormorant)] tracking-widest">
+          <h1 className="text-xl font-[family-name:var(--font-nunito)] tracking-widest">
             ORINKET
           </h1>
           <div className="flex items-center gap-1 text-xs text-gold-light font-[family-name:var(--font-nunito)]">
@@ -173,7 +173,7 @@ function CheckoutContent() {
                   <div className="w-8 h-8 rounded-full bg-cream border border-border flex items-center justify-center text-sm">
                     📍
                   </div>
-                  <h2 className="text-lg font-[family-name:var(--font-cormorant)] font-semibold">
+                  <h2 className="text-lg font-[family-name:var(--font-nunito)] font-semibold">
                     Shipping Address
                   </h2>
                 </div>
@@ -642,3 +642,4 @@ export default function CheckoutPage() {
     </Suspense>
   )
 }
+

@@ -60,8 +60,8 @@ export default function Header() {
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
-              <h1 className="text-3xl md:text-4xl font-semibold tracking-[0.3em] text-foreground font-[family-name:var(--font-cormorant)]">
+            <Link href="/" className="flex-shrink-0 group">
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-[0.3em] text-foreground font-[family-name:var(--font-nunito)] transition-all duration-300 group-hover:text-gold-dark group-hover:scale-105 transform">
                 ORINKET
               </h1>
             </Link>
@@ -70,25 +70,25 @@ export default function Header() {
             <div className="flex items-center gap-3 md:gap-5">
               <button 
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 hover:text-gold-dark transition-colors"
+                className="p-2 hover:text-gold-dark transition-all duration-300 hover:scale-110 transform"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5" />
               </button>
-              <Link href="/wishlist" className="p-2 hover:text-gold-dark transition-colors hidden md:block relative">
+              <Link href="/wishlist" className="p-2 hover:text-gold-dark transition-all duration-300 hover:scale-110 transform hidden md:block relative">
                 <Heart className="w-5 h-5" />
                 {wishlistItems.length > 0 && (
-                  <span                 className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)]">
+                  <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)] animate-pulse">
                     {wishlistItems.length}
                   </span>
                 )}
               </Link>
-              <Link href="/account" className="p-2 hover:text-gold-dark transition-colors hidden md:block">
+              <Link href="/account" className="p-2 hover:text-gold-dark transition-all duration-300 hover:scale-110 transform hidden md:block">
                 <User className="w-5 h-5" />
               </Link>
-              <Link href="/cart" className="p-2 hover:text-gold-dark transition-colors relative">
+              <Link href="/cart" className="p-2 hover:text-gold-dark transition-all duration-300 hover:scale-110 transform relative">
                 <ShoppingBag className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)]">
+                <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-[family-name:var(--font-nunito)] animate-pulse">
                   {cartCount}
                 </span>
               </Link>
@@ -96,14 +96,15 @@ export default function Header() {
           </div>
 
           {/* Desktop Category Nav */}
-          <nav className="hidden lg:flex items-center justify-center gap-8 py-3 border-t border-border">
-            {categories.map((category) => (
+          <nav className="hidden lg:flex items-center justify-center gap-8 py-4 border-t border-border">
+            {categories.map((category, index) => (
               <Link
                 key={category.name}
                 href={category.href}
-                className="text-xs font-[family-name:var(--font-nunito)] tracking-wider text-foreground hover:text-gold-dark transition-colors whitespace-nowrap"
+                className="text-xs font-[family-name:var(--font-nunito)] tracking-wider text-foreground hover:text-gold-dark transition-all duration-300 whitespace-nowrap relative group"
               >
                 {category.name}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
           </nav>
@@ -150,7 +151,7 @@ export default function Header() {
         <div className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold tracking-[0.2em] font-[family-name:var(--font-cormorant)]">ORINKET</h2>
+              <h2 className="text-2xl font-semibold tracking-[0.2em] font-[family-name:var(--font-nunito)]">ORINKET</h2>
               <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
                 <X className="w-6 h-6" />
               </button>
@@ -183,3 +184,4 @@ export default function Header() {
     </header>
   )
 }
+

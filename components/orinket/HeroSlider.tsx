@@ -11,21 +11,21 @@ const slides = [
     title: "EVERYDAY ELEGANCE",
     subtitle: "Discover our new collection",
     cta: "SHOP NOW",
-    href: "/collections/new"
+    href: "/all"
   },
   {
     image: "/images/hero-2.jpg",
     title: "DEMI-FINE JEWELLERY",
     subtitle: "Premium quality, accessible luxury",
     cta: "EXPLORE",
-    href: "/collections/all"
+    href: "/all"
   },
   {
     image: "/images/hero-3.jpg",
-    title: "18K GOLD PLATED",
-    subtitle: "Crafted to last, made to shine",
+    title: "9KT FINE GOLD",
+    subtitle: "Lab grown diamonds set in solid 9KT gold",
     cta: "DISCOVER",
-    href: "/collections/gold"
+    href: "/category/9kt-gold"
   }
 ]
 
@@ -111,3 +111,4 @@ export default function HeroSlider() {
     </section>
   )
 }
+

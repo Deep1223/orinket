@@ -46,7 +46,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-2xl font-light tracking-[0.1em] mb-2 font-[family-name:var(--font-cormorant)]">
+              <h3 className="text-2xl font-light tracking-[0.1em] mb-2 font-[family-name:var(--font-nunito)]">
                 JOIN THE ORINKET FAMILY
               </h3>
               <p className="text-white/70 font-[family-name:var(--font-nunito)] text-sm">
@@ -79,7 +79,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block mb-6">
-              <h2 className="text-2xl tracking-[0.2em] font-[family-name:var(--font-cormorant)]">
+              <h2 className="text-2xl tracking-[0.2em] font-[family-name:var(--font-nunito)]">
                 ORINKET
               </h2>
             </Link>
@@ -208,3 +208,4 @@ export default function Footer() {
     </footer>
   )
 }
+

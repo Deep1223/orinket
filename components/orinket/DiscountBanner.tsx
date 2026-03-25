@@ -12,18 +12,18 @@ export default function DiscountBanner() {
       />
       <div className="absolute inset-0 bg-black/30" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-        <p className="text-sm md:text-base tracking-[0.3em] mb-3 font-[family-name:var(--font-montserrat)]">
+        <p className="text-sm md:text-base tracking-[0.3em] mb-3 font-[family-name:var(--font-nunito)]">
           LIMITED TIME OFFER
         </p>
-        <h2 className="text-4xl md:text-6xl font-light tracking-[0.1em] mb-4 font-[family-name:var(--font-cormorant)]">
+        <h2 className="text-4xl md:text-6xl font-light tracking-[0.1em] mb-4 font-[family-name:var(--font-nunito)]">
           UP TO 50% OFF
         </h2>
-        <p className="text-lg md:text-xl mb-8 font-[family-name:var(--font-montserrat)] font-light">
+        <p className="text-lg md:text-xl mb-8 font-[family-name:var(--font-nunito)] font-light">
           On selected demi-fine pieces
         </p>
         <Link
           href="/sale"
-          className="px-8 py-3 bg-white text-foreground text-sm tracking-[0.2em] hover:bg-gold hover:text-white transition-all font-[family-name:var(--font-montserrat)]"
+          className="px-8 py-3 bg-white text-foreground text-sm tracking-[0.2em] hover:bg-gold hover:text-white transition-all font-[family-name:var(--font-nunito)]"
         >
           SHOP SALE
         </Link>
@@ -31,3 +31,4 @@ export default function DiscountBanner() {
     </section>
   )
 }
+
