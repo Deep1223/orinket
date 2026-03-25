@@ -43,28 +43,28 @@ export default function Footer() {
     <footer className="bg-[#1a1a1a] text-white">
       {/* Newsletter Section */}
       <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-2xl font-light tracking-[0.1em] mb-2 font-[family-name:var(--font-nunito)]">
-                JOIN THE ORINKET FAMILY
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex-1">
+              <h3 className="text-xl sm:text-2xl font-bold tracking-wider mb-2 font-[family-name:var(--font-nunito)]">
+                JOIN ORINKET FAMILY
               </h3>
-              <p className="text-white/70 font-[family-name:var(--font-nunito)] text-sm">
-                Subscribe for exclusive offers, new arrivals & styling tips
+              <p className="text-white/70 font-[family-name:var(--font-nunito)] text-xs sm:text-sm">
+                Exclusive offers, new arrivals & styling tips
               </p>
             </div>
-            <form className="flex w-full md:w-auto gap-3">
+            <form className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
               <div className="relative flex-1 md:w-72">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
                 <input
                   type="email"
-                  placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-gold font-[family-name:var(--font-nunito)] text-sm"
+                  placeholder="Your email"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-gold rounded-lg font-[family-name:var(--font-nunito)] text-sm transition-colors"
                 />
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gold text-white text-sm tracking-wider hover:bg-gold-dark transition-colors font-[family-name:var(--font-nunito)]"
+                className="px-6 py-3 bg-gold text-white text-xs sm:text-sm font-semibold tracking-wider hover:bg-gold-dark transition-colors font-[family-name:var(--font-nunito)] rounded-lg touch-target"
               >
                 SUBSCRIBE
               </button>
@@ -74,8 +74,8 @@ export default function Footer() {
       </div>
 
       {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8 mb-8">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block mb-6">

@@ -46,7 +46,7 @@ export default function HeroSlider() {
   }, [nextSlide])
 
   return (
-    <section className="relative w-full h-[60vh] md:h-[80vh] lg:h-[90vh] overflow-hidden">
+    <section className="relative w-full h-[45vh] sm:h-[55vh] md:h-[70vh] lg:h-[90vh] overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -60,18 +60,20 @@ export default function HeroSlider() {
             fill
             className="object-cover"
             priority={index === 0}
+            sizes="100vw"
+            loading={index === 0 ? "eager" : "lazy"}
           />
           <div className="absolute inset-0 bg-black/20" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-            <p className="text-sm md:text-base tracking-[0.3em] mb-3 font-[family-name:var(--font-nunito)] uppercase">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4 sm:px-6">
+            <p className="text-xs sm:text-sm md:text-base tracking-widest mb-2 sm:mb-3 font-[family-name:var(--font-nunito)] uppercase font-semibold">
               {slide.subtitle}
             </p>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[0.15em] mb-8 font-[family-name:var(--font-nunito)]">
+            <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-light tracking-wider mb-4 sm:mb-6 md:mb-8 font-[family-name:var(--font-nunito)] leading-tight">
               {slide.title}
             </h2>
             <Link
               href={slide.href}
-              className="px-8 py-3 border-2 border-white text-white text-sm tracking-[0.2em] hover:bg-white hover:text-foreground transition-all duration-300 font-[family-name:var(--font-nunito)]"
+              className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-white text-white text-xs sm:text-sm md:text-base tracking-widest hover:bg-white hover:text-foreground transition-all duration-300 font-[family-name:var(--font-nunito)] font-semibold rounded-sm touch-target"
             >
               {slide.cta}
             </Link>
@@ -82,27 +84,27 @@ export default function HeroSlider() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-2 text-white/80 hover:text-white transition-colors"
+        className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white/80 hover:text-white transition-colors touch-target z-10"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
+        <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-2 text-white/80 hover:text-white transition-colors"
+        className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white/80 hover:text-white transition-colors touch-target z-10"
         aria-label="Next slide"
       >
-        <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+        <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
       </button>
 
       {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-10">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentSlide ? "bg-white w-8" : "bg-white/50"
+            className={`w-2 h-2 rounded-full transition-all touch-target ${
+              index === currentSlide ? "bg-white w-6 sm:w-8" : "bg-white/50 hover:bg-white/70"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

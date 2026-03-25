@@ -146,55 +146,56 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
   return (
     <>
       {/* Mobile Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={onClose} />
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={onClose} aria-label="Close filters" />
       
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50 overflow-y-auto lg:relative lg:shadow-none lg:z-auto lg:block">
+      <div className="fixed left-0 top-0 h-screen w-80 max-w-[90vw] bg-white shadow-xl z-50 overflow-y-auto lg:relative lg:shadow-none lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:overflow-visible animate-slideInLeft lg:animate-none">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 z-10 lg:p-0 lg:border-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Package className="w-4 h-4 text-white" />
               </div>
               <h2 className="text-lg font-bold text-gray-900">Filters</h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 ml-auto">
               {getActiveFilterCount() > 0 && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                  className="text-xs sm:text-sm font-medium text-red-600 hover:text-red-700 transition-colors px-2 py-1.5 touch-target"
                 >
-                  Clear All
+                  Clear
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="lg:hidden p-2.5 hover:bg-gray-100 rounded-lg transition-colors touch-target"
+                aria-label="Close filters"
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
           </div>
           {getActiveFilterCount() > 0 && (
-            <div className="mt-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                {getActiveFilterCount()} filter{getActiveFilterCount() > 1 ? 's' : ''} active
+            <div className="mt-3">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                {getActiveFilterCount()} active
               </span>
             </div>
           )}
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="p-4 sm:p-6 space-y-5 lg:space-y-6 lg:p-0">
           {/* Categories */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-4 lg:border-0 lg:pb-0">
             <button
               onClick={() => toggleSection('categories')}
-              className="flex items-center justify-between w-full mb-3"
+              className="flex items-center justify-between w-full mb-3 touch-target hover:bg-gray-50 -mx-2 px-2 rounded lg:bg-transparent lg:hover:bg-transparent lg:-mx-0 lg:px-0"
             >
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4 text-gray-600" />
-                <h3 className="font-normal text-gray-900">Categories</h3>
+                <h3 className="font-semibold text-gray-900 text-sm">Categories</h3>
               </div>
               {expandedSections.categories ? (
                 <ChevronUp className="w-4 h-4 text-gray-500" />
@@ -204,16 +205,16 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             </button>
             
             {expandedSections.categories && (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {filters.categories.map((category) => (
-                  <label key={category} className="flex items-center cursor-pointer">
+                  <label key={category} className="flex items-center cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={activeFilters.categories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 touch-target"
                     />
-                    <span className="ml-3 text-sm font-normal text-gray-700 capitalize">
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors capitalize py-2">
                       {category.replace('-', ' ')}
                     </span>
                   </label>
