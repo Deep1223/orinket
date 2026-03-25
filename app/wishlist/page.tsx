@@ -7,7 +7,7 @@ import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductCard from "@/components/orinket/ProductCard"
 import { useCart } from "@/context/CartContext"
-import { products } from "@/data/products"
+import { dummyProducts } from "@/data/dummyProducts"
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist, addToCart } = useCart()
@@ -22,7 +22,7 @@ export default function WishlistPage() {
     })
   }
 
-  const recommendedProducts = products
+  const recommendedProducts = dummyProducts
     .filter(p => !wishlistItems.find(w => w.id === p.id))
     .slice(0, 4)
 
