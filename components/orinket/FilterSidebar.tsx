@@ -207,14 +207,14 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.categories && (
               <div className="space-y-2.5">
                 {filters.categories.map((category) => (
-                  <label key={category} className="flex items-center cursor-pointer group">
+                  <label key={category} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors -mx-3">
                     <input
                       type="checkbox"
                       checked={activeFilters.categories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 touch-target"
+                      className="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-blue-500 transition-colors"
                     />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors capitalize py-2">
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors capitalize font-medium">
                       {category.replace('-', ' ')}
                     </span>
                   </label>
@@ -245,15 +245,18 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.price && (
               <div className="space-y-2">
                 {filters.priceRanges.map((range) => (
-                  <label key={range.label} className="flex items-center cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      checked={activeFilters.priceRange?.min === range.min && activeFilters.priceRange?.max === range.max}
-                      onChange={() => handlePriceRangeChange(range.min, range.max)}
-                      className="w-4 h-4 text-green-600 border-gray-300 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                    />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{range.label}</span>
+                  <label key={range.label} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-green-50 transition-colors -mx-3">
+                    <div className="relative flex items-center">
+                      <input
+                        type="radio"
+                        name="priceRange"
+                        checked={activeFilters.priceRange?.min === range.min && activeFilters.priceRange?.max === range.max}
+                        onChange={() => handlePriceRangeChange(range.min, range.max)}
+                        className="w-5 h-5 text-green-600 bg-white border-2 border-gray-300 cursor-pointer focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-white group-hover:border-green-500 transition-colors appearance-none"
+                      />
+                      <div className="absolute left-1.5 w-2.5 h-2.5 bg-green-600 rounded-full pointer-events-none opacity-0 group-hover:opacity-50 transition-opacity"></div>
+                    </div>
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-green-700 transition-colors font-medium">{range.label}</span>
                   </label>
                 ))}
               </div>
@@ -282,14 +285,14 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.materials && (
               <div className="space-y-2">
                 {filters.materials.map((material) => (
-                  <label key={material} className="flex items-center cursor-pointer group">
+                  <label key={material} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-purple-50 transition-colors -mx-3">
                     <input
                       type="checkbox"
                       checked={activeFilters.materials.includes(material)}
                       onChange={() => handleMaterialChange(material)}
-                      className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                      className="w-5 h-5 text-purple-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-purple-500 transition-colors"
                     />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{material}</span>
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-purple-700 transition-colors font-medium">{material}</span>
                   </label>
                 ))}
               </div>
@@ -318,14 +321,14 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.platings && (
               <div className="space-y-2">
                 {filters.platings.map((plating) => (
-                  <label key={plating} className="flex items-center cursor-pointer group">
+                  <label key={plating} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-yellow-50 transition-colors -mx-3">
                     <input
                       type="checkbox"
                       checked={activeFilters.platings.includes(plating)}
                       onChange={() => handlePlatingChange(plating)}
-                      className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                      className="w-5 h-5 text-yellow-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-yellow-500 transition-colors"
                     />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{plating}</span>
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-yellow-700 transition-colors font-medium">{plating}</span>
                   </label>
                 ))}
               </div>
@@ -354,14 +357,17 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.rating && (
               <div className="space-y-2">
                 {filters.ratings.map((rating) => (
-                  <label key={rating} className="flex items-center cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="rating"
-                      checked={activeFilters.rating === rating}
-                      onChange={() => handleRatingChange(rating)}
-                      className="w-4 h-4 text-orange-600 border-gray-300 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                    />
+                  <label key={rating} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-orange-50 transition-colors -mx-3">
+                    <div className="relative flex items-center flex-shrink-0">
+                      <input
+                        type="radio"
+                        name="rating"
+                        checked={activeFilters.rating === rating}
+                        onChange={() => handleRatingChange(rating)}
+                        className="w-5 h-5 text-orange-600 bg-white border-2 border-gray-300 cursor-pointer focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-white group-hover:border-orange-500 transition-colors appearance-none"
+                      />
+                      <div className="absolute left-1.5 w-2.5 h-2.5 bg-orange-600 rounded-full pointer-events-none opacity-0 group-hover:opacity-50 transition-opacity"></div>
+                    </div>
                     <div className="ml-3">{renderStars(rating)}</div>
                   </label>
                 ))}
@@ -378,14 +384,14 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
               <h3 className="font-semibold text-gray-900">Availability</h3>
             </div>
             <div className="space-y-2">
-              <label className="flex items-center cursor-pointer group">
+              <label className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors -mx-3">
                 <input
                   type="checkbox"
                   checked={activeFilters.inStock}
                   onChange={(e) => handleInStockChange(e.target.checked)}
-                  className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="w-5 h-5 text-red-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-red-500 transition-colors"
                 />
-                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">In Stock Only</span>
+                <span className="ml-3 text-sm text-gray-700 group-hover:text-red-700 transition-colors font-medium">In Stock Only</span>
               </label>
             </div>
           </div>

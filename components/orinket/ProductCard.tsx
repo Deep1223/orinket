@@ -55,6 +55,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="eager"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
           {/* Subtle overlay on hover */}
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-2 transition-opacity duration-300" />

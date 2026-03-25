@@ -192,10 +192,7 @@
     scrollbar-width: none;
   }
   
-  /* Smooth scroll */
-  html {
-    scroll-behavior: smooth;
-  }
+  /* Smooth scroll handled by data-scroll-behavior attribute */
   
   /* Selection styling */
   ::selection {
