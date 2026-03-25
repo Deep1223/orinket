@@ -6,9 +6,9 @@ import Link from "next/link"
 import { Heart, ShoppingBag, Truck, RotateCcw, Shield, Star, Minus, Plus, ChevronRight } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
+import { getProductById, dummyProducts } from "@/data/dummyProducts"
 import ProductCard from "@/components/orinket/ProductCard"
 import { useCart } from "@/context/CartContext"
-import { getProductById, products } from "@/data/products"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -50,7 +50,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const inWishlist = isInWishlist(product.id)
   const images = product.images || [product.image]
-  const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
+  const relatedProducts = dummyProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
 
   const handleAddToCart = () => {
     addToCart({
@@ -133,12 +133,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   {product.isNew && (
-                    <span className="bg-foreground text-white text-xs px-3 py-1 font-[family-name:var(--font-montserrat)] tracking-wider">
+                    <span className="bg-foreground text-white text-xs px-3 py-1 font-[family-name:var(--font-nunito)] tracking-wider">
                       NEW
                     </span>
                   )}
                   {product.isBestseller && (
-                    <span className="bg-gold text-white text-xs px-3 py-1 font-[family-name:var(--font-montserrat)] tracking-wider">
+                    <span className="bg-gold text-white text-xs px-3 py-1 font-[family-name:var(--font-nunito)] tracking-wider">
                       BESTSELLER
                     </span>
                   )}
@@ -148,7 +148,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
             {/* Product Info */}
             <div className="flex flex-col">
-              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                 {product.name}
               </h1>
 
@@ -158,26 +158,26 @@ export default function ProductPage({ params }: ProductPageProps) {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < Math.floor(product.rating) ? "text-gold fill-gold" : "text-gray-300"}`}
+                      className={`w-4 h-4 ${i < Math.floor(product.rating || 0) ? "text-gold fill-gold" : "text-gray-300"}`}
                     />
                   ))}
                 </div>
-                <span className="text-sm font-[family-name:var(--font-montserrat)] text-muted-foreground">
-                  {product.rating} ({product.reviews} reviews)
+                <span className="text-sm font-[family-name:var(--font-nunito)] text-muted-foreground">
+                  {product.rating || 0} ({product.reviews || 0} reviews)
                 </span>
               </div>
 
               {/* Price */}
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-2xl font-semibold font-[family-name:var(--font-montserrat)] text-foreground">
+                <span className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground">
                   Rs.{product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-lg text-muted-foreground line-through font-[family-name:var(--font-montserrat)]">
+                    <span className="text-lg text-muted-foreground line-through font-[family-name:var(--font-nunito)]">
                       Rs.{product.originalPrice.toLocaleString()}
                     </span>
-                    <span className="text-sm text-red-500 font-[family-name:var(--font-montserrat)]">
+                    <span className="text-sm text-red-500 font-[family-name:var(--font-nunito)]">
                       Save Rs.{(product.originalPrice - product.price).toLocaleString()}
                     </span>
                   </>
@@ -185,23 +185,23 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
 
               {/* Description */}
-              <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] text-sm leading-relaxed mb-6">
+              <p className="text-muted-foreground font-[family-name:var(--font-nunito)] text-sm leading-relaxed mb-6">
                 {product.description}
               </p>
 
               {/* Material */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-2">
+                <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-2">
                   MATERIAL
                 </h3>
-                <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                   {product.material}
                 </p>
               </div>
 
               {/* Quantity */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-3">
+                <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-3">
                   QUANTITY
                 </h3>
                 <div className="flex items-center gap-4">
@@ -213,7 +213,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="w-12 text-center font-[family-name:var(--font-montserrat)]">
+                    <span className="w-12 text-center font-[family-name:var(--font-nunito)]">
                       {quantity}
                     </span>
                     <button
@@ -231,7 +231,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               <div className="flex gap-4 mb-8">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   ADD TO BAG
@@ -252,7 +252,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               {/* Buy Now */}
               <Link
                 href={`/checkout?product=${product.id}&quantity=${quantity}`}
-                className="w-full py-4 bg-gold text-white text-center font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors mb-8"
+                className="w-full py-4 bg-gold text-white text-center font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors mb-8"
               >
                 BUY NOW
               </Link>
@@ -261,19 +261,19 @@ export default function ProductPage({ params }: ProductPageProps) {
               <div className="grid grid-cols-3 gap-4 py-6 border-t border-border">
                 <div className="text-center">
                   <Truck className="w-6 h-6 mx-auto mb-2 text-gold" />
-                  <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                  <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                     Free Shipping
                   </p>
                 </div>
                 <div className="text-center">
                   <RotateCcw className="w-6 h-6 mx-auto mb-2 text-gold" />
-                  <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                  <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                     Easy Returns
                   </p>
                 </div>
                 <div className="text-center">
                   <Shield className="w-6 h-6 mx-auto mb-2 text-gold" />
-                  <p className="text-xs font-[family-name:var(--font-montserrat)] text-muted-foreground">
+                  <p className="text-xs font-[family-name:var(--font-nunito)] text-muted-foreground">
                     Secure Payment
                   </p>
                 </div>
@@ -287,7 +287,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`pb-4 font-[family-name:var(--font-montserrat)] text-sm font-semibold tracking-wider transition-colors ${
+                      className={`pb-4 font-[family-name:var(--font-nunito)] text-sm font-semibold tracking-wider transition-colors ${
                         activeTab === tab
                           ? "text-foreground border-b-2 border-gold -mb-6 pb-4"
                           : "text-muted-foreground hover:text-foreground"
@@ -304,12 +304,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                 {/* Tab Content */}
                 {activeTab === "specifications" && (
                   <div>
-                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                       PRODUCT DETAILS
                     </h3>
                     <ul className="space-y-3">
                       {product.details.map((detail, index) => (
-                        <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                        <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                           <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
                           {detail}
                         </li>
@@ -320,16 +320,16 @@ export default function ProductPage({ params }: ProductPageProps) {
 
                 {activeTab === "material" && (
                   <div>
-                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                       MATERIAL
                     </h3>
-                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mb-6">
+                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] mb-6">
                       {product.material}
                     </p>
-                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                       CARE INSTRUCTIONS
                     </h3>
-                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                       <li className="flex items-start gap-3">
                         <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
                         Keep away from water, perfume, and harsh chemicals
@@ -352,10 +352,10 @@ export default function ProductPage({ params }: ProductPageProps) {
 
                 {activeTab === "shipping" && (
                   <div>
-                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                       SHIPPING INFORMATION
                     </h3>
-                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                    <ul className="space-y-3 text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                       <li className="flex items-start gap-3">
                         <span className="w-1.5 h-1.5 bg-gold rounded-full mt-1 flex-shrink-0" />
                         Free shipping on all orders across India
@@ -378,13 +378,13 @@ export default function ProductPage({ params }: ProductPageProps) {
 
                 {activeTab === "size" && (
                   <div>
-                    <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+                    <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                       SIZE GUIDE
                     </h3>
-                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mb-4">
+                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] mb-4">
                       Most of our jewelry pieces are adjustable or one size fits all. For rings, please refer to your ring size chart.
                     </p>
-                    <table className="w-full text-sm font-[family-name:var(--font-montserrat)]">
+                    <table className="w-full text-sm font-[family-name:var(--font-nunito)]">
                       <thead>
                         <tr className="border-b border-border">
                           <th className="text-left py-2 text-foreground font-semibold">Type</th>
@@ -416,10 +416,10 @@ export default function ProductPage({ params }: ProductPageProps) {
         {/* Complete Your Look Section */}
         {relatedProducts.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 py-12 border-t border-border">
-            <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground text-center mb-2">
+            <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground text-center mb-2">
               Complete Your Look
             </h2>
-            <p className="text-center text-muted-foreground font-[family-name:var(--font-montserrat)] text-sm mb-8">
+            <p className="text-center text-muted-foreground font-[family-name:var(--font-nunito)] text-sm mb-8">
               Explore complementary pieces to complete your style
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -433,7 +433,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 py-12 border-t border-border">
-            <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground text-center mb-8">
               You May Also Like
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">

@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Heart, ShoppingBag } from "lucide-react"
 import { useCart } from "@/context/CartContext"
-import type { Product } from "@/data/products"
+import type { Product } from "@/data/dummyProducts"
 
 interface ProductCardProps {
   product: Product
@@ -68,11 +68,6 @@ export default function ProductCard({ product }: ProductCardProps) {
               BESTSELLER
             </span>
           )}
-          {product.discount && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 font-[family-name:var(--font-nunito)] tracking-wider animate-slideInLeft" style={{ animationDelay: "100ms" }}>
-              -{product.discount}%
-            </span>
-          )}
         </div>
 
         {/* Action Buttons */}
@@ -130,7 +125,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               {[...Array(5)].map((_, i) => (
                 <svg
                   key={i}
-                  className={`w-3 h-3 transition-all duration-300 ${i < Math.floor(product.rating) ? "text-gold" : "text-gray-300"}`}
+                  className={`w-3 h-3 transition-all duration-300 ${i < Math.floor(product.rating || 0) ? "text-gold" : "text-gray-300"}`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -139,7 +134,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               ))}
             </div>
             <span className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">
-              ({product.reviews})
+              ({product.reviews || 0})
             </span>
           </div>
         </div>
@@ -147,3 +142,4 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Link>
   )
 }
+

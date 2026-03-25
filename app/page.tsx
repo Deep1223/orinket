@@ -15,6 +15,7 @@ import BrandStory from "@/components/orinket/BrandStory"
 import Reviews from "@/components/orinket/Reviews"
 import CTABanner from "@/components/orinket/CTABanner"
 import Footer from "@/components/orinket/Footer"
+import AnimatedSection from "@/components/orinket/AnimatedSection"
 
 export default function Home() {
   return (
@@ -26,49 +27,80 @@ export default function Home() {
       <HeroSlider />
 
       {/* 2. Everyday Demi-Fine Jewellery */}
-      <DemifineSection />
+      <AnimatedSection animation="slideUp" delay={50}>
+        <DemifineSection />
+      </AnimatedSection>
 
       {/* 3. Orinket Top Styles */}
-      <TopStyles />
+      <AnimatedSection animation="slideInLeft" delay={100}>
+        <TopStyles />
+      </AnimatedSection>
 
       {/* 4. Discount Banner */}
-      <DiscountBanner />
+      <AnimatedSection animation="scaleIn" delay={150}>
+        <DiscountBanner />
+      </AnimatedSection>
 
       {/* 5. Shop By Recipient */}
-      <ShopByRecipient />
+      <AnimatedSection animation="slideInRight" delay={200}>
+        <ShopByRecipient />
+      </AnimatedSection>
 
       {/* 6. For Every You */}
-      <ForEveryYou />
+      <AnimatedSection animation="slideUp" delay={250}>
+        <ForEveryYou />
+      </AnimatedSection>
 
       {/* 7. 9KT Fine Gold */}
-      <FineGold />
+      <AnimatedSection animation="fadeIn" delay={300}>
+        <FineGold />
+      </AnimatedSection>
 
       {/* 8. Because You Deserve To Shine */}
-      <DeserveToShine />
+      <AnimatedSection animation="slideInLeft" delay={350}>
+        <DeserveToShine />
+      </AnimatedSection>
 
       {/* 9. From Founder, For You */}
-      <FounderMessage />
+      <AnimatedSection animation="fadeIn" delay={400}>
+        <FounderMessage />
+      </AnimatedSection>
 
       {/* 10. Blogs */}
-      <BlogSection />
+      <AnimatedSection animation="slideInRight" delay={450}>
+        <BlogSection />
+      </AnimatedSection>
 
       {/* 11. Shop With Confidence */}
-      <ShopWithConfidence />
+      <AnimatedSection animation="slideUp" delay={500}>
+        <ShopWithConfidence />
+      </AnimatedSection>
 
       {/* 12. Visit Our Stores */}
-      <VisitStores />
+      <AnimatedSection animation="scaleIn" delay={550}>
+        <VisitStores />
+      </AnimatedSection>
 
       {/* 13. The Orinket Story */}
-      <BrandStory />
+      <AnimatedSection animation="fadeIn" delay={600}>
+        <BrandStory />
+      </AnimatedSection>
 
       {/* 14. Trusted by Our Community (Reviews) */}
-      <Reviews />
+      <AnimatedSection animation="slideInLeft" delay={650}>
+        <Reviews />
+      </AnimatedSection>
 
       {/* 15. Buy Everyday Demi-Fine Jewellery CTA */}
-      <CTABanner />
+      <AnimatedSection animation="scaleIn" delay={700}>
+        <CTABanner />
+      </AnimatedSection>
 
       {/* Footer */}
-      <Footer />
+      <AnimatedSection animation="fadeIn" delay={750}>
+        <Footer />
+      </AnimatedSection>
     </main>
   )
 }
+

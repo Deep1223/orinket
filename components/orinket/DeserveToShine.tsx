@@ -18,20 +18,20 @@ export default function DeserveToShine() {
 
           {/* Content */}
           <div className="lg:pl-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-cormorant)]">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-nunito)]">
               BECAUSE YOU DESERVE TO SHINE
             </h2>
-            <p className="text-muted-foreground mb-6 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-6 font-[family-name:var(--font-nunito)] leading-relaxed">
               At Orinket, we create jewellery that&apos;s made to be worn — every day and on the days that 
               matter most. It&apos;s premium in quality, thoughtful in design, and priced so it feels right.
             </p>
-            <p className="text-muted-foreground mb-8 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-8 font-[family-name:var(--font-nunito)] leading-relaxed">
               We don&apos;t believe in saving the good stuff for later. Our pieces are made to move with 
               you, not sit in a box. Because with Orinket, the sparkle is always yours to keep.
             </p>
             <Link
               href="/about"
-              className="inline-block px-8 py-3 bg-foreground text-background text-sm tracking-[0.2em] hover:bg-gold-dark transition-colors font-[family-name:var(--font-montserrat)]"
+              className="inline-block px-8 py-3 bg-foreground text-background text-sm tracking-[0.2em] hover:bg-gold-dark transition-colors font-[family-name:var(--font-nunito)]"
             >
               OUR STORY
             </Link>
@@ -41,3 +41,4 @@ export default function DeserveToShine() {
     </section>
   )
 }
+
