@@ -192,10 +192,7 @@
     scrollbar-width: none;
   }
   
-  /* Smooth scroll */
-  html {
-    scroll-behavior: smooth;
-  }
+  /* Smooth scroll handled by data-scroll-behavior attribute */
   
   /* Selection styling */
   ::selection {
@@ -570,4 +567,28 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Touch-friendly target sizes */
+.touch-target {
+  min-width: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  .sm-hidden {
+    display: none !important;
+  }
+  
+  .sm-block {
+    display: block !important;
+  }
+  
+  .sm-full {
+    width: 100% !important;
+  }
 }
