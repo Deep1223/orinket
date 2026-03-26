@@ -5,7 +5,7 @@ import ProductGrid from '@/components/orinket/ProductGrid'
 import FilterSidebar from '@/components/orinket/FilterSidebar'
 import AnimatedSection from '@/components/orinket/AnimatedSection'
 import { getProductsByCategory, dummyProducts } from '@/data/dummyProducts'
-import { ShoppingBag, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Filter, X, ChevronLeft, ChevronRight, Grid3x3, List } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { getFilterOptions, filterProducts, FilterState } from '@/lib/productFilters'
 
@@ -30,6 +30,8 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [sortBy, setSortBy] = useState('relevance')
   const [activeFilters, setActiveFilters] = useState<FilterState>({
     categories: [],
     priceRange: null,
@@ -150,21 +152,19 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
 
           {/* Product Grid */}
           <div className="flex-1">
-            {/* Results Summary */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 flex items-center gap-2">
-                  <span className="text-sm font-normal">Showing</span>
-                  <span className="font-normal text-lg text-gray-900 bg-gray-100 px-2 py-1 rounded">{currentProducts.length}</span>
-                  <span className="text-sm font-normal">of</span>
-                  <span className="font-normal text-lg text-gray-900 bg-gray-100 px-2 py-1 rounded">{filteredProducts.length}</span>
-                  <span className="text-sm font-normal">products</span>
-                </p>
-                {getActiveFilterCount() > 0 && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-normal bg-blue-100 text-blue-800">
-                      {getActiveFilterCount()} filter{getActiveFilterCount() > 1 ? 's' : ''} applied
-                    </span>
+            {/* Toolbar */}
+            <div className="mb-8 p-5 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 font-normal">
+                    <span className="font-semibold text-gray-900">{filteredProducts.length}</span> products
+                    {getActiveFilterCount() > 0 && (
+                      <span className="ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        {getActiveFilterCount()} filter{getActiveFilterCount() > 1 ? 's' : ''} applied
+                      </span>
+                    )}
+                  </p>
+                  {getActiveFilterCount() > 0 && (
                     <button
                       onClick={() => handleFiltersChange({
                         categories: [slug],
@@ -174,19 +174,60 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
                         rating: null,
                         inStock: true,
                       })}
-                      className="text-xs text-red-600 hover:text-red-700 font-normal transition-colors"
+                      className="text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors mt-2"
                     >
-                      Clear filters
+                      Clear all filters
+                    </button>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  {/* Sort */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 font-normal hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                  >
+                    <option value="relevance">Sort: Relevance</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="newest">Newest First</option>
+                    <option value="bestseller">Bestseller</option>
+                  </select>
+                  
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-2 border border-gray-300 rounded-lg p-1 bg-white">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-amber-500 text-white'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="Grid view"
+                    >
+                      <Grid3x3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-amber-500 text-white'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="List view"
+                    >
+                      <List className="w-4 h-4" />
                     </button>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
             {currentProducts.length > 0 ? (
               <>
                 <AnimatedSection animation="slideUp" delay={200}>
-                  <ProductGrid products={currentProducts} />
+                  <ProductGrid products={currentProducts} viewMode={viewMode} />
                 </AnimatedSection>
                 
                 {/* Pagination */}
