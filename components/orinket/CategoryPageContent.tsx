@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { getFilterOptions, filterProducts, FilterState } from '@/lib/productFilters'
 
 const categories = [
+  { name: 'all', displayName: 'All Products', description: 'Discover our complete collection of beautiful jewelry pieces' },
   { name: 'new-arrivals', displayName: 'New Arrivals', description: 'Discover our latest collection' },
   { name: 'necklaces', displayName: 'Necklaces', description: 'Elegant necklaces for every occasion' },
   { name: 'earrings', displayName: 'Earrings', description: 'Beautiful earrings to complement your style' },
