@@ -65,9 +65,10 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
             const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0
             
             return (
-              <div 
-                key={product.id} 
-                className={`group relative animate-fadeIn ${viewMode === 'list' ? 'h-auto' : ''}`}
+              <Link
+                key={product.id}
+                href={`/product/${product.id}`}
+                className={`group relative animate-fadeIn block ${viewMode === 'list' ? 'h-auto' : ''}`}
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 <div className={`${viewMode === 'grid' ? 'rounded-2xl flex flex-col h-full' : 'rounded-xl flex flex-row h-40'} shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 bg-white hover:-translate-y-1`}>
@@ -206,7 +207,7 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
                           className="flex-1 bg-gray-900 text-white py-2 px-3 rounded-lg font-semibold text-xs hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-1.5"
                         >
                           <ShoppingBag className="w-3.5 h-3.5" />
-                          Add
+                          Add to Cart
                         </button>
                         <button
                           onClick={(e) => handleWishlist(e, product)}
@@ -223,7 +224,7 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>

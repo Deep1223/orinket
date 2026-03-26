@@ -153,8 +153,8 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
           {/* Product Grid */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="mb-8 p-5 bg-white rounded-xl border border-gray-200 shadow-sm">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="mb-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 font-normal">
                     <span className="font-semibold text-gray-900">{filteredProducts.length}</span> products
