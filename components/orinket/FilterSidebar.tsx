@@ -207,14 +207,14 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
             {expandedSections.categories && (
               <div className="space-y-2.5">
                 {filters.categories.map((category) => (
-                  <label key={category} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors -mx-3">
+                  <label key={category} className="flex items-center cursor-pointer group px-3 py-2.5 rounded-lg hover:bg-indigo-50 transition-colors -mx-3">
                     <input
                       type="checkbox"
                       checked={activeFilters.categories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-blue-500 transition-colors"
+                      className="w-5 h-5 text-indigo-600 bg-white border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-white cursor-pointer group-hover:border-indigo-500 transition-colors accent-indigo-600"
                     />
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-blue-700 transition-colors capitalize font-medium">
+                    <span className="ml-3 text-sm text-gray-700 group-hover:text-indigo-700 transition-colors capitalize font-medium">
                       {category.replace('-', ' ')}
                     </span>
                   </label>
