@@ -7,23 +7,23 @@ export default function FounderMessage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Content */}
           <div className="order-2 lg:order-1 lg:pr-12">
-            <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-cormorant)]">
+            <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-nunito)]">
               FROM PRIYA, FOR YOU
             </h2>
-            <blockquote className="text-muted-foreground mb-6 font-[family-name:var(--font-montserrat)] leading-relaxed italic text-lg">
+            <blockquote className="text-muted-foreground mb-6 font-[family-name:var(--font-nunito)] leading-relaxed italic text-lg">
               &quot;A lot of us find real gold too expensive — and we don&apos;t want our jewellery locked 
               away. At the same time, imitation jewellery fades, breaks, and doesn&apos;t last.&quot;
             </blockquote>
-            <p className="text-muted-foreground mb-6 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-6 font-[family-name:var(--font-nunito)] leading-relaxed">
               So at Orinket, we&apos;re building something in the middle — a new category called Demi-Fine: 
               18k thick gold plating on premium metals, so everyone can enjoy jewellery that&apos;s trendy, 
               lasting, and high on quality.
             </p>
             <div className="flex items-center gap-4">
               <div className="w-16 h-0.5 bg-gold"></div>
-              <span className="font-[family-name:var(--font-cormorant)] text-lg tracking-wider">Priya Sharma</span>
+              <span className="font-[family-name:var(--font-nunito)] text-lg tracking-wider">Priya Sharma</span>
             </div>
-            <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mt-2">
+            <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] mt-2">
               Founder & Creative Director, Orinket
             </p>
           </div>
@@ -42,3 +42,4 @@ export default function FounderMessage() {
     </section>
   )
 }
+

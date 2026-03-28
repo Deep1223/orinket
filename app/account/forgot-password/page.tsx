@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
           {/* Back Link */}
           <Link 
             href="/account" 
-            className="inline-flex items-center gap-2 text-sm font-[family-name:var(--font-montserrat)] text-muted-foreground hover:text-foreground transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm font-[family-name:var(--font-nunito)] text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Login
@@ -32,16 +32,16 @@ export default function ForgotPasswordPage() {
 
           {!isSubmitted ? (
             <>
-              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                 Forgot Password?
               </h1>
-              <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+              <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-8">
                 No worries! Enter your email address and we'll send you a link to reset your password.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
+                  <label className="block text-sm font-[family-name:var(--font-nunito)] text-foreground mb-2">
                     Email Address *
                   </label>
                   <div className="relative">
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full pl-12 pr-4 py-3 border border-border bg-white font-[family-name:var(--font-montserrat)] text-sm focus:outline-none focus:border-gold"
+                      className="w-full pl-12 pr-4 py-3 border border-border bg-white font-[family-name:var(--font-nunito)] text-sm focus:outline-none focus:border-gold"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+                  className="w-full py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
                 >
                   SEND RESET LINK
                 </button>
@@ -70,15 +70,15 @@ export default function ForgotPasswordPage() {
               <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+              <h1 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                 Check Your Email
               </h1>
-              <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+              <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-8">
                 We've sent a password reset link to <strong>{email}</strong>. Please check your inbox and follow the instructions.
               </p>
               <Link
                 href="/account"
-                className="inline-flex px-8 py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+                className="inline-flex px-8 py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
               >
                 BACK TO LOGIN
               </Link>
@@ -91,3 +91,4 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
+

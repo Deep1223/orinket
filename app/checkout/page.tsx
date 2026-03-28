@@ -4,17 +4,21 @@ import { useState, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Lock, CreditCard, Truck, Shield } from "lucide-react"
+import { ChevronLeft, Lock, Truck, Shield, RotateCcw } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { useCart } from "@/context/CartContext"
-import { getProductById } from "@/data/products"
+import { getProductById } from "@/data/dummyProducts"
+
+type CheckoutStep = "shipping" | "payment" | "confirm"
 
 function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { cartItems, cartTotal, clearCart } = useCart()
-  const [step, setStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>("shipping")
+  const [selectedPayment, setSelectedPayment] = useState("card")
+  const [expandedPayment, setExpandedPayment] = useState("card")
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Check for direct buy now
@@ -30,43 +34,48 @@ function CheckoutContent() {
     ? directProduct.price * quantity 
     : cartTotal
 
-  const shipping = subtotal >= 2999 ? 0 : 99
-  const total = subtotal + shipping
+  const shipping = 0
+  const tax = Math.round(subtotal * 0.18)
+  const total = subtotal + shipping + tax
 
   const [formData, setFormData] = useState({
-    email: "",
-    phone: "",
     firstName: "",
     lastName: "",
+    email: "",
+    phone: "",
     address: "",
-    apartment: "",
     city: "",
     state: "",
     pincode: "",
-    paymentMethod: "cod"
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handlePlaceOrder = async () => {
     setIsProcessing(true)
-
-    // Simulate order processing
     await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Clear cart if not direct buy
     if (!directProduct) {
       clearCart()
     }
-
-    // Redirect to success page
     router.push("/order-success")
+  }
+
+  const stepsConfig = [
+    { key: "shipping", label: "Shipping", number: 1 },
+    { key: "payment", label: "Payment", number: 2 },
+    { key: "confirm", label: "Confirm", number: 3 },
+  ]
+
+  const getStepStatus = (step: CheckoutStep) => {
+    const order = { shipping: 0, payment: 1, confirm: 2 }
+    const current = order[currentStep]
+    const target = order[step]
+    if (target < current) return "done"
+    if (target === current) return "active"
+    return "pending"
   }
 
   if (items.length === 0) {
@@ -75,12 +84,12 @@ function CheckoutContent() {
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center px-4 py-16">
-            <h1 className="text-2xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+            <h1 className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
               No items to checkout
             </h1>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
             >
               CONTINUE SHOPPING
             </Link>
@@ -92,314 +101,528 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
-      {/* Checkout Header */}
-      <header className="bg-white border-b border-border">
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Navbar */}
+      <nav className="bg-foreground text-white sticky top-0 z-50 border-b border-border/20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/cart" className="flex items-center gap-2 text-sm font-[family-name:var(--font-montserrat)] text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-            Back to cart
+          <Link href="/cart" className="flex items-center gap-2 text-gold-light hover:text-gold text-sm tracking-wider font-[family-name:var(--font-nunito)]">
+            <ChevronLeft className="w-4 h-4" />
+            BACK TO CART
           </Link>
-          <Link href="/" className="text-2xl font-semibold tracking-[0.2em] font-[family-name:var(--font-cormorant)]">
+          <h1 className="text-xl font-[family-name:var(--font-nunito)] tracking-widest">
             ORINKET
-          </Link>
-          <div className="flex items-center gap-2 text-sm font-[family-name:var(--font-montserrat)] text-muted-foreground">
+          </h1>
+          <div className="flex items-center gap-1 text-xs text-gold-light font-[family-name:var(--font-nunito)]">
             <Lock className="w-4 h-4" />
-            Secure Checkout
+            <span>SECURE</span>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <main className="flex-1 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Checkout Form */}
-            <div className="order-2 lg:order-1">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Contact Information */}
-                <div className="bg-white p-6 rounded-sm">
-                  <h2 className="text-lg font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
-                    Contact Information
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        placeholder="your@email.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                        Phone Number *
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        placeholder="+91 98765 43210"
-                      />
-                    </div>
-                  </div>
+      {/* Steps Bar */}
+      <div className="bg-background border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 flex justify-center items-center h-20">
+          <div className="flex items-center gap-2">
+            {stepsConfig.map((step, idx) => {
+              const status = getStepStatus(step.key as CheckoutStep)
+              return (
+                <div key={step.key} className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentStep(step.key as CheckoutStep)}
+                    className={`flex items-center gap-2 px-4 py-2 text-xs tracking-widest font-semibold font-[family-name:var(--font-nunito)] transition-all ${
+                      status === "active"
+                        ? "text-foreground"
+                        : status === "done"
+                        ? "text-gold-dark"
+                        : "text-muted-foreground"
+                    } ${
+                      status === "active"
+                        ? "border-b-2 border-gold -mb-4"
+                        : ""
+                    }`}
+                  >
+                    <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all ${
+                      status === "done"
+                        ? "bg-gold border-gold text-white"
+                        : status === "active"
+                        ? "bg-foreground border-foreground text-white"
+                        : "border-border text-muted-foreground"
+                    }`}>
+                      {status === "done" ? "✓" : step.number}
+                    </span>
+                    <span>{step.label.toUpperCase()}</span>
+                  </button>
+                  {idx < stepsConfig.length - 1 && (
+                    <span className="text-border text-lg">›</span>
+                  )}
                 </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
 
-                {/* Shipping Address */}
-                <div className="bg-white p-6 rounded-sm">
-                  <h2 className="text-lg font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Shipping Step */}
+            {currentStep === "shipping" && (
+              <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm animate-slideUp">
+                <div className="bg-gradient-to-r from-gold/5 to-transparent border-b border-border px-6 py-4 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-cream border border-border flex items-center justify-center text-sm">
+                    📍
+                  </div>
+                  <h2 className="text-lg font-[family-name:var(--font-nunito)] font-semibold">
                     Shipping Address
                   </h2>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                          First Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                          Last Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        />
-                      </div>
-                    </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                        Address *
+                      <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                        First Name <span className="text-gold">*</span>
                       </label>
                       <input
                         type="text"
-                        name="address"
-                        value={formData.address}
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        placeholder="House no., Building, Street"
+                        placeholder="John"
+                        className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                        Apartment, Suite, etc.
+                      <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                        Last Name <span className="text-gold">*</span>
                       </label>
                       <input
                         type="text"
-                        name="apartment"
-                        value={formData.apartment}
+                        name="lastName"
+                        value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
+                        placeholder="Doe"
+                        className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
                       />
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                          City *
-                        </label>
-                        <input
-                          type="text"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                          State *
-                        </label>
-                        <select
-                          name="state"
-                          value={formData.state}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        >
-                          <option value="">Select</option>
-                          <option value="maharashtra">Maharashtra</option>
-                          <option value="delhi">Delhi</option>
-                          <option value="karnataka">Karnataka</option>
-                          <option value="tamil-nadu">Tamil Nadu</option>
-                          <option value="gujarat">Gujarat</option>
-                          <option value="west-bengal">West Bengal</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2">
-                          PIN Code *
-                        </label>
-                        <input
-                          type="text"
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleInputChange}
-                          required
-                          maxLength={6}
-                          className="w-full px-4 py-3 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold"
-                        />
-                      </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                      Email <span className="text-gold">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="john@example.com"
+                      className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                      Phone <span className="text-gold">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+91 98765 43210"
+                      className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                      Address <span className="text-gold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      placeholder="123 Main Street"
+                      className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                        City <span className="text-gold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        placeholder="Mumbai"
+                        className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                      />
                     </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                        State <span className="text-gold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        placeholder="Maharashtra"
+                        className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                      Pincode <span className="text-gold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleInputChange}
+                      placeholder="400001"
+                      className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                    />
                   </div>
                 </div>
 
-                {/* Payment Method */}
-                <div className="bg-white p-6 rounded-sm">
-                  <h2 className="text-lg font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
-                    Payment Method
-                  </h2>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 p-4 border border-border cursor-pointer hover:border-gold transition-colors">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="cod"
-                        checked={formData.paymentMethod === "cod"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-gold"
-                      />
-                      <Truck className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-[family-name:var(--font-montserrat)] text-sm">
-                        Cash on Delivery
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-3 p-4 border border-border cursor-pointer hover:border-gold transition-colors">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="card"
-                        checked={formData.paymentMethod === "card"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-gold"
-                      />
-                      <CreditCard className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-[family-name:var(--font-montserrat)] text-sm">
-                        Credit/Debit Card
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-3 p-4 border border-border cursor-pointer hover:border-gold transition-colors">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="upi"
-                        checked={formData.paymentMethod === "upi"}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-gold"
-                      />
-                      <svg className="w-5 h-5 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l6.9 3.45L12 11.09 5.1 7.63 12 4.18zM4 8.82l7 3.5v7.36l-7-3.5V8.82zm9 10.86v-7.36l7-3.5v7.36l-7 3.5z"/>
-                      </svg>
-                      <span className="font-[family-name:var(--font-montserrat)] text-sm">
-                        UPI
-                      </span>
-                    </label>
-                  </div>
+                <div className="px-6 py-4 bg-cream border-t border-border">
+                  <button
+                    onClick={() => setCurrentStep("payment")}
+                    className="w-full px-6 py-3 bg-foreground text-white rounded hover:bg-foreground/90 transition-all text-sm font-semibold font-[family-name:var(--font-nunito)] tracking-wider"
+                  >
+                    CONTINUE TO PAYMENT
+                  </button>
                 </div>
+              </div>
+            )}
 
-                {/* Place Order Button */}
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="w-full py-4 bg-gold text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      PROCESSING...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      PLACE ORDER - Rs.{total.toLocaleString()}
-                    </>
+            {/* Payment Step */}
+            {currentStep === "payment" && (
+              <div className="space-y-4 animate-slideUp">
+                {/* Credit/Debit Card */}
+                <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => {
+                      setSelectedPayment("card")
+                      setExpandedPayment(expandedPayment === "card" ? "" : "card")
+                    }}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-gold/5 to-transparent border-b border-border flex items-center gap-3 hover:bg-cream transition-all cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="card"
+                      checked={selectedPayment === "card"}
+                      onChange={(e) => setSelectedPayment(e.target.value)}
+                      className="accent-gold"
+                    />
+                    <span className="text-lg">💳</span>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold font-[family-name:var(--font-nunito)]">Credit/Debit Card</p>
+                      <p className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">Visa, Mastercard, RuPay</p>
+                    </div>
+                  </button>
+                  {selectedPayment === "card" && (
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                          Card Number
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="1234 5678 9012 3456"
+                          maxLength={19}
+                          className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                          Cardholder Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="John Doe"
+                          className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                            Expiry (MM/YY)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="12/25"
+                            maxLength={5}
+                            className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                            CVV
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="123"
+                            maxLength={3}
+                            className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </button>
-
-                {/* Security Notice */}
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-[family-name:var(--font-montserrat)]">
-                  <Shield className="w-4 h-4" />
-                  Your payment information is secure and encrypted
                 </div>
-              </form>
-            </div>
 
-            {/* Order Summary */}
-            <div className="order-1 lg:order-2">
-              <div className="bg-white p-6 rounded-sm sticky top-8">
-                <h2 className="text-lg font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-6">
-                  Order Summary
-                </h2>
-
-                {/* Items */}
-                <div className="space-y-4 mb-6">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex gap-4">
-                      <div className="w-16 h-16 relative bg-cream rounded-sm overflow-hidden flex-shrink-0">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-foreground text-white text-xs rounded-full flex items-center justify-center">
-                          {item.quantity}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-[family-name:var(--font-montserrat)] text-foreground line-clamp-1">
-                          {item.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
-                          Rs.{item.price.toLocaleString()} x {item.quantity}
-                        </p>
-                      </div>
-                      <span className="text-sm font-semibold font-[family-name:var(--font-montserrat)]">
-                        Rs.{(item.price * item.quantity).toLocaleString()}
-                      </span>
+                {/* Net Banking */}
+                <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => {
+                      setSelectedPayment("netbanking")
+                      setExpandedPayment(expandedPayment === "netbanking" ? "" : "netbanking")
+                    }}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-gold/5 to-transparent border-b border-border flex items-center gap-3 hover:bg-cream transition-all cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="netbanking"
+                      checked={selectedPayment === "netbanking"}
+                      onChange={(e) => setSelectedPayment(e.target.value)}
+                      className="accent-gold"
+                    />
+                    <span className="text-lg">🏦</span>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold font-[family-name:var(--font-nunito)]">Net Banking</p>
+                      <p className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">All major banks</p>
                     </div>
-                  ))}
+                  </button>
+                  {selectedPayment === "netbanking" && (
+                    <div className="p-6">
+                      <p className="text-sm text-muted-foreground mb-4 font-[family-name:var(--font-nunito)]">Select your bank</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {["HDFC", "ICICI", "AXIS", "SBI", "KOTAK", "YES", "IDBI", "BOB"].map((bank) => (
+                          <button key={bank} className="p-3 border border-border rounded hover:border-gold hover:bg-cream transition-all text-sm font-semibold text-center font-[family-name:var(--font-nunito)]">
+                            {bank}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Totals */}
-                <div className="space-y-3 pt-6 border-t border-border text-sm font-[family-name:var(--font-montserrat)]">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>Rs.{subtotal.toLocaleString()}</span>
+                {/* UPI */}
+                <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => {
+                      setSelectedPayment("upi")
+                      setExpandedPayment(expandedPayment === "upi" ? "" : "upi")
+                    }}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-gold/5 to-transparent border-b border-border flex items-center gap-3 hover:bg-cream transition-all cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="upi"
+                      checked={selectedPayment === "upi"}
+                      onChange={(e) => setSelectedPayment(e.target.value)}
+                      className="accent-gold"
+                    />
+                    <span className="text-lg">📱</span>
+                    <div className="flex-1 text-left">
+                      <p className="font-semibold font-[family-name:var(--font-nunito)]">UPI</p>
+                      <p className="text-xs text-muted-foreground font-[family-name:var(--font-nunito)]">Google Pay, PhonePe, Paytm</p>
+                    </div>
+                  </button>
+                  {selectedPayment === "upi" && (
+                    <div className="p-6">
+                      <label className="block text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2 font-[family-name:var(--font-nunito)]">
+                        UPI ID
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="yourname@upi"
+                        className="w-full border border-border bg-cream rounded px-3 py-2 text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold focus:bg-white transition-all"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setCurrentStep("shipping")}
+                    className="flex-1 py-3 border border-border text-foreground rounded font-semibold hover:bg-cream transition-all text-sm font-[family-name:var(--font-nunito)] tracking-wider"
+                  >
+                    BACK
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep("confirm")}
+                    className="flex-1 py-3 bg-foreground text-white rounded font-semibold hover:bg-foreground/90 transition-all text-sm font-[family-name:var(--font-nunito)] tracking-wider"
+                  >
+                    CONTINUE TO CONFIRM
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Confirm Step */}
+            {currentStep === "confirm" && (
+              <div className="space-y-4 animate-slideUp">
+                {/* Confirm Shipping */}
+                <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                  <div className="bg-gradient-to-r from-gold/5 to-transparent border-b border-border px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">📍</span>
+                      <h3 className="font-semibold font-[family-name:var(--font-nunito)]">Delivery Address</h3>
+                    </div>
+                    <button
+                      onClick={() => setCurrentStep("shipping")}
+                      className="text-xs text-gold-dark underline hover:text-gold font-[family-name:var(--font-nunito)]"
+                    >
+                      EDIT
+                    </button>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>{shipping === 0 ? "FREE" : `Rs.${shipping}`}</span>
+                  <div className="p-6 text-sm space-y-1 font-[family-name:var(--font-nunito)]">
+                    <p>{formData.firstName} {formData.lastName}</p>
+                    <p>{formData.address}</p>
+                    <p>{formData.city}, {formData.state} {formData.pincode}</p>
+                    <p className="text-muted-foreground">{formData.email}</p>
+                    <p className="text-muted-foreground">{formData.phone}</p>
                   </div>
-                  <div className="flex justify-between pt-3 border-t border-border font-semibold text-base">
-                    <span>Total</span>
-                    <span>Rs.{total.toLocaleString()}</span>
+                </div>
+
+                {/* Confirm Payment */}
+                <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                  <div className="bg-gradient-to-r from-gold/5 to-transparent border-b border-border px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">💳</span>
+                      <h3 className="font-semibold font-[family-name:var(--font-nunito)]">Payment Method</h3>
+                    </div>
+                    <button
+                      onClick={() => setCurrentStep("payment")}
+                      className="text-xs text-gold-dark underline hover:text-gold font-[family-name:var(--font-nunito)]"
+                    >
+                      EDIT
+                    </button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    (Inclusive of all taxes)
-                  </p>
+                  <div className="p-6 text-sm font-[family-name:var(--font-nunito)]">
+                    <p className="font-semibold">
+                      {selectedPayment === "card" && "Credit/Debit Card"}
+                      {selectedPayment === "netbanking" && "Net Banking"}
+                      {selectedPayment === "upi" && "UPI"}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      {selectedPayment === "card" && "Secure payment via major banks"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Terms Checkbox */}
+                <label className="flex items-start gap-3 p-4 bg-cream border border-border rounded cursor-pointer hover:border-gold transition-all">
+                  <input
+                    type="checkbox"
+                    className="accent-gold mt-1"
+                  />
+                  <span className="text-xs text-muted-foreground leading-relaxed font-[family-name:var(--font-nunito)]">
+                    I agree to the <button className="text-gold-dark underline">Terms & Conditions</button> and <button className="text-gold-dark underline">Privacy Policy</button>. I also authorize Orinket to charge my payment method as per the billing cycle.
+                  </span>
+                </label>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setCurrentStep("payment")}
+                    className="flex-1 py-4 border border-border text-foreground rounded font-semibold hover:bg-cream transition-all text-sm font-[family-name:var(--font-nunito)] tracking-wider"
+                  >
+                    BACK
+                  </button>
+                  <button
+                    onClick={handlePlaceOrder}
+                    disabled={isProcessing}
+                    className="flex-1 py-4 bg-foreground text-white rounded font-semibold hover:bg-foreground/90 transition-all text-sm font-[family-name:var(--font-nunito)] tracking-wider disabled:opacity-50"
+                  >
+                    {isProcessing ? "PROCESSING..." : `PLACE ORDER • Rs.${total.toLocaleString()}`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-card border border-border rounded-lg overflow-hidden sticky top-32 shadow-sm">
+              <div className="bg-gradient-to-r from-gold/5 to-transparent border-b border-border px-6 py-4">
+                <h3 className="font-semibold text-sm font-[family-name:var(--font-nunito)]">
+                  ORDER SUMMARY ({items.length})
+                </h3>
+              </div>
+
+              {/* Items */}
+              <div className="max-h-64 overflow-y-auto border-b border-border">
+                {items.map((item) => (
+                  <div key={item.id} className="px-6 py-4 border-b border-border last:border-b-0 flex gap-3">
+                    <div className="w-12 h-12 rounded bg-cream flex-shrink-0" />
+                    <div className="flex-1 font-[family-name:var(--font-nunito)]">
+                      <p className="text-xs font-semibold line-clamp-1">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                      <p className="text-xs font-semibold mt-1">Rs.{(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Promo Code */}
+              <div className="px-6 py-3 border-b border-border flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Promo code"
+                  className="flex-1 border border-border bg-cream rounded px-2 py-2 text-xs font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold"
+                />
+                <button className="px-3 py-2 border border-gold text-gold text-xs font-semibold rounded hover:bg-gold hover:text-white transition-all font-[family-name:var(--font-nunito)]">
+                  APPLY
+                </button>
+              </div>
+
+              {/* Totals */}
+              <div className="px-6 py-4 space-y-2 text-sm font-[family-name:var(--font-nunito)]">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>Rs.{subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax (18%)</span>
+                  <span>Rs.{tax.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-green-600 font-semibold">FREE</span>
+                </div>
+                <div className="border-t border-border pt-2 mt-2 flex justify-between font-semibold text-base">
+                  <span>Total</span>
+                  <span>Rs.{total.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="px-6 py-4 bg-cream border-t border-border grid grid-cols-3 gap-3 font-[family-name:var(--font-nunito)]">
+                <div className="text-center">
+                  <Truck className="w-4 h-4 mx-auto mb-1 text-gold" />
+                  <p className="text-xs text-muted-foreground">Free Ship</p>
+                </div>
+                <div className="text-center">
+                  <RotateCcw className="w-4 h-4 mx-auto mb-1 text-gold" />
+                  <p className="text-xs text-muted-foreground">Easy Return</p>
+                </div>
+                <div className="text-center">
+                  <Shield className="w-4 h-4 mx-auto mb-1 text-gold" />
+                  <p className="text-xs text-muted-foreground">Secure</p>
                 </div>
               </div>
             </div>
@@ -419,3 +642,4 @@ export default function CheckoutPage() {
     </Suspense>
   )
 }
+

@@ -79,10 +79,10 @@ export default function Reviews() {
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-4 font-[family-name:var(--font-cormorant)]">
+          <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-4 font-[family-name:var(--font-nunito)]">
             TRUSTED BY OUR COMMUNITY
           </h2>
-          <p className="text-muted-foreground font-[family-name:var(--font-montserrat)]">
+          <p className="text-muted-foreground font-[family-name:var(--font-nunito)]">
             Over 5 Lakh+ Happy Customers
           </p>
         </div>
@@ -127,14 +127,14 @@ export default function Reviews() {
                       <Star key={i} className="w-4 h-4 fill-gold text-gold" />
                     ))}
                   </div>
-                  <p className="text-foreground mb-6 font-[family-name:var(--font-montserrat)] leading-relaxed text-sm">
+                  <p className="text-foreground mb-6 font-[family-name:var(--font-nunito)] leading-relaxed text-sm">
                     &quot;{review.text}&quot;
                   </p>
                   <div className="border-t border-border pt-4">
-                    <p className="font-[family-name:var(--font-cormorant)] text-lg">
+                    <p className="font-[family-name:var(--font-nunito)] text-lg">
                       {review.name}
                     </p>
-                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+                    <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                       {review.location} | {review.product}
                     </p>
                   </div>
@@ -161,3 +161,4 @@ export default function Reviews() {
     </section>
   )
 }
+

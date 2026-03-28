@@ -27,7 +27,7 @@ export default function ShopWithConfidence() {
   return (
     <section className="py-16 md:py-20 bg-cream">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-12 text-center font-[family-name:var(--font-cormorant)]">
+        <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-12 text-center font-[family-name:var(--font-nunito)]">
           SHOP WITH CONFIDENCE
         </h2>
 
@@ -37,10 +37,10 @@ export default function ShopWithConfidence() {
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gold-light flex items-center justify-center">
                 <feature.icon className="w-7 h-7 text-gold-dark" />
               </div>
-              <h3 className="text-base md:text-lg font-[family-name:var(--font-cormorant)] mb-2 tracking-wide">
+              <h3 className="text-base md:text-lg font-[family-name:var(--font-nunito)] mb-2 tracking-wide">
                 {feature.title}
               </h3>
-              <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)]">
+              <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)]">
                 {feature.description}
               </p>
             </div>
@@ -50,3 +50,4 @@ export default function ShopWithConfidence() {
     </section>
   )
 }
+

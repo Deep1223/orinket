@@ -6,7 +6,20 @@ import { Search, Filter, ChevronDown, X } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductCard from "@/components/orinket/ProductCard"
-import { searchProducts, products, categories } from "@/data/products"
+import { searchProducts, dummyProducts } from "@/data/dummyProducts"
+import { getProductsByCategory } from "@/data/dummyProducts"
+
+// Create categories from our dummy data
+const categories = [
+  { id: "new-arrivals", name: "New Arrivals" },
+  { id: "necklaces", name: "Necklaces" },
+  { id: "earrings", name: "Earrings" },
+  { id: "bracelets", name: "Bracelets" },
+  { id: "rings", name: "Rings" },
+  { id: "men", name: "Men" },
+  { id: "9kt-gold", name: "9KT Gold" },
+  { id: "gifts", name: "Gifts" }
+]
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -54,7 +67,7 @@ function SearchContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for necklaces, earrings, bracelets..."
-                  className="w-full pl-12 pr-4 py-4 border border-border bg-white font-[family-name:var(--font-montserrat)] text-sm focus:outline-none focus:border-gold"
+                  className="w-full pl-12 pr-4 py-4 border border-border bg-white font-[family-name:var(--font-nunito)] text-sm focus:outline-none focus:border-gold"
                 />
                 {searchQuery && (
                   <button
@@ -76,15 +89,15 @@ function SearchContent() {
             <div>
               {searchQuery ? (
                 <>
-                  <h1 className="text-2xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground">
+                  <h1 className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground">
                     Search results for "{searchQuery}"
                   </h1>
-                  <p className="text-sm text-muted-foreground font-[family-name:var(--font-montserrat)] mt-1">
+                  <p className="text-sm text-muted-foreground font-[family-name:var(--font-nunito)] mt-1">
                     {filteredResults.length} products found
                   </p>
                 </>
               ) : (
-                <h1 className="text-2xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground">
+                <h1 className="text-2xl font-semibold font-[family-name:var(--font-nunito)] text-foreground">
                   All Products
                 </h1>
               )}
@@ -96,7 +109,7 @@ function SearchContent() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none px-4 py-2 pr-10 border border-border bg-white text-sm font-[family-name:var(--font-montserrat)] focus:outline-none focus:border-gold cursor-pointer"
+                  className="appearance-none px-4 py-2 pr-10 border border-border bg-white text-sm font-[family-name:var(--font-nunito)] focus:outline-none focus:border-gold cursor-pointer"
                 >
                   <option value="featured">Featured</option>
                   <option value="newest">Newest</option>
@@ -113,7 +126,7 @@ function SearchContent() {
             <div className="lg:col-span-1">
               <div className="bg-cream p-6 rounded-sm sticky top-32">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-semibold font-[family-name:var(--font-montserrat)] text-foreground">
+                  <h2 className="font-semibold font-[family-name:var(--font-nunito)] text-foreground">
                     Filters
                   </h2>
                   <button
@@ -121,7 +134,7 @@ function SearchContent() {
                       setSelectedCategory(null)
                       setPriceRange([0, 50000])
                     }}
-                    className="text-xs text-muted-foreground hover:text-gold-dark transition-colors font-[family-name:var(--font-montserrat)]"
+                    className="text-xs text-muted-foreground hover:text-gold-dark transition-colors font-[family-name:var(--font-nunito)]"
                   >
                     Clear all
                   </button>
@@ -129,7 +142,7 @@ function SearchContent() {
 
                 {/* Category Filter */}
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-3">
+                  <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-3">
                     Category
                   </h3>
                   <div className="space-y-2">
@@ -142,7 +155,7 @@ function SearchContent() {
                           onChange={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
                           className="w-4 h-4 text-gold"
                         />
-                        <span className="text-sm font-[family-name:var(--font-montserrat)] text-foreground">
+                        <span className="text-sm font-[family-name:var(--font-nunito)] text-foreground">
                           {cat.name}
                         </span>
                       </label>
@@ -152,7 +165,7 @@ function SearchContent() {
 
                 {/* Price Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-3">
+                  <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-3">
                     Price Range
                   </h3>
                   <div className="space-y-2">
@@ -171,7 +184,7 @@ function SearchContent() {
                           onChange={() => setPriceRange(option.range)}
                           className="w-4 h-4 text-gold"
                         />
-                        <span className="text-sm font-[family-name:var(--font-montserrat)] text-foreground">
+                        <span className="text-sm font-[family-name:var(--font-nunito)] text-foreground">
                           {option.label}
                         </span>
                       </label>
@@ -192,10 +205,10 @@ function SearchContent() {
               ) : (
                 <div className="text-center py-16">
                   <Search className="w-16 h-16 mx-auto mb-6 text-muted-foreground" />
-                  <h2 className="text-xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-2">
+                  <h2 className="text-xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-2">
                     No products found
                   </h2>
-                  <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-6">
+                  <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-6">
                     Try adjusting your search or filters to find what you're looking for.
                   </p>
                   <button
@@ -204,7 +217,7 @@ function SearchContent() {
                       setSelectedCategory(null)
                       setPriceRange([0, 50000])
                     }}
-                    className="px-6 py-3 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+                    className="px-6 py-3 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
                   >
                     CLEAR FILTERS
                   </button>
@@ -214,7 +227,7 @@ function SearchContent() {
               {/* Show suggestions if no query */}
               {!searchQuery && filteredResults.length === 0 && (
                 <div className="text-center py-16">
-                  <h2 className="text-xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+                  <h2 className="text-xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
                     Popular Searches
                   </h2>
                   <div className="flex flex-wrap justify-center gap-3">
@@ -222,7 +235,7 @@ function SearchContent() {
                       <button
                         key={term}
                         onClick={() => setSearchQuery(term.toLowerCase())}
-                        className="px-4 py-2 border border-border text-sm font-[family-name:var(--font-montserrat)] hover:border-gold hover:text-gold-dark transition-colors"
+                        className="px-4 py-2 border border-border text-sm font-[family-name:var(--font-nunito)] hover:border-gold hover:text-gold-dark transition-colors"
                       >
                         {term}
                       </button>
@@ -247,3 +260,4 @@ export default function SearchPage() {
     </Suspense>
   )
 }
+

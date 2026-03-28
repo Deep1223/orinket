@@ -18,25 +18,25 @@ export default function BrandStory() {
 
           {/* Content */}
           <div className="lg:pl-12">
-            <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-cormorant)]">
+            <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-6 font-[family-name:var(--font-nunito)]">
               THE ORINKET STORY
             </h2>
-            <p className="text-muted-foreground mb-4 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-4 font-[family-name:var(--font-nunito)] leading-relaxed">
               Orinket was born from a simple belief: everyone deserves to own beautiful jewellery that 
               doesn&apos;t break the bank or lose its shine.
             </p>
-            <p className="text-muted-foreground mb-4 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-4 font-[family-name:var(--font-nunito)] leading-relaxed">
               We noticed a gap in the market — real gold was too expensive for everyday wear, and 
               imitation jewellery just didn&apos;t last. So we created something in between: demi-fine 
               jewellery that combines premium materials with accessible pricing.
             </p>
-            <p className="text-muted-foreground mb-8 font-[family-name:var(--font-montserrat)] leading-relaxed">
+            <p className="text-muted-foreground mb-8 font-[family-name:var(--font-nunito)] leading-relaxed">
               Today, with over 5 lakh happy customers, we continue our mission to make every woman 
               feel confident and beautiful, every single day.
             </p>
             <Link
               href="/about"
-              className="inline-block px-8 py-3 bg-foreground text-background text-sm tracking-[0.2em] hover:bg-gold-dark transition-colors font-[family-name:var(--font-montserrat)]"
+              className="inline-block px-8 py-3 bg-foreground text-background text-sm tracking-[0.2em] hover:bg-gold-dark transition-colors font-[family-name:var(--font-nunito)]"
             >
               LEARN MORE
             </Link>
@@ -46,3 +46,4 @@ export default function BrandStory() {
     </section>
   )
 }
+

@@ -2,9 +2,9 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingBag } from "lucide-react"
+import { Heart, ShoppingBag, Star, Truck, Shield } from "lucide-react"
 import { useCart } from "@/context/CartContext"
-import type { Product } from "@/data/products"
+import type { Product } from "@/data/dummyProducts"
 
 interface ProductCardProps {
   product: Product
@@ -16,6 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     addToCart({
       id: product.id,
       name: product.name,
@@ -27,6 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (inWishlist) {
       removeFromWishlist(product.id)
     } else {
@@ -41,103 +43,136 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0
+
   return (
-    <Link href={`/product/${product.id}`} className="group block">
-      <div className="relative overflow-hidden bg-cream-dark rounded-sm">
-        {/* Product Image */}
-        <div className="aspect-square relative overflow-hidden">
+    <Link href={`/product/${product.id}`} className="group block h-full cursor-pointer">
+      <div className="relative overflow-hidden rounded-3xl h-full flex flex-col transition-all duration-500 hover:shadow-xl bg-white hover:-translate-y-2 animate-fadeIn border border-gray-150 shadow-md">
+        {/* Product Image Container */}
+        <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="eager"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
+          {/* Subtle overlay on hover */}
+          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-2 transition-opacity duration-300" />
         </div>
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        {/* Premium Badges */}
+        <div className="absolute top-5 left-5 flex flex-col gap-2.5 z-10">
           {product.isNew && (
-            <span className="bg-foreground text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider">
+            <span className="bg-white/98 backdrop-blur-sm text-gray-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-md border border-gray-200 animate-slideInLeft">
               NEW
             </span>
           )}
           {product.isBestseller && (
-            <span className="bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider">
+            <span className="bg-gray-900/98 backdrop-blur-sm text-white text-xs font-bold px-3.5 py-2 rounded-full shadow-md animate-slideInLeft" style={{ animationDelay: "50ms" }}>
               BESTSELLER
             </span>
           )}
-          {product.discount && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)] tracking-wider">
-              -{product.discount}%
+          {discount > 0 && (
+            <span className="bg-red-500/95 backdrop-blur-sm text-white text-xs font-bold px-3.5 py-2 rounded-full shadow-md">
+              {discount}% OFF
             </span>
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Action Buttons - Hover Effect */}
+        <div className="absolute top-5 right-5 flex flex-col gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 z-20">
           <button
             onClick={handleWishlist}
-            className={`p-2 rounded-full shadow-md transition-colors ${
-              inWishlist ? "bg-gold text-white" : "bg-white hover:bg-gold hover:text-white"
+            className={`p-3 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
+              inWishlist 
+                ? "bg-red-500 text-white" 
+                : "bg-white/95 hover:bg-red-500 hover:text-white text-gray-700"
             }`}
             aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={`w-4 h-4 ${inWishlist ? "fill-current" : ""}`} />
+            <Heart className={`w-5 h-5 transition-all duration-300 ${inWishlist ? "fill-current" : ""}`} />
           </button>
           <button
             onClick={handleAddToCart}
-            className="p-2 bg-white rounded-full shadow-md hover:bg-gold hover:text-white transition-colors"
+            className="p-3 bg-white/95 backdrop-blur-md rounded-full shadow-lg hover:bg-gray-900 hover:text-white text-gray-700 transition-all duration-300 transform hover:scale-110"
             aria-label="Add to cart"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-5 h-5 transition-all duration-300" />
           </button>
         </div>
 
-        {/* Quick Add Button */}
-        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform">
+        {/* Quick Add Button - Slide Up */}
+        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
           <button
             onClick={handleAddToCart}
-            className="w-full py-3 bg-foreground text-white text-sm font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+            className="w-full py-4 bg-gradient-to-r from-gray-950 via-gray-900 to-black text-white text-sm font-bold font-[family-name:var(--font-nunito)] tracking-wide hover:from-gray-900 hover:via-gray-800 hover:to-gray-950 transition-all duration-300 flex items-center justify-center gap-2.5"
           >
-            ADD TO BAG
+            <ShoppingBag className="w-4 h-4" />
+            ADD TO CART
           </button>
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="mt-4 text-center">
-        <h3 className="text-sm font-[family-name:var(--font-montserrat)] text-foreground mb-2 line-clamp-2">
-          {product.name}
-        </h3>
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-base font-semibold font-[family-name:var(--font-montserrat)] text-foreground">
-            Rs.{product.price.toLocaleString()}
+      {/* Product Info Section */}
+      <div className="mt-5 px-0.5 flex-1 flex flex-col justify-between gap-3.5">
+        {/* Product Name */}
+        <div>
+          <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-gray-900 mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-amber-700 leading-snug">
+            {product.name}
+          </h3>
+        </div>
+
+        {/* Rating Section */}
+        {product.rating && (
+          <div className="flex items-center gap-2.5">
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3.5 h-3.5 transition-all duration-300 ${
+                    i < Math.floor(product.rating!)
+                      ? "text-amber-400 fill-current"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-700 font-semibold">
+              {product.rating}
+            </span>
+            <span className="text-xs text-gray-500">
+              ({product.reviews || 0})
+            </span>
+          </div>
+        )}
+
+        {/* Price Display */}
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-bold text-gray-900">
+            ₹{product.price.toLocaleString()}
           </span>
           {product.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through font-[family-name:var(--font-montserrat)]">
-              Rs.{product.originalPrice.toLocaleString()}
+            <span className="text-sm text-gray-500 line-through font-[family-name:var(--font-nunito)]">
+              ₹{product.originalPrice.toLocaleString()}
             </span>
           )}
         </div>
-        {/* Rating */}
-        <div className="flex items-center justify-center gap-1 mt-2">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className={`w-3 h-3 ${i < Math.floor(product.rating) ? "text-gold" : "text-gray-300"}`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
+
+        {/* Trust Badges */}
+        <div className="flex items-center justify-between text-xs text-gray-600 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1.5">
+            <Truck className="w-3.5 h-3.5 text-gray-700" />
+            <span className="text-xs">Free Shipping</span>
           </div>
-          <span className="text-xs text-muted-foreground font-[family-name:var(--font-montserrat)]">
-            ({product.reviews})
-          </span>
+          <div className="flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-gray-700" />
+            <span className="text-xs">Secure</span>
+          </div>
         </div>
       </div>
     </Link>
   )
 }
+

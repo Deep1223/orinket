@@ -1,89 +1,48 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
+import ProductCard from "@/components/orinket/ProductCard"
+import { dummyProducts, getProductsByCategory } from "@/data/dummyProducts"
 
 const filters = ["All", "Necklace", "Bracelets", "Rings", "Earrings", "Pendant"]
-
-const products = [
-  {
-    id: 1,
-    name: "Crystal Peak 9KT Gold Lab Grown Diamond Studs",
-    image: "/images/fine-gold-1.jpg",
-    category: "Earrings",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  },
-  {
-    id: 2,
-    name: "Orba Shine 9KT Gold Lab Grown Diamond Bracelet",
-    image: "/images/fine-gold-2.jpg",
-    category: "Bracelets",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  },
-  {
-    id: 3,
-    name: "Stellar Bloom 9KT Gold Lab Grown Diamond Pendant",
-    image: "/images/fine-gold-3.jpg",
-    category: "Pendant",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  },
-  {
-    id: 4,
-    name: "Floral Whisper 9KT Gold Diamond Studs",
-    image: "/images/fine-gold-1.jpg",
-    category: "Earrings",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  },
-  {
-    id: 5,
-    name: "Sweethex 9KT Gold Lab Grown Diamond Ring",
-    image: "/images/fine-gold-2.jpg",
-    category: "Rings",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  },
-  {
-    id: 6,
-    name: "Celestial Dot 9KT Gold Diamond Necklace",
-    image: "/images/fine-gold-3.jpg",
-    category: "Necklace",
-    badge: "Flat 5% Off",
-    tag: "9KT Solid Gold"
-  }
-]
 
 export default function FineGold() {
   const [activeFilter, setActiveFilter] = useState("All")
 
   const filteredProducts = activeFilter === "All"
-    ? products
-    : products.filter(p => p.category === activeFilter)
+    ? getProductsByCategory("9kt-gold")
+    : getProductsByCategory("9kt-gold").filter(p => 
+        p.subcategory?.toLowerCase() === activeFilter.toLowerCase()
+      )
 
   return (
-    <section className="py-16 md:py-24 bg-[#1a1a1a] text-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-light tracking-[0.1em] mb-4 text-center font-[family-name:var(--font-cormorant)]">
-          9KT FINE GOLD
-        </h2>
-        <p className="text-center text-white/70 mb-8 font-[family-name:var(--font-montserrat)]">
-          Lab grown diamonds set in solid 9KT gold
-        </p>
+    <section className="py-20 md:py-32 bg-gradient-to-b from-gray-950 to-gray-900 text-white relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl -z-0" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl -z-0" />
+      
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        {/* Section Header */}
+        <div className="mb-16 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-wider mb-4 text-white font-[family-name:var(--font-nunito)]">
+            9KT FINE GOLD
+          </h2>
+          <p className="text-base md:text-lg text-gray-400 font-[family-name:var(--font-nunito)] max-w-2xl mx-auto leading-relaxed">
+            Lab grown diamonds set in solid 9KT gold. Premium jewelry crafted for timeless elegance.
+          </p>
+        </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <div className="flex flex-wrap justify-center gap-3 mb-14">
           {filters.map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 text-sm tracking-wider font-[family-name:var(--font-montserrat)] transition-all border ${
+              className={`px-6 py-2.5 text-sm font-semibold tracking-wider font-[family-name:var(--font-nunito)] transition-all duration-300 rounded-lg border-2 ${
                 activeFilter === filter
-                  ? "bg-gold border-gold text-white"
-                  : "border-white/30 text-white/70 hover:border-white hover:text-white"
+                  ? "bg-yellow-500 border-yellow-500 text-gray-950 shadow-lg shadow-yellow-500/20"
+                  : "border-gray-700 text-gray-300 hover:border-yellow-500 hover:text-yellow-400 hover:shadow-lg hover:shadow-yellow-500/10"
               }`}
             >
               {filter}
@@ -92,44 +51,31 @@ export default function FineGold() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <Link
-              key={product.id}
-              href={`/product/fine-gold/${product.id}`}
-              className="group"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {filteredProducts.map((product, idx) => (
+            <div 
+              key={product.id} 
+              className="group animate-fadeIn"
+              style={{ animationDelay: `${idx * 50}ms` }}
             >
-              <div className="relative aspect-square overflow-hidden bg-[#2a2a2a] mb-4">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <span className="absolute top-3 left-3 bg-gold text-white text-xs px-2 py-1 font-[family-name:var(--font-montserrat)]">
-                  {product.badge}
-                </span>
-                <span className="absolute bottom-3 left-3 bg-white/90 text-foreground text-xs px-2 py-1 font-[family-name:var(--font-montserrat)]">
-                  {product.tag}
-                </span>
+              <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100">
+                <ProductCard product={product} />
               </div>
-              <h3 className="text-sm md:text-base font-[family-name:var(--font-cormorant)] group-hover:text-gold transition-colors line-clamp-2">
-                {product.name}
-              </h3>
-            </Link>
+            </div>
           ))}
         </div>
 
-        {/* View All */}
-        <div className="text-center mt-12">
+        {/* View All Button */}
+        <div className="text-center pt-8 border-t border-gray-800">
           <Link
-            href="/collections/9kt-gold"
-            className="inline-block px-8 py-3 border border-white text-white text-sm tracking-[0.2em] hover:bg-white hover:text-foreground transition-all font-[family-name:var(--font-montserrat)]"
+            href="/category/9kt-gold"
+            className="inline-block px-10 py-3.5 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-gray-950 font-bold text-sm tracking-wider rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-yellow-500/30 transform hover:scale-105 font-[family-name:var(--font-nunito)]"
           >
-            VIEW ALL
+            VIEW ALL COLLECTION
           </Link>
         </div>
       </div>
     </section>
   )
 }
+

@@ -11,13 +11,13 @@ export default function NotFound() {
       <main className="flex-1 flex items-center justify-center py-16">
         <div className="max-w-lg mx-auto px-4 text-center">
           {/* 404 Text */}
-          <h1 className="text-8xl md:text-9xl font-bold font-[family-name:var(--font-cormorant)] text-gold mb-4">
+          <h1 className="text-8xl md:text-9xl font-bold font-[family-name:var(--font-nunito)] text-gold mb-4">
             404
           </h1>
-          <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-cormorant)] text-foreground mb-4">
+          <h2 className="text-2xl md:text-3xl font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
             Page Not Found
           </h2>
-          <p className="text-muted-foreground font-[family-name:var(--font-montserrat)] mb-8">
+          <p className="text-muted-foreground font-[family-name:var(--font-nunito)] mb-8">
             Sorry, we couldn't find the page you're looking for. It might have been moved or no longer exists.
           </p>
 
@@ -25,14 +25,14 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-gold-dark transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-foreground text-white font-[family-name:var(--font-nunito)] tracking-wider hover:bg-gold-dark transition-colors"
             >
               <Home className="w-5 h-5" />
               GO HOME
             </Link>
             <Link
               href="/search"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-foreground text-foreground font-[family-name:var(--font-montserrat)] tracking-wider hover:bg-foreground hover:text-white transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-foreground text-foreground font-[family-name:var(--font-nunito)] tracking-wider hover:bg-foreground hover:text-white transition-colors"
             >
               <Search className="w-5 h-5" />
               SEARCH
@@ -41,7 +41,7 @@ export default function NotFound() {
 
           {/* Popular Links */}
           <div className="mt-12">
-            <h3 className="text-sm font-semibold font-[family-name:var(--font-montserrat)] text-foreground mb-4">
+            <h3 className="text-sm font-semibold font-[family-name:var(--font-nunito)] text-foreground mb-4">
               POPULAR CATEGORIES
             </h3>
             <div className="flex flex-wrap justify-center gap-3">
@@ -49,7 +49,7 @@ export default function NotFound() {
                 <Link
                   key={cat}
                   href={`/category/${cat.toLowerCase().replace(" ", "-")}`}
-                  className="px-4 py-2 bg-cream text-sm font-[family-name:var(--font-montserrat)] text-foreground hover:bg-gold-light transition-colors"
+                  className="px-4 py-2 bg-cream text-sm font-[family-name:var(--font-nunito)] text-foreground hover:bg-gold-light transition-colors"
                 >
                   {cat}
                 </Link>
@@ -63,3 +63,4 @@ export default function NotFound() {
     </div>
   )
 }
+
