@@ -1,0 +1,75 @@
+{
+  "brand": {
+    "name": "ORINKET",
+    "tagline": "Fine demi-fine jewellery for modern elegance.",
+    "promise": "Certified quality, secure checkout, and concierge support."
+  },
+  "support": {
+    "email": "care@orinket.com",
+    "phone": "+91 98765 43210",
+    "hours": "Mon-Sat, 10:00 AM - 7:00 PM",
+    "address": "12, Jewel Square, Mumbai, India"
+  },
+  "trustBadges": [
+    {
+      "title": "Certified Quality",
+      "description": "Every piece goes through a strict quality check."
+    },
+    {
+      "title": "Secure Payments",
+      "description": "Trusted gateways with encrypted checkout."
+    },
+    {
+      "title": "Free Shipping",
+      "description": "Complimentary delivery across India."
+    }
+  ],
+  "orderStatuses": [
+    {
+      "key": "processing",
+      "label": "Processing",
+      "description": "Your order is being prepared."
+    },
+    {
+      "key": "shipped",
+      "label": "Shipped",
+      "description": "Your parcel is on the way."
+    },
+    {
+      "key": "delivered",
+      "label": "Delivered",
+      "description": "Your order has been delivered."
+    }
+  ],
+  "policies": {
+    "terms": [
+      "By placing an order, you agree that all details shared are accurate and complete.",
+      "Orders once packed can only be cancelled before dispatch confirmation.",
+      "Any misuse of promotions may result in cancellation of discounts or orders.",
+      "All product images are for reference; minor handcrafted variations may occur."
+    ],
+    "privacy": [
+      "We collect only essential details required to process orders and improve service.",
+      "Payment information is processed via secure partners and never stored as plain card data.",
+      "Your personal data is never sold to third parties for advertising.",
+      "You may request data update or deletion by contacting customer support."
+    ]
+  },
+  "contactCards": [
+    {
+      "title": "Email Support",
+      "value": "care@orinket.com",
+      "note": "Response in under 24 hours"
+    },
+    {
+      "title": "Phone Support",
+      "value": "+91 98765 43210",
+      "note": "Mon-Sat, 10:00 AM - 7:00 PM"
+    },
+    {
+      "title": "Store & Office",
+      "value": "12, Jewel Square, Mumbai, India",
+      "note": "By appointment only"
+    }
+  ]
+}
