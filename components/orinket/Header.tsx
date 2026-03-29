@@ -1,22 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Search, Heart, ShoppingBag, User, Menu, X, GitCompare } from "lucide-react"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
 import { useCompare } from "@/context/CompareContext"
 import { useCurrency } from "@/context/CurrencyContext"
-import { dummyProducts } from "@/data/dummyProducts"
-import { categories, searchTags } from "@/dummydata/header-menu/categories"
+import { useStoreSettings } from "@/context/StoreSettingsContext"
+import { useAppSelector } from "@/store/hooks"
+import { selectCatalogCategories, selectProducts } from "@/store/selectors"
+import { searchTags } from "@/dummydata/header-menu/categories"
 import { font } from "@/lib/fonts"
 
 export default function Header() {
+  const { settings } = useStoreSettings()
   const {
     getTopBannerDesktopText,
     getTopBannerMobileText,
     getSecondaryBannerText,
   } = useCurrency()
+
+  const showTopBanner = (settings?.showTopBanner ?? 1) === 1
+  const showSecondaryBanner = (settings?.showSecondaryBanner ?? 1) === 1
+  const storeName = settings?.storeName?.trim() || "ORINKET"
+
+  const desktopBanner =
+    settings?.topBannerDesktopText?.trim() || getTopBannerDesktopText()
+  const mobileBanner =
+    settings?.topBannerMobileText?.trim() || getTopBannerMobileText()
+  const secondaryBanner =
+    settings?.secondaryBannerText?.trim() || getSecondaryBannerText()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -24,7 +38,17 @@ export default function Header() {
   const router = useRouter()
   const { cartCount, wishlistItems } = useCart()
   const { compareCount } = useCompare()
-  const uniqueProductNames = Array.from(new Set(dummyProducts.map((product) => product.name)))
+  const catalog = useAppSelector(selectProducts)
+  const catalogCategoryRows = useAppSelector(selectCatalogCategories)
+  const categories = useMemo(
+    () =>
+      catalogCategoryRows.map((c) => ({
+        name: c.displayName.toUpperCase(),
+        href: `/category/${c.slug}`,
+      })),
+    [catalogCategoryRows]
+  )
+  const uniqueProductNames = Array.from(new Set(catalog.map((product) => product.name)))
   const searchSuggestions =
     searchQuery.trim().length > 0
       ? uniqueProductNames
@@ -70,15 +94,19 @@ export default function Header() {
   return (
     <header className="w-full relative z-40 bg-white">
       {/* Top Banner */}
-      <div className={`bg-[#2d2d2d] text-white text-center py-2 px-3 sm:px-4 text-xs sm:text-sm tracking-wide ${font('body')}`}>
-        <span className="hidden md:inline">{getTopBannerDesktopText()}</span>
-        <span className="md:hidden text-[11px] sm:text-xs">{getTopBannerMobileText()}</span>
-      </div>
+      {showTopBanner && (
+        <div className={`bg-[#2d2d2d] text-white text-center py-2 px-3 sm:px-4 text-xs sm:text-sm tracking-wide ${font('body')}`}>
+          <span className="hidden md:inline">{desktopBanner}</span>
+          <span className="md:hidden text-[11px] sm:text-xs">{mobileBanner}</span>
+        </div>
+      )}
 
       {/* Secondary Banner */}
-      <div className={`bg-gold-light text-gold-dark text-center py-2 px-3 sm:px-4 text-xs sm:text-sm ${font('body')}`}>
-        <span className="block text-[11px] sm:text-xs md:text-sm">{getSecondaryBannerText()}</span>
-      </div>
+      {showSecondaryBanner && (
+        <div className={`bg-gold-light text-gold-dark text-center py-2 px-3 sm:px-4 text-xs sm:text-sm ${font('body')}`}>
+          <span className="block text-[11px] sm:text-xs md:text-sm">{secondaryBanner}</span>
+        </div>
+      )}
 
       {/* Main Header */}
       <div className="bg-white border-b border-border sticky top-0 z-30">
@@ -100,7 +128,7 @@ export default function Header() {
               className="group absolute left-1/2 top-1/2 z-0 flex -translate-x-1/2 -translate-y-1/2 flex-shrink-0 lg:static lg:left-auto lg:top-auto lg:z-auto lg:translate-x-0 lg:translate-y-0"
             >
               <h1 className={`text-2xl font-semibold tracking-widest text-foreground transition-all duration-300 group-hover:text-gold-dark group-hover:scale-105 transform sm:text-3xl md:text-4xl ${font('headings')}`}>
-                ORINKET
+                {storeName}
               </h1>
             </Link>
 
@@ -158,9 +186,9 @@ export default function Header() {
 
           {/* Desktop Category Nav */}
           <nav className="hidden lg:flex items-center justify-center gap-8 py-4 border-t border-border">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <Link
-                key={category.name}
+                key={category.href}
                 href={category.href}
                 className={`text-xs tracking-wider text-foreground hover:text-gold-dark transition-all duration-300 whitespace-nowrap relative group ${font('navigation')}`}
               >
@@ -255,7 +283,7 @@ export default function Header() {
           <div className="p-4 sm:p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className={`text-2xl font-semibold tracking-widest sm:text-3xl ${font('headings')}`}>
-                ORINKET
+                {storeName}
               </h2>
               <button
                 type="button"
@@ -334,7 +362,7 @@ export default function Header() {
             <nav className="flex flex-col gap-0">
               {categories.map((category) => (
                 <Link
-                  key={category.name}
+                  key={category.href}
                   href={category.href}
                   className={`border-b border-gray-200 px-2 py-3.5 text-base tracking-wide transition-colors hover:bg-gray-50 sm:text-lg ${font('navigation')}`}
                   onClick={() => setMobileMenuOpen(false)}

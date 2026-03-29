@@ -11,8 +11,10 @@ import {
 import {
   createCurrencyFormatters,
   FALLBACK_UNITS_PER_USD,
+  type CreateCurrencyFormattersOptions,
   type UnitsPerUsd,
 } from "@/lib/currency"
+import { useStoreSettings } from "@/context/StoreSettingsContext"
 
 export type CurrencyContextValue = ReturnType<typeof createCurrencyFormatters> & {
   /** After first `/api/exchange-rates` attempt finishes */
@@ -23,9 +25,19 @@ export type CurrencyContextValue = ReturnType<typeof createCurrencyFormatters> &
 const CurrencyContext = createContext<CurrencyContextValue | null>(null)
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
+  const { settings } = useStoreSettings()
   const [units, setUnits] = useState<UnitsPerUsd>({ ...FALLBACK_UNITS_PER_USD })
   const [liveSource, setLiveSource] = useState<CurrencyContextValue["liveSource"]>("pending")
   const [ratesReady, setRatesReady] = useState(false)
+
+  const formatOptions = useMemo<CreateCurrencyFormattersOptions | undefined>(() => {
+    if (!settings) return undefined
+    const code = String(settings.defaultCurrency || "INR").toUpperCase()
+    return {
+      displayCurrency: code as CreateCurrencyFormattersOptions["displayCurrency"],
+      nonInrMarkupPercent: settings.otherCurrencyPriceIncreasePercent,
+    }
+  }, [settings])
 
   useEffect(() => {
     let cancelled = false
@@ -56,7 +68,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const formatters = useMemo(() => createCurrencyFormatters(units), [units])
+  const formatters = useMemo(
+    () => createCurrencyFormatters(units, formatOptions),
+    [units, formatOptions]
+  )
 
   const value = useMemo<CurrencyContextValue>(
     () => ({

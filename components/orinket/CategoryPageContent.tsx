@@ -8,29 +8,33 @@ import {
   ProductListingHero,
   ProductListingToolbar,
 } from "@/components/orinket/ProductListingShell"
-import { getProductsByCategory, dummyProducts } from "@/data/dummyProducts"
+import type { Product } from "@/data/dummyProducts"
+import { getProductsByCategory } from "@/lib/catalogQueries"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import { getFilterOptions, filterProducts, FilterState } from "@/lib/productFilters"
 import { useCurrency } from "@/context/CurrencyContext"
 import { fonts } from "@/lib/fonts"
+import { useAppSelector } from "@/store/hooks"
+import {
+  selectCatalogCategories,
+  selectCatalogShopError,
+  selectCatalogShopFailed,
+  selectCatalogShopLoading,
+  selectCatalogShopReady,
+  selectProducts,
+} from "@/store/selectors"
 
-const categories = [
-  { name: "all", displayName: "All Products", description: "Discover our complete collection of beautiful jewelry pieces" },
-  { name: "new-arrivals", displayName: "New Arrivals", description: "Discover our latest collection" },
-  { name: "necklaces", displayName: "Necklaces", description: "Elegant necklaces for every occasion" },
-  { name: "earrings", displayName: "Earrings", description: "Beautiful earrings to complement your style" },
-  { name: "bracelets", displayName: "Bracelets", description: "Stylish bracelets for everyday wear" },
-  { name: "rings", displayName: "Rings", description: "Stunning rings for special moments" },
-  { name: "men", displayName: "Men", description: "Sophisticated jewelry for modern men" },
-  { name: "9kt-gold", displayName: "9KT Gold", description: "Premium 9KT gold collection" },
-  { name: "gifts", displayName: "Gifts", description: "Perfect gifts for your loved ones" },
-]
+const ALL_CATEGORY_META = {
+  displayName: "All Products",
+  description:
+    "Discover our complete collection of beautiful jewelry pieces",
+} as const
 
 const PRODUCTS_PER_PAGE = 9
 
-function getBaseProductsForSlug(slug: string) {
-  return slug === "all" ? dummyProducts : getProductsByCategory(slug)
+function getBaseProductsForSlug(slug: string, allProducts: Product[]) {
+  return slug === "all" ? allProducts : getProductsByCategory(allProducts, slug)
 }
 
 function initialCategoryFilterForSlug(slug: string): string[] {
@@ -53,6 +57,23 @@ interface CategoryPageContentProps {
 export default function CategoryPageContent({ slug }: CategoryPageContentProps) {
   const { formatPrice } = useCurrency()
   const router = useRouter()
+  const allProducts = useAppSelector(selectProducts)
+  const catalogCategories = useAppSelector(selectCatalogCategories)
+  const shopReady = useAppSelector(selectCatalogShopReady)
+  const shopLoading = useAppSelector(selectCatalogShopLoading)
+  const shopFailed = useAppSelector(selectCatalogShopFailed)
+  const shopError = useAppSelector(selectCatalogShopError)
+
+  const categoryMeta = useMemo(() => {
+    if (slug === "all") {
+      return {
+        displayName: ALL_CATEGORY_META.displayName,
+        description: ALL_CATEGORY_META.description,
+      }
+    }
+    return catalogCategories.find((c) => c.slug === slug) ?? null
+  }, [slug, catalogCategories])
+
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [listSearchQuery, setListSearchQuery] = useState("")
@@ -69,35 +90,29 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
   })
 
   const filterOptions = useMemo(
-    () => getFilterOptions(dummyProducts, formatPrice),
-    [formatPrice]
+    () => getFilterOptions(allProducts, formatPrice),
+    [allProducts, formatPrice]
   )
 
   useEffect(() => {
-    const category = categories.find((cat) => cat.name === slug)
+    if (!shopReady || !categoryMeta) return
 
-    if (!category) {
-      notFound()
-      return
-    }
-
-    const products = getBaseProductsForSlug(slug)
+    const products = getBaseProductsForSlug(slug, allProducts)
     setFilteredProducts(products)
 
     setActiveFilters((prev) => ({
       ...prev,
       categories: initialCategoryFilterForSlug(slug),
     }))
-  }, [slug])
+  }, [slug, allProducts, shopReady, categoryMeta])
 
   useEffect(() => {
-    if (slug) {
-      const categoryProducts = getBaseProductsForSlug(slug)
-      const filtered = filterProducts(categoryProducts, activeFilters)
-      setFilteredProducts(filtered)
-      setCurrentPage(1)
-    }
-  }, [activeFilters, slug])
+    if (!shopReady || !categoryMeta) return
+    const categoryProducts = getBaseProductsForSlug(slug, allProducts)
+    const filtered = filterProducts(categoryProducts, activeFilters)
+    setFilteredProducts(filtered)
+    setCurrentPage(1)
+  }, [activeFilters, slug, allProducts, shopReady, categoryMeta])
 
   const sortedProducts = useMemo(() => {
     const products = [...filteredProducts]
@@ -140,11 +155,32 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
     return count
   }
 
-  const category = categories.find((cat) => cat.name === slug)
-
-  if (!category) {
-    return notFound()
+  if (shopLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center px-4">
+        <p className={`text-sm text-stone-600 ${fonts.body}`}>Loading collection…</p>
+      </div>
+    )
   }
+
+  if (shopFailed) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h2 className={`text-xl font-semibold text-stone-900 ${fonts.headings}`}>
+          Could not load catalog
+        </h2>
+        <p className={`mt-2 text-stone-600 ${fonts.body}`}>
+          {shopError ?? "Please try again later."}
+        </p>
+      </div>
+    )
+  }
+
+  if (!categoryMeta) {
+    notFound()
+  }
+
+  const category = categoryMeta
 
   const handleListSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()

@@ -6,14 +6,17 @@ import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductCard from "@/components/orinket/ProductCard"
 import WishlistCard from "@/components/orinket/WishlistCard"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
 import { useCompare } from "@/context/CompareContext"
-import { dummyProducts, getProductById } from "@/data/dummyProducts"
+import { useAppSelector } from "@/store/hooks"
+import { selectProducts } from "@/store/selectors"
+import { getProductById } from "@/lib/catalogQueries"
 import { getStockDisplay } from "@/lib/wishlistDisplay"
 import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"
 import { fonts } from "@/lib/fonts"
 
 export default function WishlistPage() {
+  const catalog = useAppSelector(selectProducts)
   const { wishlistItems, removeFromWishlist, addToCart, moveWishlistToCart } = useCart()
   const { addToCompare, isInCompare, compareCount } = useCompare()
   const addAllAdded = useTimedAdded()
@@ -34,7 +37,7 @@ export default function WishlistPage() {
     })
   }
 
-  const recommendedProducts = dummyProducts
+  const recommendedProducts = catalog
     .filter((p) => !wishlistItems.find((w) => w.id === p.id))
     .slice(0, 4)
 
@@ -134,7 +137,7 @@ export default function WishlistPage() {
                 <WishlistCard
                   key={item.id}
                   item={item}
-                  product={getProductById(item.id)}
+                  product={getProductById(catalog, item.id)}
                   index={index}
                   onRemove={removeFromWishlist}
                   onAddToCart={handleAddToCart}
@@ -151,7 +154,7 @@ export default function WishlistPage() {
                 disabled={addAllAdded.added}
                 onClick={() => {
                   const eligible = wishlistItems.filter((item) => {
-                    const p = getProductById(item.id)
+                    const p = getProductById(catalog, item.id)
                     return !getStockDisplay(p).disabled
                   })
                   if (eligible.length === 0) {

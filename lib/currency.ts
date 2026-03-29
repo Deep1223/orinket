@@ -40,17 +40,36 @@ export type FormatPriceOptions = {
   maximumFractionDigits?: number
 }
 
+export type CreateCurrencyFormattersOptions = {
+  /** From General Settings; `OTHER` uses USD FX. */
+  displayCurrency?: SupportedCurrency | "OTHER"
+  /** When display currency is not INR, multiply converted prices by (1 + pct/100). */
+  nonInrMarkupPercent?: number
+}
+
 function defaultMaxFractionDigits(code: SupportedCurrency): number {
   if (code === "INR") return 0
   return 2
+}
+
+function resolveDisplayCode(
+  raw: SupportedCurrency | "OTHER" | undefined
+): SupportedCurrency {
+  if (raw === "OTHER") return "USD"
+  if (raw === "USD" || raw === "EUR" || raw === "GBP" || raw === "INR") return raw
+  return ACTIVE_DISPLAY_CURRENCY
 }
 
 /**
  * Build all formatters for a given USD cross table (live or fallback).
  * Use via `useCurrency()` in client UI, or `staticCurrency` for non-React / SSR-safe defaults.
  */
-export function createCurrencyFormatters(units: UnitsPerUsd) {
-  const display = ACTIVE_DISPLAY_CURRENCY
+export function createCurrencyFormatters(
+  units: UnitsPerUsd,
+  formatOptions?: CreateCurrencyFormattersOptions
+) {
+  const display = resolveDisplayCode(formatOptions?.displayCurrency)
+  const markupPct = Number(formatOptions?.nonInrMarkupPercent ?? 0) || 0
 
   function storageAmountToUsd(amountInStorage: number): number {
     if (STORAGE_CURRENCY === "INR") {
@@ -67,7 +86,11 @@ export function createCurrencyFormatters(units: UnitsPerUsd) {
   }
 
   function convertFromStorage(amountInStorage: number): number {
-    return usdToDisplay(storageAmountToUsd(amountInStorage))
+    let v = usdToDisplay(storageAmountToUsd(amountInStorage))
+    if (display !== "INR" && markupPct > 0) {
+      v *= 1 + markupPct / 100
+    }
+    return v
   }
 
   function formatPrice(amountInStorage: number, options?: FormatPriceOptions): string {

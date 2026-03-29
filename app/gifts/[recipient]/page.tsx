@@ -2,10 +2,9 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import ProductGrid from "@/components/orinket/ProductGrid"
 import AnimatedSection from "@/components/orinket/AnimatedSection"
 import { giftRecipientCopy } from "@/data/landingCollections"
-import { getGiftProductsForRecipient } from "@/data/dummyProducts"
+import GiftsProductGridClient from "./GiftsProductGridClient"
 import { fonts } from "@/lib/fonts"
 
 const RECIPIENTS = ["for-her", "for-him"] as const
@@ -32,7 +31,6 @@ export default async function GiftsRecipientPage({ params }: Props) {
   if (!copy) notFound()
 
   const key = recipient === "for-him" ? "him" : "her"
-  const products = getGiftProductsForRecipient(key)
 
   return (
     <main className="min-h-screen">
@@ -49,9 +47,7 @@ export default async function GiftsRecipientPage({ params }: Props) {
           </div>
         </AnimatedSection>
 
-        <AnimatedSection animation="slideUp" delay={120}>
-          <ProductGrid products={products} />
-        </AnimatedSection>
+        <GiftsProductGridClient recipientKey={key} />
       </div>
       <Footer />
     </main>

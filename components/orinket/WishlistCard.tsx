@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Check, GitCompare, ShoppingBag, X } from "lucide-react"
-import type { WishlistItem } from "@/context/CartContext"
+import type { WishlistItem } from "@/types/cart"
 import type { Product } from "@/data/dummyProducts"
 import { formatAddedAgo, getStockDisplay } from "@/lib/wishlistDisplay"
 import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"

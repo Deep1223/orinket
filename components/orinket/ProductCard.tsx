@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Check, Heart, ShoppingBag, Star } from "lucide-react"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
 import type { Product } from "@/data/dummyProducts"
 import { useTimedAdded } from "@/hooks/useTimedAdded"
 import { useCurrency } from "@/context/CurrencyContext"

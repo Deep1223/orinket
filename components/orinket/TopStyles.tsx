@@ -1,26 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Check, Heart, ShoppingBag } from "lucide-react"
-import { dummyProducts, type Product } from "@/data/dummyProducts"
-import { useCart } from "@/context/CartContext"
-import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"
-import { topStyles, productIds } from "@/dummydata/top-styles/content"
+import type { Product } from "@/data/dummyProducts"
+import { useCart } from "@/store/useCart"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
+import {
+  selectShowGridListShimmer,
+  selectTopStylesError,
+  selectTopStylesItems,
+  selectTopStylesStatus,
+} from "@/store/selectors"
+import GridListShimmer from "@/components/orinket/GridListShimmer"
+import { fetchTopStyles } from "@/store/slices/topStylesSlice"
+import { topStyles } from "@/dummydata/top-styles/content"
+import {
+  topStyleLabelToCategoryPath,
+  topStyleLabelToTab,
+} from "@/lib/topStyles/labelToTabSlug"
 import { fonts } from "@/lib/fonts"
 import { useCurrency } from "@/context/CurrencyContext"
 
-const sampleProducts = productIds.map(id => 
-  dummyProducts.find((p) => p.id === id) || dummyProducts[0]
-).filter(Boolean) as Product[]
-
-const products = sampleProducts.map((product) => ({
-  ...product,
-  discount: topStyles.discount,
-}))
-
-type RowProduct = (typeof products)[number]
+type RowProduct = Product & { discount: number }
 
 function TopStyleProductTile({
   product,
@@ -36,8 +39,8 @@ function TopStyleProductTile({
     return formatPrice(price)
   }
   const { addToWishlist, removeFromWishlist, isInWishlist, addToCart } = useCart()
-  const bagAdded = useTimedAdded()
-  const oosHint = useTimedHint(2200)
+  const [bagAdded, setBagAdded] = useState(false)
+  const [oosHint, setOosHint] = useState<string | null>(null)
   const inList = isInWishlist(product.id)
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -61,7 +64,8 @@ function TopStyleProductTile({
     e.preventDefault()
     e.stopPropagation()
     if (!product.inStock) {
-      oosHint.show("Out of stock")
+      setOosHint("Out of stock")
+      window.setTimeout(() => setOosHint(null), 2200)
       return
     }
     addToCart({
@@ -71,7 +75,7 @@ function TopStyleProductTile({
       originalPrice: product.originalPrice,
       image: product.image,
     })
-    bagAdded.pulse()
+    setBagAdded(true)
   }
 
   return (
@@ -105,12 +109,12 @@ function TopStyleProductTile({
           <button
             type="button"
             onClick={handleAddToBag}
-            disabled={bagAdded.added}
+            disabled={bagAdded}
             className={`flex w-full items-center justify-center gap-2 py-3 ${fonts.buttons} text-sm tracking-wider transition-colors ${
-              bagAdded.added ? "bg-emerald-700 text-white" : "bg-foreground text-background"
+              bagAdded ? "bg-emerald-700 text-white" : "bg-foreground text-background"
             }`}
           >
-            {bagAdded.added ? (
+            {bagAdded ? (
               <>
                 <Check className="h-4 w-4" strokeWidth={2.5} />
                 Added to cart
@@ -122,9 +126,9 @@ function TopStyleProductTile({
               </>
             )}
           </button>
-          {oosHint.hint && (
+          {oosHint && (
             <p className={`bg-white/95 px-2 py-1 text-center text-[11px] text-amber-900 ${fonts.labels}`}>
-              {oosHint.hint}
+              {oosHint}
             </p>
           )}
         </div>
@@ -147,14 +151,43 @@ function TopStyleProductTile({
   )
 }
 
+function useTopStylesPageSize(): number {
+  const [limit, setLimit] = useState(8)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    const sync = () => setLimit(mq.matches ? 8 : 4)
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
+  }, [])
+
+  return limit
+}
+
 export default function TopStyles() {
   const { formatPrice } = useCurrency()
+  const dispatch = useAppDispatch()
   const [activeCategory, setActiveCategory] = useState("ALL")
+  const visibleLimit = useTopStylesPageSize()
 
-  const filteredProducts =
-    activeCategory === "ALL"
-      ? products
-      : products.filter((p: RowProduct) => p.category === activeCategory.toLowerCase())
+  const items = useAppSelector(selectTopStylesItems)
+  const status = useAppSelector(selectTopStylesStatus)
+  const error = useAppSelector(selectTopStylesError)
+  const showGridShimmer = useAppSelector(selectShowGridListShimmer)
+
+  const tab = topStyleLabelToTab(activeCategory)
+
+  useEffect(() => {
+    dispatch(fetchTopStyles({ tab, limit: visibleLimit, pageno: 1 }))
+  }, [dispatch, tab, visibleLimit])
+
+  const rowProducts = useMemo((): RowProduct[] => {
+    return items.map((product) => ({
+      ...product,
+      discount: topStyles.discount,
+    }))
+  }, [items])
 
   return (
     <section className="py-16 md:py-24">
@@ -183,30 +216,49 @@ export default function TopStyles() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
-          {filteredProducts.slice(0, 8).map((product: RowProduct, index: number) => (
-            <TopStyleProductTile
-              key={product.id}
-              product={product}
-              index={index}
-              formatPrice={formatPrice}
-            />
-          ))}
-        </div>
+        {(showGridShimmer || status === "loading") && (
+          <div className="py-2">
+            <GridListShimmer count={visibleLimit} />
+          </div>
+        )}
 
-        <div className="mt-12 text-center">
-          <Link
-            href={
-              activeCategory === "ALL"
-                ? "/category/all"
-                : `/category/${activeCategory.toLowerCase()}`
-            }
-            className={`animate-slideUp inline-block border border-foreground px-8 py-3 ${fonts.buttons} text-sm tracking-[0.2em] text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-lg`}
-            style={{ animationDelay: "600ms" }}
-          >
-            VIEW ALL
-          </Link>
-        </div>
+        {status === "failed" && error && !showGridShimmer && (
+          <p className={`py-8 text-center text-sm text-red-700 ${fonts.body}`}>{error}</p>
+        )}
+
+        {status === "succeeded" && rowProducts.length === 0 && !showGridShimmer && (
+          <div className={`mx-auto max-w-md py-16 text-center ${fonts.body}`}>
+            <p className="text-base font-medium text-stone-800">Products not available</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              There are no products to show for this category right now. Try another tab or check back later.
+            </p>
+          </div>
+        )}
+
+        {status === "succeeded" && rowProducts.length > 0 && !showGridShimmer && (
+          <>
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
+              {rowProducts.map((product: RowProduct, index: number) => (
+                <TopStyleProductTile
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  formatPrice={formatPrice}
+                />
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href={topStyleLabelToCategoryPath(activeCategory)}
+                className={`animate-slideUp inline-block border border-foreground px-8 py-3 ${fonts.buttons} text-sm tracking-[0.2em] text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-lg`}
+                style={{ animationDelay: "600ms" }}
+              >
+                VIEW ALL
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   )

@@ -12,13 +12,16 @@ import {
   ProductListingHero,
   ProductListingToolbar,
 } from "@/components/orinket/ProductListingShell"
-import { searchProducts, dummyProducts } from "@/data/dummyProducts"
+import { searchProducts } from "@/lib/catalogQueries"
+import { useAppSelector } from "@/store/hooks"
+import { selectProducts } from "@/store/selectors"
 import { getFilterOptions, filterProducts, FilterState } from "@/lib/productFilters"
 import { useCurrency } from "@/context/CurrencyContext"
 import { fonts } from "@/lib/fonts"
 
 function SearchContent() {
   const { formatPrice } = useCurrency()
+  const catalog = useAppSelector(selectProducts)
   const searchParams = useSearchParams()
   const router = useRouter()
   const query = searchParams.get("q") || ""
@@ -36,13 +39,13 @@ function SearchContent() {
   })
 
   const filterOptions = useMemo(
-    () => getFilterOptions(dummyProducts, formatPrice),
-    [formatPrice]
+    () => getFilterOptions(catalog, formatPrice),
+    [catalog, formatPrice]
   )
 
   const baseProducts = useMemo(
-    () => (searchQuery.trim() ? searchProducts(searchQuery) : dummyProducts),
-    [searchQuery]
+    () => (searchQuery.trim() ? searchProducts(catalog, searchQuery) : catalog),
+    [searchQuery, catalog]
   )
 
   const filteredResults = useMemo(() => {

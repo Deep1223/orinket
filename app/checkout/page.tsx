@@ -7,8 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, Lock, Truck, Shield, RotateCcw, Sparkles } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import { useCart } from "@/context/CartContext"
-import { getProductById } from "@/data/dummyProducts"
+import { useCart } from "@/store/useCart"
+import { useAppSelector } from "@/store/hooks"
+import { getProductById } from "@/lib/catalogQueries"
 import {
   calculatePromoDiscount,
   findPromoCode,
@@ -40,7 +41,9 @@ function CheckoutContent() {
   // Check for direct buy now
   const productId = searchParams.get("product")
   const quantity = parseInt(searchParams.get("quantity") || "1")
-  const directProduct = productId ? getProductById(productId) : null
+  const directProduct = useAppSelector((state) =>
+    productId ? getProductById(state.catalog.products, productId) : null
+  )
 
   const items = directProduct 
     ? [{ ...directProduct, quantity }] 

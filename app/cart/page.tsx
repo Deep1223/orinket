@@ -17,7 +17,8 @@ import {
 } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import { useCart, type CartItem } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
+import type { CartItem } from "@/types/cart"
 import {
   calculatePromoDiscount,
   findPromoCode,

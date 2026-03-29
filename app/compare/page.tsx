@@ -5,9 +5,10 @@ import Link from "next/link"
 import { Check, GitCompare, Heart, Plus, Trash2, X } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
 import { useCompare } from "@/context/CompareContext"
-import { dummyProducts } from "@/data/dummyProducts"
+import { useAppSelector } from "@/store/hooks"
+import { selectProducts } from "@/store/selectors"
 import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"
 import { useCurrency } from "@/context/CurrencyContext"
 import { font } from "@/lib/fonts"
@@ -67,10 +68,11 @@ function CompareWishlistAddButton({
 
 export default function ComparePage() {
   const { formatPrice } = useCurrency()
+  const catalog = useAppSelector(selectProducts)
   const { wishlistItems } = useCart()
   const { compareIds, clearCompare, isInCompare } = useCompare()
   const products = compareIds
-    .map((id) => dummyProducts.find((p) => p.id === id))
+    .map((id) => catalog.find((p) => p.id === id))
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
 
   const wishlistNotInCompare = wishlistItems.filter((w) => !isInCompare(w.id))

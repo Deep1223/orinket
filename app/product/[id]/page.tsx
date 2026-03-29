@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, use, useEffect } from "react"
+import { useState, use, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -31,9 +31,11 @@ import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductVideoAnd360 from "@/components/orinket/ProductVideoAnd360"
 import ProductReviewsPanel from "@/components/orinket/ProductReviewsPanel"
-import { getProductById, dummyProducts } from "@/data/dummyProducts"
+import type { Product } from "@/data/dummyProducts"
+import { getProductById } from "@/lib/catalogQueries"
 import ProductCard from "@/components/orinket/ProductCard"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/store/useCart"
+import { useAppSelector } from "@/store/hooks"
 import { useCompare } from "@/context/CompareContext"
 import { PRODUCT_FAQ } from "@/lib/productDetailMock"
 import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"
@@ -47,8 +49,18 @@ interface ProductPageProps {
 export default function ProductPage({ params }: ProductPageProps) {
   const { formatPrice } = useCurrency()
   const { id } = use(params)
-  const product = getProductById(id)
-  
+  const catalog = useAppSelector((s) => s.catalog.products)
+  const product = useMemo(() => getProductById(catalog, id), [catalog, id])
+  const relatedProducts = useMemo(
+    () =>
+      product
+        ? catalog
+            .filter((p) => p.category === product.category && p.id !== product.id)
+            .slice(0, 4)
+        : [],
+    [catalog, product]
+  )
+
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("specifications")
@@ -59,6 +71,12 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [faqOpen, setFaqOpen] = useState<number | null>(0)
   const [recentIds, setRecentIds] = useState<string[]>([])
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useCart()
+
+  const recentProducts = useMemo(() => {
+    return recentIds
+      .map((rid) => catalog.find((p) => p.id === rid))
+      .filter((p): p is Product => Boolean(p))
+  }, [recentIds, catalog])
   const { addToCompare, isInCompare } = useCompare()
   const bagAdded = useTimedAdded()
   const compareAdded = useTimedAdded()
@@ -118,7 +136,6 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const inWishlist = isInWishlist(product.id)
   const images = product.images || [product.image]
-  const relatedProducts = dummyProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
 
   const handleAddToCart = () => {
     addToCart({
@@ -189,10 +206,6 @@ export default function ProductPage({ params }: ProductPageProps) {
     const days = 5 + (last % 3)
     setPincodeResult(`Estimated delivery: ${days}–${days + 2} business days to pincode ${clean}.`)
   }
-
-  const recentProducts = recentIds
-    .map((rid) => dummyProducts.find((p) => p.id === rid))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p))
 
   return (
     <div className="min-h-screen flex flex-col">

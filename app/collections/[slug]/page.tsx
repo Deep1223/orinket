@@ -2,10 +2,9 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import ProductGrid from "@/components/orinket/ProductGrid"
 import AnimatedSection from "@/components/orinket/AnimatedSection"
 import { collectionLandings } from "@/data/landingCollections"
-import { getProductsByIds } from "@/data/dummyProducts"
+import CollectionProductGridClient from "./CollectionProductGridClient"
 import { fonts } from "@/lib/fonts"
 
 type Props = { params: Promise<{ slug: string }> }
@@ -29,8 +28,6 @@ export default async function CollectionLandingPage({ params }: Props) {
   const landing = collectionLandings[slug]
   if (!landing) notFound()
 
-  const products = getProductsByIds(landing.productIds)
-
   return (
     <main className="min-h-screen">
       <Header />
@@ -46,9 +43,7 @@ export default async function CollectionLandingPage({ params }: Props) {
           </div>
         </AnimatedSection>
 
-        <AnimatedSection animation="slideUp" delay={120}>
-          <ProductGrid products={products} />
-        </AnimatedSection>
+        <CollectionProductGridClient productIds={landing.productIds} />
       </div>
       <Footer />
     </main>

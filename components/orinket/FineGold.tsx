@@ -4,17 +4,21 @@ import { useState } from "react"
 import Link from "next/link"
 import { PackageOpen } from "lucide-react"
 import ProductCard from "@/components/orinket/ProductCard"
-import { getProductsByCategory } from "@/data/dummyProducts"
+import { useAppSelector } from "@/store/hooks"
+import { selectProducts } from "@/store/selectors"
+import { getProductsByCategory } from "@/lib/catalogQueries"
 import { fineGold } from "@/dummydata/fine-gold/content"
 import { fonts } from "@/lib/fonts"
 
 export default function FineGold() {
   const [activeFilter, setActiveFilter] = useState("All")
+  const catalog = useAppSelector(selectProducts)
+  const nineKt = getProductsByCategory(catalog, "9kt-gold")
 
   const filteredProducts =
     activeFilter === "All"
-      ? getProductsByCategory("9kt-gold")
-      : getProductsByCategory("9kt-gold").filter(
+      ? nineKt
+      : nineKt.filter(
           (p) => p.subcategory?.toLowerCase() === activeFilter.toLowerCase()
         )
 

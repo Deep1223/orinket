@@ -1,7 +1,4 @@
-import React from 'react'
-import { generateStaticParams } from './generate-static-params'
-
-export { generateStaticParams }
+import React from "react"
 
 export default function CategoryLayout({
   children,
