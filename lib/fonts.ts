@@ -1,31 +1,32 @@
-import { fontConfig } from "@/dummydata/config/fonts"
+const fontDetails = {
+  name: "Nunito Sans",
+  family: "'Nunito Sans', sans-serif",
+  className: "font-nunito",
+  variable: "var(--font-nunito)",
+} as const
+
+const usage = {
+  headings: `font-[family-name:${fontDetails.variable}]`,
+  body: `font-[family-name:${fontDetails.variable}]`,
+  buttons: `font-[family-name:${fontDetails.variable}]`,
+  navigation: `font-[family-name:${fontDetails.variable}]`,
+  labels: `font-[family-name:${fontDetails.variable}]`,
+} as const
 
 /**
  * Font utility functions for consistent typography across the project
  */
 export const fonts = {
-  /** Main font family */
-  main: fontConfig.font.className,
-  
-  /** CSS variable for main font */
-  mainVar: fontConfig.font.variable,
-  
-  /** Font classes for different UI elements */
-  headings: fontConfig.usage.headings,
-  body: fontConfig.usage.body,
-  buttons: fontConfig.usage.buttons,
-  navigation: fontConfig.usage.navigation,
-  labels: fontConfig.usage.labels,
-  
-  /** Helper function to get font class by type */
-  get: (type: 'headings' | 'body' | 'buttons' | 'navigation' | 'labels') => {
-    return fontConfig.usage[type]
-  },
-  
-  /** Helper function to combine font class with other classes */
-  with: (fontClass: string, ...otherClasses: string[]) => {
-    return [fontClass, ...otherClasses].filter(Boolean).join(' ')
-  }
+  main: fontDetails.className,
+  mainVar: fontDetails.variable,
+  headings: usage.headings,
+  body: usage.body,
+  buttons: usage.buttons,
+  navigation: usage.navigation,
+  labels: usage.labels,
+  get: (type: keyof typeof usage) => usage[type],
+  with: (fontClass: string, ...otherClasses: string[]) =>
+    [fontClass, ...otherClasses].filter(Boolean).join(" "),
 }
 
 /**

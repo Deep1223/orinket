@@ -1,4 +1,4 @@
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 
 /** Deterministic demo stock 1–20 when `stockLeft` is not on the product. */
 export function getEffectiveStockLeft(product: Product | undefined): number | null {

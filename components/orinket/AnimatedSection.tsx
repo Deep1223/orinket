@@ -21,12 +21,23 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    let didShow = false
+    const reveal = () => {
+      if (didShow) return
+      didShow = true
+      setTimeout(() => setIsVisible(true), delay)
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      reveal()
+      return
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => {
-            setIsVisible(true)
-          }, delay)
+          reveal()
         }
       },
       {
@@ -35,19 +46,24 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
       }
     )
 
+    // Safety: if observer misses on first paint, still show content.
+    const fallbackTimer = window.setTimeout(reveal, 1200 + delay)
+
     if (ref.current) {
       observer.observe(ref.current)
     }
 
     return () => {
+      window.clearTimeout(fallbackTimer)
       if (ref.current) {
         observer.unobserve(ref.current)
       }
+      observer.disconnect()
     }
   }, [delay, threshold])
 
   const getAnimationClass = () => {
-    if (!isVisible) return 'opacity-0'
+    if (!isVisible) return 'opacity-0 pointer-events-none'
     
     switch (animation) {
       case 'fadeIn':

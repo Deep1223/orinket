@@ -1,18 +1,32 @@
 import type { Metadata } from "next"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import storeContent from "@/data/storeContent.json"
-import { shippingPage } from "@/dummydata/supportPages"
+import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { supportPagesBlock } from "@/lib/supportPagesFromCms"
+import { contactFromSettings } from "@/lib/contactFromSettings"
 import { Truck, Package, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { fonts } from "@/lib/fonts"
 
 export const metadata: Metadata = {
-  title: "Shipping Info | ORINKET",
-  description: "Delivery zones, timelines, and how Orinket ships your jewellery across India.",
+  title: "Shipping",
+  description: "Shipping information.",
 }
 
-export default function ShippingPage() {
+export default async function ShippingPage() {
+  const settings = await fetchStoreSettingsServer()
+  const contact = contactFromSettings(settings)
+  const p = supportPagesBlock(settings, "shippingPage") as {
+    title?: string
+    subtitle?: string
+    zones?: Array<{ name?: string; eta?: string; note?: string }>
+    bullets?: string[]
+    packaging?: string
+  } | null
+
+  const zones = Array.isArray(p?.zones) ? p!.zones : []
+  const bullets = Array.isArray(p?.bullets) ? p!.bullets.map(String) : []
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -26,54 +40,74 @@ export default function ShippingPage() {
               </div>
               <div className="flex-1">
                 <h1 className={`text-3xl md:text-4xl font-semibold text-foreground ${fonts.headings}`}>
-                  {shippingPage.title}
+                  {p?.title?.trim() || "Shipping information"}
                 </h1>
-                <p className={`mt-2 text-sm md:text-base text-muted-foreground ${fonts.body}`}>
-                  {shippingPage.subtitle}
-                </p>
+                {p?.subtitle?.trim() ? (
+                  <p className={`mt-2 text-sm md:text-base text-muted-foreground ${fonts.body}`}>{p.subtitle}</p>
+                ) : null}
               </div>
               <Sparkles className="w-5 h-5 text-gold mt-3 shrink-0 hidden sm:block" />
             </div>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {shippingPage.zones.map((z) => (
-                <div key={z.name} className="rounded-2xl border border-border bg-white p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Package className="w-4 h-4 text-gold" />
-                    <p className={`text-sm font-semibold text-foreground ${fonts.headings}`}>{z.name}</p>
-                  </div>
-                  <p className={`text-sm text-foreground ${fonts.body}`}>{z.eta}</p>
-                  <p className={`mt-2 text-xs text-muted-foreground ${fonts.labels} leading-relaxed`}>
-                    {z.note}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-border bg-white p-6">
-              <p className={`text-xs uppercase tracking-widest text-muted-foreground ${fonts.labels}`}>
-                Good to know
+            {zones.length === 0 ? (
+              <p className={`mt-8 text-sm text-muted-foreground ${fonts.body}`}>
+                Add <code className="text-xs bg-muted px-1 rounded">supportPages.shippingPage</code> in General
+                Settings → storefront JSON.
               </p>
-              <ul className={`mt-4 space-y-3 text-sm text-muted-foreground ${fonts.body}`}>
-                {shippingPage.bullets.map((line) => (
-                  <li key={line} className="flex gap-3">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gold flex-shrink-0" />
-                    <span>{line}</span>
-                  </li>
+            ) : (
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {zones.map((z, i) => (
+                  <div key={`${z.name}-${i}`} className="rounded-2xl border border-border bg-white p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package className="w-4 h-4 text-gold" />
+                      <p className={`text-sm font-semibold text-foreground ${fonts.headings}`}>{z.name}</p>
+                    </div>
+                    {z.eta ? <p className={`text-sm text-foreground ${fonts.body}`}>{z.eta}</p> : null}
+                    {z.note ? (
+                      <p className={`mt-2 text-xs text-muted-foreground ${fonts.labels} leading-relaxed`}>{z.note}</p>
+                    ) : null}
+                  </div>
                 ))}
-              </ul>
-            </div>
+              </div>
+            )}
+
+            {bullets.length > 0 ? (
+              <div className="mt-6 rounded-2xl border border-border bg-white p-6">
+                <p className={`text-xs uppercase tracking-widest text-muted-foreground ${fonts.labels}`}>
+                  Good to know
+                </p>
+                <ul className={`mt-4 space-y-3 text-sm text-muted-foreground ${fonts.body}`}>
+                  {bullets.map((line) => (
+                    <li key={line} className="flex gap-3">
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-gold flex-shrink-0" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
             <div className="mt-6 rounded-2xl border border-border bg-cream p-6">
-              <p className={`text-sm text-muted-foreground ${fonts.body} leading-relaxed`}>
-                {shippingPage.packaging}
-              </p>
+              {p?.packaging?.trim() ? (
+                <p className={`text-sm text-muted-foreground ${fonts.body} leading-relaxed`}>{p.packaging}</p>
+              ) : null}
               <p className={`mt-4 text-sm text-muted-foreground ${fonts.body}`}>
-                Track anytime from{" "}
                 <Link href="/track" className="text-foreground font-medium underline-offset-2 hover:underline">
                   Track order
-                </Link>{" "}
-                or email {storeContent.support.email}.
+                </Link>
+                {contact.email ? (
+                  <>
+                    {" "}
+                    · email{" "}
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="text-foreground font-medium underline-offset-2 hover:underline"
+                    >
+                      {contact.email}
+                    </a>
+                  </>
+                ) : null}
+                .
               </p>
             </div>
           </div>

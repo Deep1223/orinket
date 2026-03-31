@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Check, Heart, ShoppingBag } from "lucide-react"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { useCart } from "@/store/useCart"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
 import {
@@ -15,13 +15,12 @@ import {
 } from "@/store/selectors"
 import GridListShimmer from "@/components/orinket/GridListShimmer"
 import { fetchTopStyles } from "@/store/slices/topStylesSlice"
-import { topStyles } from "@/dummydata/top-styles/content"
-import {
-  topStyleLabelToCategoryPath,
-  topStyleLabelToTab,
-} from "@/lib/topStyles/labelToTabSlug"
+import { topStyleLabelToTab } from "@/lib/topStyles/labelToTabSlug"
+import { slugifyLabel } from "@/lib/slugify"
 import { fonts } from "@/lib/fonts"
 import { useCurrency } from "@/context/CurrencyContext"
+import { useStorefrontCms } from "@/hooks/useStorefrontCms"
+import { selectCatalogCategories } from "@/store/selectors"
 
 type RowProduct = Product & { discount: number }
 
@@ -38,6 +37,7 @@ function TopStyleProductTile({
     if (price == null || price <= 0) return formatPrice(0)
     return formatPrice(price)
   }
+  const categoryPathPart = product.categoryId || "uncategorized"
   const { addToWishlist, removeFromWishlist, isInWishlist, addToCart } = useCart()
   const [bagAdded, setBagAdded] = useState(false)
   const [oosHint, setOosHint] = useState<string | null>(null)
@@ -56,6 +56,7 @@ function TopStyleProductTile({
         originalPrice: product.originalPrice,
         image: product.image,
         category: product.category,
+        stockLeft: product.stockLeft,
       })
     }
   }
@@ -74,13 +75,14 @@ function TopStyleProductTile({
       price: product.price,
       originalPrice: product.originalPrice,
       image: product.image,
+      stockLeft: product.stockLeft,
     })
     setBagAdded(true)
   }
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={`/category/${categoryPathPart}/${product.id}`}
       className="group animate-slideUp relative block cursor-pointer"
       style={{ animationDelay: `${index * 75}ms` }}
     >
@@ -101,9 +103,11 @@ function TopStyleProductTile({
           <Heart className={`h-4 w-4 ${inList ? "fill-red-500 text-red-500" : "text-gray-700"}`} />
         </button>
 
-        <span className={`absolute left-3 top-3 bg-black px-3 py-1.5 rounded-full ${fonts.labels} text-xs text-white font-light`}>
-          {product.discount}% OFF
-        </span>
+        {product.discount > 0 ? (
+          <span className={`absolute left-3 top-3 bg-black px-3 py-1.5 rounded-full ${fonts.labels} text-xs text-white font-light`}>
+            {product.discount}% OFF
+          </span>
+        ) : null}
 
         <div className="absolute bottom-0 left-0 right-0 opacity-0 transition-opacity group-hover:opacity-100">
           <button
@@ -168,6 +172,8 @@ function useTopStylesPageSize(): number {
 export default function TopStyles() {
   const { formatPrice } = useCurrency()
   const dispatch = useAppDispatch()
+  const { settings, cms } = useStorefrontCms()
+  const catalogCategoryRows = useAppSelector(selectCatalogCategories)
   const [activeCategory, setActiveCategory] = useState("ALL")
   const visibleLimit = useTopStylesPageSize()
 
@@ -176,29 +182,118 @@ export default function TopStyles() {
   const error = useAppSelector(selectTopStylesError)
   const showGridShimmer = useAppSelector(selectShowGridListShimmer)
 
+  const ts = cms.topStylesSection as
+    | {
+        title?: string
+        categories?: string[]
+        discount?: number
+        categoryid?: string
+        category?: string
+        productIds?: string[]
+      }
+    | undefined
+
+  const curatedProductIds = useMemo(() => {
+    const raw = ts?.productIds
+    if (!Array.isArray(raw)) return [] as string[]
+    return raw.map((id) => String(id || "").trim()).filter(Boolean)
+  }, [ts?.productIds])
+  const isCurated = curatedProductIds.length > 0
+  const curatedIdsKey = curatedProductIds.join(",")
+
+  const categoriesFromCatalog = useMemo(
+    () => ["ALL", ...catalogCategoryRows.map((c) => c.displayName.toUpperCase())],
+    [catalogCategoryRows]
+  )
+
+  const categories = useMemo(() => {
+    if (Array.isArray(ts?.categories) && ts.categories.length > 0) {
+      return ts.categories.map((c) => String(c).toUpperCase())
+    }
+    return categoriesFromCatalog
+  }, [ts?.categories, categoriesFromCatalog])
+
+  const sectionTitle = useMemo(() => {
+    const t = ts?.title?.trim()
+    if (t) return t
+    const name = settings?.storeName?.trim() || "Shop"
+    return `${name.toUpperCase()} TOP STYLES`
+  }, [ts?.title, settings?.storeName])
+
+  const discountPct = useMemo(() => {
+    const d = ts?.discount
+    if (typeof d === "number" && Number.isFinite(d) && d >= 0) return Math.round(d)
+    return 0
+  }, [ts?.discount])
+
+  useEffect(() => {
+    if (categories.length && !categories.includes(activeCategory)) {
+      setActiveCategory(categories[0]!)
+    }
+  }, [categories, activeCategory])
+
   const tab = topStyleLabelToTab(activeCategory)
 
   useEffect(() => {
+    if (isCurated) return
     dispatch(fetchTopStyles({ tab, limit: visibleLimit, pageno: 1 }))
-  }, [dispatch, tab, visibleLimit])
+  }, [dispatch, isCurated, tab, visibleLimit])
+
+  useEffect(() => {
+    if (!isCurated) return
+    dispatch(
+      fetchTopStyles({
+        tab: "all",
+        limit: 50,
+        pageno: 1,
+        productIds: curatedProductIds,
+      })
+    )
+  }, [dispatch, isCurated, curatedIdsKey])
+
+  const itemsForTab = useMemo(() => {
+    if (!isCurated) return items
+    if (tab === "all") return items
+    return items.filter((p) => p.category === tab)
+  }, [items, isCurated, tab])
 
   const rowProducts = useMemo((): RowProduct[] => {
-    return items.map((product) => ({
+    return itemsForTab.map((product) => ({
       ...product,
-      discount: topStyles.discount,
+      discount: discountPct,
     }))
-  }, [items])
+  }, [itemsForTab, discountPct])
+
+  const viewAllHref = useMemo(() => {
+    if (activeCategory === "ALL") return "/category/all"
+    const tabSlug = topStyleLabelToTab(activeCategory)
+    const stripTrailingS = (s: string) =>
+      s.length > 1 ? s.replace(/s$/i, "") : s
+    const row = catalogCategoryRows.find((c) => {
+      const cSlug = String(c.slug || "").trim().toLowerCase()
+      const fromName = slugifyLabel(String(c.displayName || ""))
+      return (
+        cSlug === tabSlug ||
+        fromName === tabSlug ||
+        stripTrailingS(cSlug) === stripTrailingS(tabSlug) ||
+        stripTrailingS(fromName) === stripTrailingS(tabSlug)
+      )
+    })
+    if (row?.id) return `/category/${row.id}`
+    // Fallback to slug route; category page will canonicalize to `/category/<id>` once catalog resolves.
+    return `/category/${tabSlug || "all"}`
+  }, [activeCategory, catalogCategoryRows])
 
   return (
     <section className="py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mb-12 text-center">
           <h2 className={`mb-8 animate-fadeIn ${fonts.headings} text-3xl font-light tracking-[0.1em] md:text-4xl`}>
-            {topStyles.title}
+            {sectionTitle}
           </h2>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-4">
-            {topStyles.categories.map((category, index: number) => (
+            {categories.map((category, index: number) => (
               <button
                 key={category}
                 type="button"
@@ -218,7 +313,7 @@ export default function TopStyles() {
 
         {(showGridShimmer || status === "loading") && (
           <div className="py-2">
-            <GridListShimmer count={visibleLimit} />
+            <GridListShimmer count={isCurated ? Math.min(50, visibleLimit) : visibleLimit} />
           </div>
         )}
 
@@ -250,7 +345,7 @@ export default function TopStyles() {
 
             <div className="mt-12 text-center">
               <Link
-                href={topStyleLabelToCategoryPath(activeCategory)}
+                href={viewAllHref}
                 className={`animate-slideUp inline-block border border-foreground px-8 py-3 ${fonts.buttons} text-sm tracking-[0.2em] text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-lg`}
                 style={{ animationDelay: "600ms" }}
               >

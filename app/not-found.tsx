@@ -49,7 +49,7 @@ export default function NotFound() {
               {["Necklaces", "Earrings", "Bracelets", "Rings", "9KT Gold"].map((cat) => (
                 <Link
                   key={cat}
-                  href={`/category/${cat.toLowerCase().replace(" ", "-")}`}
+                  href="/category/all"
                   className={`px-4 py-2 bg-cream text-sm text-foreground hover:bg-gold-light transition-colors ${font('body')}`}
                 >
                   {cat}

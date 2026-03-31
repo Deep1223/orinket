@@ -1,4 +1,4 @@
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { slugifyLabel } from "@/lib/slugify"
 
 export type ApiCategoryRow = {
@@ -25,6 +25,7 @@ export type ApiProductRow = {
   images?: string[]
   description?: string
   instock?: number
+  availableQty?: number
   material?: string
   plating?: string
   dimensions?: string
@@ -121,7 +122,13 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
   const images = Array.isArray(doc.images) ? doc.images.filter((u) => u && String(u).trim()) : []
   const primary = images[0] || PLACEHOLDER_IMAGE
 
-  const instock = typeof doc.instock === "number" ? doc.instock : 1
+  const rawQty =
+    typeof doc.availableQty === "number" && Number.isFinite(doc.availableQty)
+      ? Math.max(0, Math.floor(doc.availableQty))
+      : undefined
+  const legacyFlag = typeof doc.instock === "number" ? doc.instock : 1
+  const available =
+    rawQty !== undefined ? rawQty : legacyFlag > 0 ? 1 : 0
 
   return {
     id: String(doc._id),
@@ -131,13 +138,14 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
       doc.originalPrice != null && Number(doc.originalPrice) > 0
         ? Number(doc.originalPrice)
         : undefined,
+    categoryId: doc.categoryid ? String(doc.categoryid) : undefined,
     category: categorySlug,
     subcategory,
     image: primary,
     images: images.length ? images : undefined,
     description: doc.description?.trim() || "",
-    inStock: instock > 0,
-    stockLeft: instock > 0 ? instock : 0,
+    inStock: available > 0,
+    stockLeft: available,
     material: doc.material?.trim() || undefined,
     plating: doc.plating?.trim() || undefined,
     dimensions: doc.dimensions?.trim() || undefined,

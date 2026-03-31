@@ -2,11 +2,19 @@ import Link from "next/link"
 import { CheckCircle, Package, Mail, ArrowRight, ShieldCheck } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import storeContent from "@/data/storeContent.json"
+import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { contactFromSettings } from "@/lib/contactFromSettings"
 import { fonts } from "@/lib/fonts"
 
-export default function OrderSuccessPage() {
-  const orderNumber = `ORN${Date.now().toString().slice(-8)}`
+export default async function OrderSuccessPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ orderId?: string }>
+}) {
+  const settings = await fetchStoreSettingsServer()
+  const contact = contactFromSettings(settings)
+  const params = (await searchParams) || {}
+  const orderNumber = params.orderId || `ORN${Date.now().toString().slice(-8)}`
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#fbf8f2] via-[#f8f4eb] to-[#f4efe5]">
@@ -59,7 +67,7 @@ export default function OrderSuccessPage() {
                       We've sent a confirmation email with your order details.
                     </p>
                     <p className={`text-xs text-muted-foreground ${fonts.labels} mt-1`}>
-                      Need help? Reach us at {storeContent.support.email}.
+                      Need help? Reach us at {contact.email || "your store email (General Settings)"}.
                     </p>
                   </div>
                 </div>

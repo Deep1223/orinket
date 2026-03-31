@@ -31,11 +31,14 @@ const cartSlice = createSlice({
       }>
     ) => {
       const { item, quantity = 1 } = action.payload
+      const max =
+        item.stockLeft != null && item.stockLeft >= 0 ? item.stockLeft : Number.POSITIVE_INFINITY
       const existing = state.cartItems.find((i) => i.id === item.id)
       if (existing) {
-        existing.quantity += quantity
+        existing.quantity = Math.min(existing.quantity + quantity, max)
+        if (item.stockLeft != null) existing.stockLeft = item.stockLeft
       } else {
-        state.cartItems.push({ ...item, quantity })
+        state.cartItems.push({ ...item, quantity: Math.min(quantity, max) })
       }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
@@ -48,7 +51,11 @@ const cartSlice = createSlice({
         return
       }
       const item = state.cartItems.find((i) => i.id === id)
-      if (item) item.quantity = quantity
+      if (item) {
+        const max =
+          item.stockLeft != null && item.stockLeft >= 0 ? item.stockLeft : Number.POSITIVE_INFINITY
+        item.quantity = Math.min(quantity, max)
+      }
     },
     clearCart: (state, _action: PayloadAction<{ silent?: boolean } | undefined>) => {
       state.cartItems = []
@@ -69,8 +76,11 @@ const cartSlice = createSlice({
       if (!item) return
       state.wishlistItems = state.wishlistItems.filter((i) => i.id !== id)
       const existing = state.cartItems.find((i) => i.id === id)
+      const max =
+        item.stockLeft != null && item.stockLeft >= 0 ? item.stockLeft : Number.POSITIVE_INFINITY
       if (existing) {
-        existing.quantity += 1
+        existing.quantity = Math.min(existing.quantity + 1, max)
+        if (item.stockLeft != null) existing.stockLeft = item.stockLeft
       } else {
         state.cartItems.push({
           id: item.id,
@@ -78,7 +88,8 @@ const cartSlice = createSlice({
           price: item.price,
           originalPrice: item.originalPrice,
           image: item.image,
-          quantity: 1,
+          quantity: Math.min(1, max),
+          stockLeft: item.stockLeft,
         })
       }
     },

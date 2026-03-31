@@ -1,13 +1,31 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react"
-import { reviews } from "@/dummydata/reviews/content"
 import { fonts } from "@/lib/fonts"
+import { useCmsSection } from "@/hooks/useStorefrontCms"
 
-const reviewsData = reviews.reviews
+type ReviewRow = {
+  id?: string
+  rating?: number
+  text?: string
+  name?: string
+  location?: string
+  product?: string
+}
 
 export default function Reviews() {
+  const raw = useCmsSection("reviews")
+  const title = typeof raw?.title === "string" ? raw.title : ""
+  const subtitle = typeof raw?.subtitle === "string" ? raw.subtitle : ""
+  const list = useMemo((): ReviewRow[] => {
+    const r = raw?.reviews
+    if (!Array.isArray(r)) return []
+    return r
+      .map((x) => (x && typeof x === "object" && !Array.isArray(x) ? (x as ReviewRow) : null))
+      .filter(Boolean) as ReviewRow[]
+  }, [raw?.reviews])
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [itemsPerView, setItemsPerView] = useState(3)
 
@@ -26,6 +44,19 @@ export default function Reviews() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  const reviewsData = useMemo(() => {
+    return list
+      .map((r, i) => ({
+        id: r.id || `r-${i}`,
+        rating: Math.min(5, Math.max(1, Math.floor(Number(r.rating) || 5))),
+        text: String(r.text || ""),
+        name: String(r.name || ""),
+        location: String(r.location || ""),
+        product: String(r.product || ""),
+      }))
+      .filter((r) => r.text.trim())
+  }, [list])
+
   const maxIndex = Math.max(0, reviewsData.length - itemsPerView)
 
   const nextSlide = useCallback(() => {
@@ -36,21 +67,23 @@ export default function Reviews() {
     setCurrentIndex((prev) => Math.max(prev - 1, 0))
   }, [])
 
+  useEffect(() => {
+    if (currentIndex > maxIndex) setCurrentIndex(0)
+  }, [currentIndex, maxIndex])
+
+  if (!title.trim() || reviewsData.length === 0) return null
+
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className={`text-3xl md:text-4xl font-light tracking-[0.1em] mb-4 ${fonts.headings}`}>
-            {reviews.title}
-          </h2>
-          <p className={`text-muted-foreground ${fonts.body}`}>
-            {reviews.subtitle}
-          </p>
+          <h2 className={`text-3xl md:text-4xl font-light tracking-[0.1em] mb-4 ${fonts.headings}`}>{title}</h2>
+          {subtitle.trim() ? <p className={`text-muted-foreground ${fonts.body}`}>{subtitle}</p> : null}
         </div>
 
         <div className="relative">
-          {/* Navigation Arrows */}
           <button
+            type="button"
             onClick={prevSlide}
             disabled={currentIndex === 0}
             className={`absolute -left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md ${
@@ -61,6 +94,7 @@ export default function Reviews() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
+            type="button"
             onClick={nextSlide}
             disabled={currentIndex >= maxIndex}
             className={`absolute -right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md ${
@@ -71,9 +105,8 @@ export default function Reviews() {
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Reviews Carousel */}
           <div className="overflow-hidden px-4">
-            <div 
+            <div
               className="flex transition-transform duration-500 ease-out gap-6"
               style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView + 2)}%)` }}
             >
@@ -92,11 +125,10 @@ export default function Reviews() {
                     &quot;{review.text}&quot;
                   </p>
                   <div className="border-t border-border pt-4">
-                    <p className={`${fonts.body} text-lg`}>
-                      {review.name}
-                    </p>
+                    <p className={`${fonts.body} text-lg`}>{review.name}</p>
                     <p className={`text-sm text-muted-foreground ${fonts.body}`}>
-                      {review.location} | {review.product}
+                      {review.location}
+                      {review.product ? ` | ${review.product}` : ""}
                     </p>
                   </div>
                 </div>
@@ -105,21 +137,22 @@ export default function Reviews() {
           </div>
         </div>
 
-        {/* Dots */}
-        <div className="flex justify-center gap-2 mt-8">
-          {[...Array(maxIndex + 1)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                i === currentIndex ? "bg-gold w-6" : "bg-border"
-              }`}
-              aria-label={`Go to review group ${i + 1}`}
-            />
-          ))}
-        </div>
+        {maxIndex > 0 ? (
+          <div className="flex justify-center gap-2 mt-8">
+            {[...Array(maxIndex + 1)].map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setCurrentIndex(i)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  i === currentIndex ? "bg-gold w-6" : "bg-border"
+                }`}
+                aria-label={`Go to review group ${i + 1}`}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   )
 }
-

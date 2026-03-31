@@ -6,6 +6,8 @@ export interface CartItem {
   image: string
   quantity: number
   variant?: string
+  /** When set, cart quantity cannot exceed this (synced from catalog). */
+  stockLeft?: number
 }
 
 export interface WishlistItem {
@@ -17,4 +19,5 @@ export interface WishlistItem {
   category: string
   /** Unix ms when saved; optional for older saved wishlists. */
   addedAt?: number
+  stockLeft?: number
 }

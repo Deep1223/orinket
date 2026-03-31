@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import {
   mapApiProducts,
   type ApiProductRow,
@@ -14,13 +14,18 @@ export type FetchTopStylesArg = {
   /** Dashboard-style sort: `{ field, order }` or `{}` for default (newest first). */
   sort?: Record<string, unknown>
   searchtext?: string
+  /** When set (max 50), backend loads these Product Master IDs in order (curated Top Styles). */
+  productIds?: string[]
 }
 
 function buildTopStylesPayload(arg: FetchTopStylesArg) {
+  const hasCurated =
+    Array.isArray(arg.productIds) && arg.productIds.length > 0
   return {
     paginationinfo: {
       filter: {
         tab: arg.tab,
+        ...(hasCurated ? { productIds: arg.productIds } : {}),
       },
       pageno: arg.pageno ?? 1,
       pagelimit: arg.limit,

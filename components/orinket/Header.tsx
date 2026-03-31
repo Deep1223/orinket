@@ -10,7 +10,6 @@ import { useCurrency } from "@/context/CurrencyContext"
 import { useStoreSettings } from "@/context/StoreSettingsContext"
 import { useAppSelector } from "@/store/hooks"
 import { selectCatalogCategories, selectProducts } from "@/store/selectors"
-import { searchTags } from "@/dummydata/header-menu/categories"
 import { font } from "@/lib/fonts"
 
 export default function Header() {
@@ -44,11 +43,15 @@ export default function Header() {
     () =>
       catalogCategoryRows.map((c) => ({
         name: c.displayName.toUpperCase(),
-        href: `/category/${c.slug}`,
+        href: `/category/${c.id}`,
       })),
     [catalogCategoryRows]
   )
   const uniqueProductNames = Array.from(new Set(catalog.map((product) => product.name)))
+  const popularSearchTags = useMemo(
+    () => catalogCategoryRows.slice(0, 8).map((c) => c.displayName),
+    [catalogCategoryRows]
+  )
   const searchSuggestions =
     searchQuery.trim().length > 0
       ? uniqueProductNames
@@ -257,21 +260,23 @@ export default function Header() {
                 </button>
               </form>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                {searchTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => {
-                      router.push(`/search?q=${encodeURIComponent(tag)}`)
-                      setSearchOpen(false)
-                    }}
-                    className={`px-3 py-1.5 rounded-full border border-[#e4d8c3] bg-white text-xs text-foreground hover:border-gold hover:text-gold-dark hover:bg-[#fff8ea] transition-all ${font('labels')}`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
+              {popularSearchTags.length > 0 ? (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {popularSearchTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        router.push(`/search?q=${encodeURIComponent(tag)}`)
+                        setSearchOpen(false)
+                      }}
+                      className={`px-3 py-1.5 rounded-full border border-[#e4d8c3] bg-white text-xs text-foreground hover:border-gold hover:text-gold-dark hover:bg-[#fff8ea] transition-all ${font('labels')}`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

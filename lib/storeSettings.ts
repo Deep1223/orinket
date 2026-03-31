@@ -3,6 +3,15 @@
  * Shapes match backend `generalsetting` documents (not dashboard table-field transforms).
  */
 
+export type HeroSlide = {
+  image?: string
+  title?: string
+  subtitle?: string
+  caption?: string
+  cta?: string
+  href?: string
+}
+
 export type StoreSettings = {
   storeName: string
   storeDescription: string
@@ -60,6 +69,9 @@ export type StoreSettings = {
   paymentPaytm: number
   seoHomepageTitle: string
   seoHomepageMetaDescription: string
+  heroSlides?: HeroSlide[]
+  /** Optional JSON string for homepage sections & policy copy (see dashboard). */
+  storefrontContentJson?: string
 }
 
 export function parseStoreSettingsPayload(json: unknown): StoreSettings | null {

@@ -39,7 +39,7 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
     materials: [] as string[],
     platings: [] as string[],
     rating: null as number | null,
-    inStock: true,
+    inStock: false,
   })
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -109,7 +109,7 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
       materials: [] as string[],
       platings: [] as string[],
       rating: null as number | null,
-      inStock: true,
+      inStock: false,
     }
     setActiveFilters(clearedFilters)
     onFiltersChange(clearedFilters)
@@ -122,7 +122,7 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
     if (activeFilters.materials.length > 0) count++
     if (activeFilters.platings.length > 0) count++
     if (activeFilters.rating) count++
-    if (!activeFilters.inStock) count++
+    if (activeFilters.inStock) count++
     return count
   }
 

@@ -1,10 +1,14 @@
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import storeContent from "@/data/storeContent.json"
+import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { contactFromSettings } from "@/lib/contactFromSettings"
 import { Mail, Phone, MapPin, Sparkles } from "lucide-react"
 import { fonts } from "@/lib/fonts"
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await fetchStoreSettingsServer()
+  const c = contactFromSettings(settings)
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -18,10 +22,11 @@ export default function ContactPage() {
               </div>
               <div className="flex-1">
                 <h1 className={`text-3xl md:text-4xl font-semibold text-foreground ${fonts.headings}`}>
-                  Contact {storeContent.brand.name}
+                  Contact {c.brandName}
                 </h1>
                 <p className={`mt-2 text-sm md:text-base text-muted-foreground ${fonts.body} max-w-2xl`}>
-                  Concierge support for orders, gifting, and styling. We respond quickly and keep it personal.
+                  Concierge support for orders, gifting, and styling. Fill in General Settings so these details stay up
+                  to date.
                 </p>
               </div>
             </div>
@@ -34,7 +39,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className={`text-sm font-semibold text-foreground ${fonts.headings}`}>Email</p>
-                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>{storeContent.support.email}</p>
+                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>
+                      {c.email || "— add in General Settings"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -46,7 +53,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className={`text-sm font-semibold text-foreground ${fonts.headings}`}>Phone</p>
-                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>{storeContent.support.phone}</p>
+                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>
+                      {c.phone || "— add in General Settings"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -58,7 +67,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className={`text-sm font-semibold text-foreground ${fonts.headings}`}>Address</p>
-                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>{storeContent.support.address}</p>
+                    <p className={`text-sm text-muted-foreground ${fonts.body}`}>
+                      {c.address || "— add in General Settings"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -66,7 +77,9 @@ export default function ContactPage() {
 
             <div className="mt-6 rounded-2xl border border-border bg-white p-6">
               <p className={`text-xs uppercase tracking-widest text-muted-foreground ${fonts.labels}`}>Hours</p>
-              <p className={`mt-1 text-sm font-semibold text-foreground ${fonts.headings}`}>{storeContent.support.hours}</p>
+              <p className={`mt-1 text-sm font-semibold text-foreground ${fonts.headings}`}>
+                {c.hours || "— add support hours in General Settings"}
+              </p>
               <p className={`mt-3 text-sm text-muted-foreground ${fonts.body}`}>
                 For faster help, mention your order number (if available) in your message.
               </p>
@@ -79,4 +92,3 @@ export default function ContactPage() {
     </div>
   )
 }
-

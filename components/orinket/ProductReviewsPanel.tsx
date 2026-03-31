@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Star, X, PenLine } from "lucide-react"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { getMockReviews } from "@/lib/productDetailMock"
 import {
   addUserReview,

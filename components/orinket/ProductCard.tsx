@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Check, Heart, ShoppingBag, Star } from "lucide-react"
 import { useCart } from "@/store/useCart"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { useTimedAdded } from "@/hooks/useTimedAdded"
 import { useCurrency } from "@/context/CurrencyContext"
 import { font } from "@/lib/fonts"
@@ -29,6 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       price: product.price,
       originalPrice: product.originalPrice,
       image: product.image,
+      stockLeft: product.stockLeft,
     })
     if (source === "quick") quickAdded.pulse()
     else iconAdded.pulse()
@@ -47,6 +48,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         originalPrice: product.originalPrice,
         image: product.image,
         category: product.category,
+        stockLeft: product.stockLeft,
       })
     }
   }
@@ -54,8 +56,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0
   const categoryLabel = product.category.replace(/-/g, " ")
 
+  const categoryPathPart = product.categoryId || "uncategorized"
+
   return (
-    <Link href={`/product/${product.id}`} className="group/card block h-full outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-2xl">
+    <Link href={`/category/${categoryPathPart}/${product.id}`} className="group/card block h-full outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-2xl">
       <article
         className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-b from-card via-card to-cream/30 shadow-[0_2px_24px_-8px_rgba(25,18,14,0.1)] ring-1 ring-black/[0.04] transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_28px_56px_-16px_rgba(25,18,14,0.18)] hover:ring-gold/15"
       >

@@ -1,7 +1,47 @@
-import type { Product } from '@/data/dummyProducts'
+import type { Product } from '@/types/product'
+import { slugifyLabel } from '@/lib/slugify'
 
-export function getProductsByCategory(products: Product[], category: string): Product[] {
-  return products.filter((product) => product.category === category)
+/**
+ * Match products to a category route slug. Handles small slug mismatches (singular/plural,
+ * API vs URL) by comparing normalized slugs and optional catalog rows.
+ */
+export function getProductsByCategory(
+  products: Product[],
+  categorySlug: string,
+  catalogCategories?: { slug: string }[]
+): Product[] {
+  if (categorySlug === 'all') return products
+
+  const routeNorm = slugifyLabel(categorySlug)
+  const alt = new Set<string>()
+  alt.add(categorySlug.trim().toLowerCase())
+  alt.add(routeNorm)
+
+  const row = catalogCategories?.find(
+    (c) => c.slug === categorySlug || slugifyLabel(c.slug) === routeNorm
+  )
+  if (row) {
+    alt.add(row.slug.trim().toLowerCase())
+    alt.add(slugifyLabel(row.slug))
+  }
+
+  const stripTrailingS = (s: string) => (s.length > 1 ? s.replace(/s$/i, '') : s)
+
+  return products.filter((product) => {
+    const raw = product.category.trim().toLowerCase()
+    const pNorm = slugifyLabel(product.category)
+    if (alt.has(raw) || alt.has(pNorm)) return true
+    if (pNorm === routeNorm) return true
+    // e.g. necklaces vs necklace, rings vs ring
+    if (
+      routeNorm.length > 2 &&
+      pNorm.length > 2 &&
+      stripTrailingS(routeNorm) === stripTrailingS(pNorm)
+    ) {
+      return true
+    }
+    return false
+  })
 }
 
 export function getProductById(products: Product[], id: string): Product | undefined {

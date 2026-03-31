@@ -1,35 +1,31 @@
 "use client"
 
 import Link from "next/link"
-import { use } from "react"
+import { use, useEffect, useState } from "react"
 import { ChevronRight, Package, Truck, CheckCircle, Clock } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import storeContent from "@/data/storeContent.json"
 import { useCurrency } from "@/context/CurrencyContext"
+import { useStoreSettings } from "@/context/StoreSettingsContext"
+import { contactFromSettings } from "@/lib/contactFromSettings"
+import { labelForOrderStatus } from "@/lib/orderStatusLabels"
 import { font } from "@/lib/fonts"
+import { ecomFetch } from "@/lib/ecom/client"
 
 interface OrderDetailsPageProps {
   params: Promise<{ orderId: string }>
 }
 
-type OrderStatus = "processing" | "shipped" | "delivered"
+type OrderStatus = string
 
-const demoOrderById = (orderId: string) => {
-  // Luxury UI demo: deterministic mapping by last digit
-  const last = Number(orderId.slice(-1))
-  const status: OrderStatus = last % 3 === 0 ? "delivered" : last % 3 === 1 ? "shipped" : "processing"
-
+function placeholderOrder(orderId: string) {
   return {
     id: orderId,
-    date: "March 20, 2026",
-    status,
-    tracking: status === "shipped" ? "DLV-IND-92817364" : null,
-    deliveryEta: status === "shipped" ? "Arriving in 2-4 days" : status === "processing" ? "Dispatching soon" : "Delivered",
-    items: [
-      { name: "Emerald Drop Pendant", price: 1599, quantity: 1 },
-      { name: "Eternal Love Heart Bracelet", price: 1299, quantity: 1 }
-    ]
+    date: "—",
+    status: "processing" as OrderStatus,
+    tracking: null as string | null,
+    deliveryEta: "Connect your orders API to show live status.",
+    items: [] as Array<{ name: string; price: number; quantity: number }>,
   }
 }
 
@@ -46,8 +42,35 @@ const StatusIcon = ({ status }: { status: OrderStatus }) => {
 
 export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const { formatPrice } = useCurrency()
+  const { settings } = useStoreSettings()
+  const contact = contactFromSettings(settings)
   const { orderId } = use(params)
-  const order = demoOrderById(orderId)
+  const [order, setOrder] = useState(placeholderOrder(orderId))
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await ecomFetch<{
+        success: boolean
+        data?: {
+          _id: string
+          createdAt: string
+          orderStatus: OrderStatus
+          paymentReference?: string
+          items: Array<{ name: string; price: number; quantity: number }>
+        }
+      }>(`/api/ecom/orders/${orderId}`)
+      if (!response?.success || !response.data) return
+      setOrder({
+        id: response.data._id,
+        date: new Date(response.data.createdAt).toLocaleString(),
+        status: response.data.orderStatus,
+        tracking: response.data.paymentReference || null,
+        deliveryEta: "Live status from automated order engine",
+        items: response.data.items || [],
+      })
+    }
+    load()
+  }, [orderId])
   const subtotal = order.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const shipping = 0
   const tax = Math.round(subtotal * 0.18)
@@ -84,7 +107,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                   <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm ${font('body')}">
                     <StatusIcon status={order.status} />
                     <span className="font-semibold text-foreground">
-                      {storeContent.orderStatuses.find(s => s.key === order.status)?.label ?? order.status}
+                      {labelForOrderStatus(order.status)}
                     </span>
                   </div>
                 </div>
@@ -106,19 +129,25 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
 
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <h2 className={`text-lg font-semibold text-foreground ${font("body")}`}>Items</h2>
-                <div className="mt-4 divide-y divide-border">
-                  {order.items.map((item) => (
-                    <div key={item.name} className="py-4 flex items-start justify-between gap-4">
-                      <div>
-                        <p className={`text-sm font-semibold text-foreground ${font("body")}`}>{item.name}</p>
-                        <p className={`text-sm text-muted-foreground ${font("body")}`}>Qty: {item.quantity}</p>
+                {order.items.length === 0 ? (
+                  <p className={`mt-4 text-sm text-muted-foreground ${font("body")}`}>
+                    Line items will load here after checkout is connected to your backend orders API.
+                  </p>
+                ) : (
+                  <div className="mt-4 divide-y divide-border">
+                    {order.items.map((item) => (
+                      <div key={item.name} className="py-4 flex items-start justify-between gap-4">
+                        <div>
+                          <p className={`text-sm font-semibold text-foreground ${font("body")}`}>{item.name}</p>
+                          <p className={`text-sm text-muted-foreground ${font("body")}`}>Qty: {item.quantity}</p>
+                        </div>
+                        <p className={`text-sm font-semibold text-foreground ${font("body")}`}>
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
                       </div>
-                      <p className={`text-sm font-semibold text-foreground ${font("body")}`}>
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -149,8 +178,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
 
                 <div className="mt-6 rounded-xl border border-border bg-cream p-4">
                   <p className={`text-xs uppercase tracking-widest text-muted-foreground ${font("body")}`}>Support</p>
-                  <p className={`mt-1 text-sm font-semibold text-foreground ${font("body")}`}>{storeContent.support.email}</p>
-                  <p className={`text-sm text-muted-foreground ${font("body")}`}>{storeContent.support.hours}</p>
+                  <p className={`mt-1 text-sm font-semibold text-foreground ${font("body")}`}>
+                    {contact.email || "—"}
+                  </p>
+                  <p className={`text-sm text-muted-foreground ${font("body")}`}>{contact.hours || "—"}</p>
                 </div>
 
                 <Link

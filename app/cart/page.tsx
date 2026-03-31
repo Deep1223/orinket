@@ -25,6 +25,7 @@ import {
 } from "@/data/promoCodes"
 import { useCurrency } from "@/context/CurrencyContext"
 import { fonts } from "@/lib/fonts"
+import { ecomFetch } from "@/lib/ecom/client"
 
 function CartLineRow({ item }: { item: CartItem }) {
   const { formatPrice } = useCurrency()
@@ -122,7 +123,7 @@ function CartLineRow({ item }: { item: CartItem }) {
 
 export default function CartPage() {
   const { formatPrice, formatPromoLine } = useCurrency()
-  const { cartItems, cartTotal, clearCart } = useCart()
+  const { cartItems, cartTotal, clearCart, addToCart } = useCart()
 
   const [promoInput, setPromoInput] = useState("")
   const [appliedPromo, setAppliedPromo] = useState<{
@@ -133,6 +134,14 @@ export default function CartPage() {
     type: "success" | "error"
     text: string
   } | null>(null)
+  const [upsell, setUpsell] = useState<{
+    threshold: number
+    missingAmount: number
+    products: Array<{ id: string; name: string; image: string; price: number }>
+  } | null>(null)
+  const [fbtProducts, setFbtProducts] = useState<
+    Array<{ id: string; name: string; image?: string; price: number }>
+  >([])
 
   const discountAmount = appliedPromo?.discount ?? 0
   const subtotalAfterDiscount = Math.max(0, cartTotal - discountAmount)
@@ -203,6 +212,41 @@ export default function CartPage() {
       })
     }
   }, [cartTotal, formatPrice, formatPromoLine])
+
+  useEffect(() => {
+    const loadUpsell = async () => {
+      const response = await ecomFetch<{
+        success: boolean
+        data?: {
+          threshold: number
+          missingAmount: number
+          products: Array<{ id: string; name: string; image: string; price: number }>
+        }
+      }>(`/api/ecom/recommendations/cart-upsell?cartTotal=${cartTotal}`)
+      if (response?.success && response.data) {
+        setUpsell(response.data)
+      }
+    }
+    loadUpsell()
+  }, [cartTotal])
+
+  useEffect(() => {
+    const mainProduct = cartItems[0]
+    if (!mainProduct) {
+      setFbtProducts([])
+      return
+    }
+    const load = async () => {
+      const response = await ecomFetch<{
+        success: boolean
+        data?: Array<{ id: string; name: string; image?: string; price: number }>
+      }>(`/api/ecom/recommendations/frequently-bought-together?productId=${mainProduct.id}`)
+      if (response?.success && Array.isArray(response.data)) {
+        setFbtProducts(response.data.slice(0, 3))
+      }
+    }
+    load()
+  }, [cartItems])
 
   if (cartItems.length === 0) {
     return (
@@ -409,6 +453,65 @@ export default function CartPage() {
                         </span>{" "}
                         more for complimentary shipping
                       </p>
+                    </div>
+                  )}
+
+                  {upsell && upsell.products.length > 0 && (
+                    <div className="rounded-xl border border-[#e6ddcc] bg-white p-3">
+                      <p className={`text-[10px] uppercase tracking-[0.2em] text-muted-foreground ${fonts.labels}`}>
+                        Smart suggestions
+                      </p>
+                      <p className={`mt-1 text-xs text-foreground ${fonts.body}`}>
+                        Add {formatPrice(upsell.missingAmount)} more to unlock free shipping
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {upsell.products.slice(0, 3).map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() =>
+                              addToCart({
+                                id: p.id,
+                                name: p.name,
+                                price: p.price,
+                                image: p.image || "/images/product-necklace-1.jpg",
+                              })
+                            }
+                            className={`flex w-full items-center justify-between rounded-lg border border-[#efe6d6] px-2 py-2 text-left hover:bg-[#faf6ee] ${fonts.body}`}
+                          >
+                            <span className="line-clamp-1 text-xs">{p.name}</span>
+                            <span className="ml-2 shrink-0 text-xs font-semibold">{formatPrice(p.price)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {fbtProducts.length > 0 && (
+                    <div className="rounded-xl border border-[#e6ddcc] bg-white p-3">
+                      <p className={`text-[10px] uppercase tracking-[0.2em] text-muted-foreground ${fonts.labels}`}>
+                        Often bought together
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {fbtProducts.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() =>
+                              addToCart({
+                                id: p.id,
+                                name: p.name,
+                                price: p.price,
+                                image: p.image || "/images/product-necklace-1.jpg",
+                              })
+                            }
+                            className={`flex w-full items-center justify-between rounded-lg border border-[#efe6d6] px-2 py-2 text-left hover:bg-[#faf6ee] ${fonts.body}`}
+                          >
+                            <span className="line-clamp-1 text-xs">{p.name}</span>
+                            <span className="ml-2 shrink-0 text-xs font-semibold">{formatPrice(p.price)}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
 

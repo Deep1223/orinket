@@ -28,12 +28,14 @@ export default function WishlistPage() {
   }
 
   const handleAddToCart = (item: (typeof wishlistItems)[0]) => {
+    const p = getProductById(catalog, item.id)
     addToCart({
       id: item.id,
       name: item.name,
       price: item.price,
       originalPrice: item.originalPrice,
       image: item.image,
+      stockLeft: p?.stockLeft ?? item.stockLeft,
     })
   }
 
@@ -162,6 +164,7 @@ export default function WishlistPage() {
                     return
                   }
                   eligible.forEach((item) => {
+                    const p = getProductById(catalog, item.id)
                     addToCart(
                       {
                         id: item.id,
@@ -169,6 +172,7 @@ export default function WishlistPage() {
                         price: item.price,
                         originalPrice: item.originalPrice,
                         image: item.image,
+                        stockLeft: p?.stockLeft ?? item.stockLeft,
                       },
                       1,
                       { silent: true }

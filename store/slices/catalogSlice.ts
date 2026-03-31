@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { postPublicListing } from "@/lib/publicApi/client/listingPublicClient"
 import {
   deriveCatalogFromRaw,

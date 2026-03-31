@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { Instagram, Facebook, Twitter, Youtube } from "lucide-react"
 import { useStoreSettings } from "@/context/StoreSettingsContext"
-import { footerData } from "@/dummydata/footer/content"
 import { font } from "@/lib/fonts"
 import type { StoreSettings } from "@/lib/storeSettings"
 
@@ -56,24 +55,16 @@ function mapShopLinks(rows: StoreSettings["shopFooterLinks"] | undefined): LinkI
 export default function Footer() {
   const { settings } = useStoreSettings()
 
-  const brandName = settings?.brandName?.trim() || footerData.brand.name
-  const brandDesc = settings?.brandDescription?.trim() || footerData.brand.description
+  const brandName = settings?.brandName?.trim() || settings?.storeName?.trim() || "Store"
+  const brandDesc =
+    settings?.brandDescription?.trim() || settings?.storeDescription?.trim() || ""
   const footerLogo = settings?.footerLogoUrl?.trim()
 
-  const shopFromApi = mapShopLinks(settings?.shopFooterLinks)
-  const shopLinks = shopFromApi.length > 0 ? shopFromApi : footerData.links.shop
+  const shopLinks = mapShopLinks(settings?.shopFooterLinks)
 
-  const companyLinks = settings
-    ? staticColumnLinks(settings, STATIC_COMPANY)
-    : footerData.links.company
-
-  const supportLinks = settings
-    ? staticColumnLinks(settings, STATIC_SUPPORT)
-    : footerData.links.support
-
-  const legalLinks = settings
-    ? staticColumnLinks(settings, STATIC_LEGAL)
-    : footerData.links.legal
+  const companyLinks = staticColumnLinks(settings, STATIC_COMPANY)
+  const supportLinks = staticColumnLinks(settings, STATIC_SUPPORT)
+  const legalLinks = staticColumnLinks(settings, STATIC_LEGAL)
 
   const builtSocial: Array<{ icon: typeof Instagram; href: string; label: string }> = []
   if (settings?.instagramUrl?.trim()) {
@@ -89,43 +80,38 @@ export default function Footer() {
     builtSocial.push({ icon: Youtube, href: settings.youtubeUrl.trim(), label: "YouTube" })
   }
 
-  const socialToRender =
-    builtSocial.length > 0
-      ? builtSocial
-      : footerData.social.map((s) => ({ icon: s.icon, href: s.href, label: s.label }))
+  const socialToRender = builtSocial
 
-  let paymentLabels: string[]
-  if (!settings) {
-    paymentLabels = footerData.payments
-  } else {
-    const payments: string[] = []
-    if (settings.paymentVisa !== 0) payments.push("Visa")
-    if (settings.paymentMastercard !== 0) payments.push("Mastercard")
-    if (settings.paymentUpi !== 0) payments.push("UPI")
-    if (settings.paymentPaytm !== 0) payments.push("PayTM")
-    paymentLabels = payments.length > 0 ? payments : footerData.payments
+  const paymentLabels: string[] = []
+  if (settings) {
+    if (settings.paymentVisa !== 0) paymentLabels.push("Visa")
+    if (settings.paymentMastercard !== 0) paymentLabels.push("Mastercard")
+    if (settings.paymentUpi !== 0) paymentLabels.push("UPI")
+    if (settings.paymentPaytm !== 0) paymentLabels.push("PayTM")
   }
 
   const newsletterOn = (settings?.newsletterEnabled ?? 1) === 1
-  const nlTitle = settings?.newsletterTitle?.trim() || footerData.newsletter.title
-  const nlDesc = settings?.newsletterDescription?.trim() || footerData.newsletter.description
+  const nlTitle = settings?.newsletterTitle?.trim() || ""
+  const nlDesc = settings?.newsletterDescription?.trim() || ""
   const nlPlaceholder = settings?.newsletterPlaceholder?.trim() || "Your email"
   const nlButton = settings?.newsletterButtonText?.trim() || "SUBSCRIBE"
 
-  const copyrightName = settings?.storeName?.trim() || "Orinket"
+  const copyrightName = settings?.storeName?.trim() || brandName
 
   return (
     <footer className="bg-[#1a1a1a] text-white">
       {/* Newsletter Section */}
-      {newsletterOn && (
+      {newsletterOn && (nlTitle || nlDesc) && (
         <div className="border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex-1">
-                <h3 className={`text-xl sm:text-2xl font-bold tracking-wider mb-2 ${font("headings")}`}>
-                  {nlTitle}
-                </h3>
-                <p className={`text-white/70 text-xs sm:text-sm ${font("body")}`}>{nlDesc}</p>
+                {nlTitle ? (
+                  <h3 className={`text-xl sm:text-2xl font-bold tracking-wider mb-2 ${font("headings")}`}>
+                    {nlTitle}
+                  </h3>
+                ) : null}
+                {nlDesc ? <p className={`text-white/70 text-xs sm:text-sm ${font("body")}`}>{nlDesc}</p> : null}
               </div>
               <form className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
                 <div className="relative flex-1 md:w-72">
@@ -163,42 +149,48 @@ export default function Footer() {
                 <h2 className={`text-2xl tracking-[0.2em] ${font("headings")}`}>{brandName}</h2>
               )}
             </Link>
-            <p className={`text-white/70 text-sm mb-6 leading-relaxed ${font("body")}`}>{brandDesc}</p>
-            <div className="flex gap-4">
-              {socialToRender.map((social) => {
-                const Icon = social.icon
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-white/10 hover:bg-gold transition-colors"
-                    aria-label={social.label}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </a>
-                )
-              })}
-            </div>
+            {brandDesc ? (
+              <p className={`text-white/70 text-sm mb-6 leading-relaxed ${font("body")}`}>{brandDesc}</p>
+            ) : null}
+            {socialToRender.length > 0 ? (
+              <div className="flex gap-4">
+                {socialToRender.map((social) => {
+                  const Icon = social.icon
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-white/10 hover:bg-gold transition-colors"
+                      aria-label={social.label}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  )
+                })}
+              </div>
+            ) : null}
           </div>
 
           {/* Shop Links */}
-          <div>
-            <h4 className={`text-sm tracking-wider mb-4 ${font("labels")}`}>SHOP</h4>
-            <ul className="space-y-3">
-              {shopLinks.map((link) => (
-                <li key={`${link.name}-${link.href}`}>
-                  <Link
-                    href={link.href}
-                    className={`text-white/70 text-sm hover:text-white transition-colors ${font("body")}`}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {shopLinks.length > 0 ? (
+            <div>
+              <h4 className={`text-sm tracking-wider mb-4 ${font("labels")}`}>SHOP</h4>
+              <ul className="space-y-3">
+                {shopLinks.map((link) => (
+                  <li key={`${link.name}-${link.href}`}>
+                    <Link
+                      href={link.href}
+                      className={`text-white/70 text-sm hover:text-white transition-colors ${font("body")}`}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {/* Company Links */}
           <div>
@@ -260,19 +252,21 @@ export default function Footer() {
             <p className={`text-white/50 text-sm ${font("body")}`}>
               &copy; {new Date().getFullYear()} {copyrightName}. All rights reserved.
             </p>
-            <div className="flex items-center gap-4">
-              <span className={`text-white/50 text-sm ${font("body")}`}>We accept:</span>
-              <div className="flex gap-2">
-                {paymentLabels.map((payment) => (
-                  <span
-                    key={payment}
-                    className={`px-2 py-1 bg-white/10 text-white/70 text-xs ${font("labels")}`}
-                  >
-                    {payment}
-                  </span>
-                ))}
+            {paymentLabels.length > 0 ? (
+              <div className="flex items-center gap-4">
+                <span className={`text-white/50 text-sm ${font("body")}`}>We accept:</span>
+                <div className="flex gap-2">
+                  {paymentLabels.map((payment) => (
+                    <span
+                      key={payment}
+                      className={`px-2 py-1 bg-white/10 text-white/70 text-xs ${font("labels")}`}
+                    >
+                      {payment}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -4,29 +4,30 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import { getStoreBySlug, storeLocations } from "@/data/dummyCompanyPages"
+import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { getCmsStoreBySlug } from "@/lib/server/cmsFromSettings"
 import { MapPin, Phone, Clock, ArrowLeft } from "lucide-react"
 import { fonts } from "@/lib/fonts"
 
-type Props = { params: Promise<{ slug: string }> }
+export const dynamic = "force-dynamic"
 
-export function generateStaticParams() {
-  return storeLocations.map((s) => ({ slug: s.slug }))
-}
+type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const store = getStoreBySlug(slug)
-  if (!store) return { title: "Store | ORINKET" }
+  const settings = await fetchStoreSettingsServer()
+  const store = getCmsStoreBySlug(settings, slug)
+  if (!store) return { title: "Store" }
   return {
-    title: `${store.name} — ${store.city} | ORINKET Stores`,
+    title: `${store.name} — ${store.city}`,
     description: `${store.address}. ${store.hours}`,
   }
 }
 
 export default async function StoreDetailPage({ params }: Props) {
   const { slug } = await params
-  const store = getStoreBySlug(slug)
+  const settings = await fetchStoreSettingsServer()
+  const store = getCmsStoreBySlug(settings, slug)
   if (!store) notFound()
 
   return (
@@ -43,12 +44,8 @@ export default async function StoreDetailPage({ params }: Props) {
             All stores
           </Link>
 
-          <p className={`text-xs uppercase tracking-[0.25em] text-gold ${fonts.labels}`}>
-            {store.city}
-          </p>
-          <h1 className={`mt-2 text-3xl md:text-4xl font-semibold text-foreground ${fonts.headings}`}>
-            {store.name}
-          </h1>
+          <p className={`text-xs uppercase tracking-[0.25em] text-gold ${fonts.labels}`}>{store.city}</p>
+          <h1 className={`mt-2 text-3xl md:text-4xl font-semibold text-foreground ${fonts.headings}`}>{store.name}</h1>
 
           <div className="relative aspect-[16/10] mt-8 rounded-2xl overflow-hidden border border-border">
             <Image

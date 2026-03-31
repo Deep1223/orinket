@@ -2,43 +2,23 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 import { Package, ChevronRight, Truck, CheckCircle, Clock } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
-import storeContent from "@/data/storeContent.json"
 import { useCurrency } from "@/context/CurrencyContext"
+import { useStoreSettings } from "@/context/StoreSettingsContext"
+import { contactFromSettings } from "@/lib/contactFromSettings"
 import { font } from "@/lib/fonts"
+import { ecomFetch } from "@/lib/ecom/client"
 
-// Demo orders for UI display
-const demoOrders = [
-  {
-    id: "ORN12345678",
-    date: "March 20, 2026",
-    status: "delivered",
-    total: 2598,
-    items: [
-      { name: "Eternal Love Heart Bracelet", image: "/images/product-bracelet-1.jpg", price: 1299, quantity: 2 }
-    ]
-  },
-  {
-    id: "ORN12345679",
-    date: "March 15, 2026",
-    status: "shipped",
-    total: 1599,
-    items: [
-      { name: "Emerald Drop Pendant", image: "/images/product-necklace-2.jpg", price: 1599, quantity: 1 }
-    ]
-  },
-  {
-    id: "ORN12345680",
-    date: "March 10, 2026",
-    status: "processing",
-    total: 999,
-    items: [
-      { name: "Diamond Hoop Earrings", image: "/images/product-earrings-1.jpg", price: 999, quantity: 1 }
-    ]
-  }
-]
+type OrderRow = {
+  id: string
+  date: string
+  status: string
+  total: number
+  items: Array<{ name: string; image: string; price: number; quantity: number }>
+}
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -81,6 +61,35 @@ const getStatusColor = (status: string) => {
 
 export default function OrdersPage() {
   const { formatPrice } = useCurrency()
+  const { settings } = useStoreSettings()
+  const contact = contactFromSettings(settings)
+  const [orders, setOrders] = useState<OrderRow[]>([])
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await ecomFetch<{
+        success: boolean
+        data?: Array<{
+          _id: string
+          createdAt: string
+          orderStatus: string
+          totalAmount: number
+          items: Array<{ name: string; image: string; price: number; quantity: number }>
+        }>
+      }>("/api/ecom/orders")
+      if (!response?.success || !response.data) return
+      setOrders(
+        response.data.map((o) => ({
+          id: o._id,
+          date: new Date(o.createdAt).toLocaleDateString(),
+          status: o.orderStatus,
+          total: o.totalAmount,
+          items: o.items || [],
+        }))
+      )
+    }
+    load()
+  }, [])
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#fbf8f2] via-[#f7f3ea] to-[#f4efe4]">
       <Header />
@@ -101,19 +110,19 @@ export default function OrdersPage() {
                   My Orders
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground ${font('body')}">
-                  Premium updates from {storeContent.brand.name} - track, manage, and reorder anytime.
+                  Order updates from {contact.brandName} — connect checkout to your backend to show live orders.
                 </p>
               </div>
               <div className="rounded-xl border border-[#e2d7c5] bg-white px-4 py-3 text-sm ${font('body')} shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
                 <p className="text-muted-foreground">Need help?</p>
-                <p className="font-semibold text-foreground">{storeContent.support.email}</p>
+                <p className="font-semibold text-foreground">{contact.email || "—"}</p>
               </div>
             </div>
           </div>
 
-          {demoOrders.length > 0 ? (
+          {orders.length > 0 ? (
             <div className="space-y-6">
-              {demoOrders.map((order) => (
+              {orders.map((order) => (
                 <div key={order.id} className="overflow-hidden rounded-2xl border border-[#e3d9c9] bg-white shadow-[0_14px_36px_rgba(55,37,12,0.07)]">
                   {/* Order Header */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-gradient-to-r from-[#faf3e3] via-[#fffdf9] to-[#faf3e3] border-b border-[#ece3d2]">

@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useCallback, useRef, useState } from "react"
 import { MoveHorizontal, Play } from "lucide-react"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { fonts } from "@/lib/fonts"
 
 interface ProductVideoAnd360Props {

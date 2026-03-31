@@ -16,6 +16,7 @@ import {
 } from "@/data/promoCodes"
 import { useCurrency } from "@/context/CurrencyContext"
 import { font } from "@/lib/fonts"
+import { ecomFetch } from "@/lib/ecom/client"
 
 type CheckoutStep = "shipping" | "payment" | "confirm"
 
@@ -62,12 +63,40 @@ function CheckoutContent() {
     type: "success" | "error"
     text: string
   } | null>(null)
+  const [checkoutSuggestions, setCheckoutSuggestions] = useState<
+    Array<{ id: string; name: string; image?: string; price: number }>
+  >([])
 
   const discountAmount = appliedPromo?.discount ?? 0
   const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount)
   const shipping = 0
   const tax = Math.round(subtotalAfterDiscount * 0.18)
   const total = subtotalAfterDiscount + shipping + tax
+
+  useEffect(() => {
+    const baseId = items[0]?.id
+    if (!baseId) {
+      setCheckoutSuggestions([])
+      return
+    }
+    const load = async () => {
+      const [similar, complete] = await Promise.all([
+        ecomFetch<{ success: boolean; data?: Array<{ id: string; name: string; image?: string; price: number }> }>(
+          `/api/ecom/recommendations/similar-products?productId=${baseId}`
+        ),
+        ecomFetch<{ success: boolean; data?: Array<{ id: string; name: string; image?: string; price: number }> }>(
+          `/api/ecom/recommendations/complete-the-look?productId=${baseId}`
+        ),
+      ])
+      const merged = [...(similar.data || []), ...(complete.data || [])]
+      const uniq = new Map<string, { id: string; name: string; image?: string; price: number }>()
+      for (const p of merged) {
+        if (!uniq.has(p.id)) uniq.set(p.id, p)
+      }
+      setCheckoutSuggestions([...uniq.values()].slice(0, 4))
+    }
+    load()
+  }, [items])
 
   const handleApplyPromo = () => {
     const promo = findPromoCode(promoInput)
@@ -133,12 +162,64 @@ function CheckoutContent() {
   }
 
   const handlePlaceOrder = async () => {
-    setIsProcessing(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    if (!directProduct) {
-      clearCart({ silent: true })
+    try {
+      setIsProcessing(true)
+      for (const item of items) {
+        await ecomFetch<{ success: boolean }>("/api/ecom/cart/add", {
+          method: "POST",
+          body: JSON.stringify({ productId: item.id, quantity: item.quantity }),
+        })
+      }
+
+      await ecomFetch<{ success: boolean }>("/api/ecom/payments/create-order", {
+        method: "POST",
+        body: JSON.stringify({ amount: total, currency: "INR" }),
+      })
+
+      const orderResponse = await ecomFetch<{
+        success: boolean
+        data?: { _id: string }
+      }>("/api/ecom/orders", {
+        method: "POST",
+        body: JSON.stringify({
+          paymentMethod: selectedPayment,
+          items: items.map((item) => ({
+            productId: item.id,
+            name: item.name,
+            image: item.image,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          shippingAddress: {
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            phone: formData.phone,
+            line1: formData.address,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+          },
+        }),
+      })
+
+      if (!directProduct) {
+        clearCart({ silent: true })
+      }
+      const orderId = orderResponse?.data?._id
+      if (orderId) {
+        await ecomFetch<{ success: boolean }>("/api/ecom/payments/verify", {
+          method: "POST",
+          body: JSON.stringify({
+            orderId,
+            status: "success",
+            paymentReference: `SIMULATED_${selectedPayment}_${Date.now()}`,
+          }),
+        })
+      }
+      router.push(orderId ? `/order-success?orderId=${orderId}` : "/order-success")
+    } finally {
+      setIsProcessing(false)
     }
-    router.push("/order-success")
   }
 
   const stepsConfig = [
@@ -871,6 +952,29 @@ function CheckoutContent() {
                   <span>{formatPrice(total)}</span>
                 </div>
               </div>
+
+              {checkoutSuggestions.length > 0 && (
+                <div className="px-6 py-4 border-t border-border">
+                  <p className={`text-[10px] uppercase tracking-[0.2em] text-muted-foreground ${font('labels')}`}>
+                    You may also like
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {checkoutSuggestions.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() =>
+                          window.location.assign(`/checkout?product=${p.id}&quantity=1`)
+                        }
+                        className={`flex w-full items-center justify-between rounded-lg border border-[#ece4d5] px-2 py-2 text-left hover:bg-[#faf6ee] ${font('body')}`}
+                      >
+                        <span className="line-clamp-1 text-xs">{p.name}</span>
+                        <span className="ml-2 shrink-0 text-xs font-semibold">{formatPrice(p.price)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Trust Badges */}
               <div className={`px-6 py-4 bg-cream border-t border-border grid grid-cols-3 gap-3 ${font('body')}`}>

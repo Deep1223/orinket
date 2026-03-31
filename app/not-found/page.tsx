@@ -26,7 +26,7 @@ export default function NotFound() {
                 Back to Home
               </Link>
               <Link
-                href="/category/new-arrivals"
+                href="/category/all"
                 className="px-6 py-3 border border-border rounded-sm hover:bg-cream transition-colors"
               >
                 Shop New Arrivals
@@ -38,28 +38,28 @@ export default function NotFound() {
               <h3 className="text-lg font-semibold mb-6">Popular Categories</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
                 <Link
-                  href="/category/necklaces"
+                  href="/category/all"
                   className="p-4 border border-border rounded-sm hover:border-gold hover:bg-cream transition-all text-center"
                 >
                   <div className="font-medium">Necklaces</div>
                   <div className="text-sm text-muted-foreground">Elegant designs</div>
                 </Link>
                 <Link
-                  href="/category/earrings"
+                  href="/category/all"
                   className="p-4 border border-border rounded-sm hover:border-gold hover:bg-cream transition-all text-center"
                 >
                   <div className="font-medium">Earrings</div>
                   <div className="text-sm text-muted-foreground">Beautiful styles</div>
                 </Link>
                 <Link
-                  href="/category/bracelets"
+                  href="/category/all"
                   className="p-4 border border-border rounded-sm hover:border-gold hover:bg-cream transition-all text-center"
                 >
                   <div className="font-medium">Bracelets</div>
                   <div className="text-sm text-muted-foreground">Everyday wear</div>
                 </Link>
                 <Link
-                  href="/category/rings"
+                  href="/category/all"
                   className="p-4 border border-border rounded-sm hover:border-gold hover:bg-cream transition-all text-center"
                 >
                   <div className="font-medium">Rings</div>

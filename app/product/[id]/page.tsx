@@ -31,26 +31,74 @@ import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductVideoAnd360 from "@/components/orinket/ProductVideoAnd360"
 import ProductReviewsPanel from "@/components/orinket/ProductReviewsPanel"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { getProductById } from "@/lib/catalogQueries"
 import ProductCard from "@/components/orinket/ProductCard"
 import { useCart } from "@/store/useCart"
 import { useAppSelector } from "@/store/hooks"
+import { selectCatalogShopLoading } from "@/store/selectors"
 import { useCompare } from "@/context/CompareContext"
 import { PRODUCT_FAQ } from "@/lib/productDetailMock"
 import { useTimedAdded, useTimedHint } from "@/hooks/useTimedAdded"
 import { useCurrency } from "@/context/CurrencyContext"
 import { font } from "@/lib/fonts"
+import { ecomFetch } from "@/lib/ecom/client"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
 }
 
+const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
+
 export default function ProductPage({ params }: ProductPageProps) {
   const { formatPrice } = useCurrency()
   const { id } = use(params)
   const catalog = useAppSelector((s) => s.catalog.products)
-  const product = useMemo(() => getProductById(catalog, id), [catalog, id])
+  const shopLoading = useAppSelector(selectCatalogShopLoading)
+
+  const catalogProduct = useMemo(() => getProductById(catalog, id), [catalog, id])
+  const [remoteProduct, setRemoteProduct] = useState<Product | null>(null)
+  /** False until catalog+remote lookup settles (avoids flashing “not found” before fetch). */
+  const [remoteFetchDone, setRemoteFetchDone] = useState(false)
+
+  const product = catalogProduct ?? remoteProduct
+
+  useEffect(() => {
+    setRemoteProduct(null)
+    setRemoteFetchDone(false)
+  }, [id])
+
+  useEffect(() => {
+    if (catalogProduct) return
+    if (shopLoading) return
+    if (!OBJECT_ID_RE.test(id)) {
+      setRemoteFetchDone(true)
+      return
+    }
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/public/product/${encodeURIComponent(id)}`, {
+          cache: "no-store",
+        })
+        const json = (await res.json()) as { success?: boolean; data?: Product }
+        if (cancelled) return
+        if (res.ok && json.success && json.data) {
+          setRemoteProduct(json.data)
+        } else {
+          setRemoteProduct(null)
+        }
+      } catch {
+        if (!cancelled) setRemoteProduct(null)
+      } finally {
+        if (!cancelled) setRemoteFetchDone(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [id, catalogProduct, shopLoading])
   const relatedProducts = useMemo(
     () =>
       product
@@ -60,6 +108,11 @@ export default function ProductPage({ params }: ProductPageProps) {
         : [],
     [catalog, product]
   )
+  const [apiRecommendations, setApiRecommendations] = useState<{
+    similar: Product[]
+    frequentlyBought: Product[]
+    completeLook: Product[]
+  }>({ similar: [], frequentlyBought: [], completeLook: [] })
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -109,6 +162,69 @@ export default function ProductPage({ params }: ProductPageProps) {
     }
   }, [lightboxOpen])
 
+  useEffect(() => {
+    if (!product) return
+    const mapToProduct = (p: {
+      id: string
+      name: string
+      price: number
+      originalPrice?: number
+      category?: string
+      image?: string
+      images?: string[]
+      stock?: number
+      inStock?: boolean
+    }): Product => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      category: p.category || product.category,
+      image: p.image || "/images/product-necklace-1.jpg",
+      images: p.images || (p.image ? [p.image] : []),
+      description: "",
+      inStock: p.inStock ?? true,
+      stockLeft: p.stock,
+      details: ["Recommended for your style"],
+    })
+
+    const loadRecommendations = async () => {
+      const [similarRes, fbtRes, completeRes] = await Promise.all([
+        ecomFetch<{ success: boolean; data?: Array<any> }>(
+          `/api/ecom/recommendations/similar-products?productId=${product.id}`
+        ),
+        ecomFetch<{ success: boolean; data?: Array<any> }>(
+          `/api/ecom/recommendations/frequently-bought-together?productId=${product.id}`
+        ),
+        ecomFetch<{ success: boolean; data?: Array<any> }>(
+          `/api/ecom/recommendations/complete-the-look?productId=${product.id}`
+        ),
+      ])
+      setApiRecommendations({
+        similar: (similarRes.data || []).map(mapToProduct).slice(0, 4),
+        frequentlyBought: (fbtRes.data || []).map(mapToProduct).slice(0, 4),
+        completeLook: (completeRes.data || []).map(mapToProduct).slice(0, 4),
+      })
+    }
+    loadRecommendations()
+  }, [product])
+
+  const needsRemoteLookup =
+    !catalogProduct && OBJECT_ID_RE.test(id) && !remoteFetchDone
+  const showBlockingLoader = !product && (shopLoading || needsRemoteLookup)
+
+  if (showBlockingLoader) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex flex-1 items-center justify-center px-4 py-24">
+          <p className={`text-sm text-stone-600 ${font("body")}`}>Loading product…</p>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -144,6 +260,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       price: product.price,
       originalPrice: product.originalPrice,
       image: product.image,
+      stockLeft: product.stockLeft,
     }, quantity)
     bagAdded.pulse()
   }
@@ -159,6 +276,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         originalPrice: product.originalPrice,
         image: product.image,
         category: product.category,
+        stockLeft: product.stockLeft,
       })
     }
   }
@@ -221,7 +339,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               </Link>
               <ChevronRight className="w-3.5 h-3.5 opacity-50 shrink-0" />
               <Link
-                href={`/category/${product.category}`}
+                href={`/category/${product.categoryId || "all"}`}
                 className="hover:text-gold-dark transition-colors capitalize tracking-wide"
               >
                 {product.category.replace("-", " ")}
@@ -878,7 +996,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           )}
         </div>
 
-        {relatedProducts.length > 0 && (
+        {(apiRecommendations.completeLook.length > 0 || relatedProducts.length > 0) && (
           <div className="border-t border-border/60 bg-gradient-to-b from-cream/40 to-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 md:py-20">
               <div className="text-center max-w-2xl mx-auto mb-10 md:mb-14">
@@ -893,7 +1011,36 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 lg:gap-8">
-                {relatedProducts.map((p) => (
+                {(apiRecommendations.completeLook.length > 0
+                  ? apiRecommendations.completeLook
+                  : relatedProducts
+                ).map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {apiRecommendations.similar.length > 0 && (
+          <div className="border-t border-border/40 bg-background">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+              <h3 className={`text-2xl ${font('headings')} mb-6`}>Similar Products</h3>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+                {apiRecommendations.similar.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {apiRecommendations.frequentlyBought.length > 0 && (
+          <div className="border-t border-border/40 bg-background">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+              <h3 className={`text-2xl ${font('headings')} mb-6`}>Frequently Bought Together</h3>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+                {apiRecommendations.frequentlyBought.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
               </div>

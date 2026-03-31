@@ -1,4 +1,4 @@
-import { Product } from '@/data/dummyProducts'
+import type { Product } from '@/types/product'
 
 export interface FilterState {
   categories: string[]

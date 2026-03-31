@@ -1,6 +1,6 @@
 "use client"
 
-import { notFound, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import ProductGrid from "@/components/orinket/ProductGrid"
 import FilterSidebar from "@/components/orinket/FilterSidebar"
 import {
@@ -8,7 +8,7 @@ import {
   ProductListingHero,
   ProductListingToolbar,
 } from "@/components/orinket/ProductListingShell"
-import type { Product } from "@/data/dummyProducts"
+import type { Product } from "@/types/product"
 import { getProductsByCategory } from "@/lib/catalogQueries"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
@@ -16,6 +16,7 @@ import { getFilterOptions, filterProducts, FilterState } from "@/lib/productFilt
 import { useCurrency } from "@/context/CurrencyContext"
 import { fonts } from "@/lib/fonts"
 import { useAppSelector } from "@/store/hooks"
+import type { CatalogCategoryRow } from "@/store/slices/catalogSlice"
 import {
   selectCatalogCategories,
   selectCatalogShopError,
@@ -33,13 +34,23 @@ const ALL_CATEGORY_META = {
 
 const PRODUCTS_PER_PAGE = 9
 
-function getBaseProductsForSlug(slug: string, allProducts: Product[]) {
-  return slug === "all" ? allProducts : getProductsByCategory(allProducts, slug)
+function displayNameFromSlug(slug: string) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ")
+    .trim() || slug
 }
 
-function initialCategoryFilterForSlug(slug: string): string[] {
-  if (slug === "all") return []
-  return [slug]
+function getBaseProductsForSlug(
+  slug: string,
+  allProducts: Product[],
+  catalogCategories: CatalogCategoryRow[]
+) {
+  return slug === "all"
+    ? allProducts
+    : getProductsByCategory(allProducts, slug, catalogCategories)
 }
 
 const CATEGORY_SORT_OPTIONS = [
@@ -54,6 +65,28 @@ interface CategoryPageContentProps {
   slug: string
 }
 
+function isObjectId(value: string): boolean {
+  return /^[a-fA-F0-9]{24}$/.test(String(value || "").trim())
+}
+
+function resolveCategoryRoute(
+  routeParam: string,
+  catalogCategories: CatalogCategoryRow[]
+): { row: CatalogCategoryRow | null; effectiveSlug: string } {
+  const raw = String(routeParam || "").trim()
+  if (!raw || raw === "all") return { row: null, effectiveSlug: "all" }
+
+  const byId = isObjectId(raw)
+    ? catalogCategories.find((c) => String(c.id) === raw)
+    : null
+  if (byId) return { row: byId, effectiveSlug: byId.slug }
+
+  const bySlug = catalogCategories.find((c) => c.slug === raw)
+  if (bySlug) return { row: bySlug, effectiveSlug: bySlug.slug }
+
+  return { row: null, effectiveSlug: raw }
+}
+
 export default function CategoryPageContent({ slug }: CategoryPageContentProps) {
   const { formatPrice } = useCurrency()
   const router = useRouter()
@@ -63,16 +96,40 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
   const shopLoading = useAppSelector(selectCatalogShopLoading)
   const shopFailed = useAppSelector(selectCatalogShopFailed)
   const shopError = useAppSelector(selectCatalogShopError)
+  const resolvedRoute = useMemo(
+    () => resolveCategoryRoute(slug, catalogCategories),
+    [slug, catalogCategories]
+  )
+
+  useEffect(() => {
+    if (!shopReady) return
+    if (slug === "all") return
+    if (isObjectId(slug)) return
+    if (!resolvedRoute.row?.id) return
+    router.replace(`/category/${resolvedRoute.row.id}`)
+  }, [shopReady, slug, resolvedRoute, router])
 
   const categoryMeta = useMemo(() => {
-    if (slug === "all") {
+    if (resolvedRoute.effectiveSlug === "all") {
       return {
         displayName: ALL_CATEGORY_META.displayName,
         description: ALL_CATEGORY_META.description,
       }
     }
-    return catalogCategories.find((c) => c.slug === slug) ?? null
-  }, [slug, catalogCategories])
+    const fromCatalog = resolvedRoute.row
+    if (fromCatalog) {
+      return {
+        displayName: fromCatalog.displayName,
+        description: fromCatalog.description,
+      }
+    }
+    /** If route id/slug is not in catalog yet, still show listing shell without 404. */
+    const label = displayNameFromSlug(resolvedRoute.effectiveSlug)
+    return {
+      displayName: label,
+      description: `Discover ${label.toLowerCase()} from our collection.`,
+    }
+  }, [resolvedRoute])
 
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -80,13 +137,14 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
   const [currentPage, setCurrentPage] = useState(1)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
+  /** Route already scopes PLP by category; sidebar `categories` stays empty unless user refines. `inStock: false` = show OOS too (default). */
   const [activeFilters, setActiveFilters] = useState<FilterState>({
     categories: [],
     priceRange: null,
     materials: [],
     platings: [],
     rating: null,
-    inStock: true,
+    inStock: false,
   })
 
   const filterOptions = useMemo(
@@ -97,22 +155,30 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
   useEffect(() => {
     if (!shopReady || !categoryMeta) return
 
-    const products = getBaseProductsForSlug(slug, allProducts)
+    const products = getBaseProductsForSlug(
+      resolvedRoute.effectiveSlug,
+      allProducts,
+      catalogCategories
+    )
     setFilteredProducts(products)
 
     setActiveFilters((prev) => ({
       ...prev,
-      categories: initialCategoryFilterForSlug(slug),
+      categories: [],
     }))
-  }, [slug, allProducts, shopReady, categoryMeta])
+  }, [resolvedRoute, allProducts, shopReady, categoryMeta, catalogCategories])
 
   useEffect(() => {
     if (!shopReady || !categoryMeta) return
-    const categoryProducts = getBaseProductsForSlug(slug, allProducts)
+    const categoryProducts = getBaseProductsForSlug(
+      resolvedRoute.effectiveSlug,
+      allProducts,
+      catalogCategories
+    )
     const filtered = filterProducts(categoryProducts, activeFilters)
     setFilteredProducts(filtered)
     setCurrentPage(1)
-  }, [activeFilters, slug, allProducts, shopReady, categoryMeta])
+  }, [activeFilters, resolvedRoute, allProducts, shopReady, categoryMeta, catalogCategories])
 
   const sortedProducts = useMemo(() => {
     const products = [...filteredProducts]
@@ -151,7 +217,7 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
     if (activeFilters.materials.length > 0) count++
     if (activeFilters.platings.length > 0) count++
     if (activeFilters.rating) count++
-    if (!activeFilters.inStock) count++
+    if (activeFilters.inStock) count++
     return count
   }
 
@@ -174,10 +240,6 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
         </p>
       </div>
     )
-  }
-
-  if (!categoryMeta) {
-    notFound()
   }
 
   const category = categoryMeta
@@ -318,12 +380,12 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
                 type="button"
                 onClick={() =>
                   handleFiltersChange({
-                    categories: initialCategoryFilterForSlug(slug),
+                    categories: [],
                     priceRange: null,
                     materials: [],
                     platings: [],
                     rating: null,
-                    inStock: true,
+                    inStock: false,
                   })
                 }
                 className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 px-8 py-3.5 ${fonts.buttons} text-sm font-semibold tracking-wide text-white shadow-lg transition hover:from-gold-dark hover:to-stone-900`}

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Check, Heart, ShoppingBag, Star } from 'lucide-react'
-import { Product } from '@/data/dummyProducts'
+import type { Product } from '@/types/product'
 import { useCart } from '@/store/useCart'
 import ProductCard from '@/components/orinket/ProductCard'
 import { useCurrency } from '@/context/CurrencyContext'
@@ -32,13 +32,14 @@ function ProductGridListRow({
   formatPrice: (amountInStorage: number) => string
 }) {
   const bagAdded = useTimedAdded()
+  const categoryPathPart = product.categoryId || "uncategorized"
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={`/category/${categoryPathPart}/${product.id}`}
       className="group relative animate-fadeIn block h-auto"
       style={{ animationDelay: `${idx * 50}ms` }}
     >
@@ -161,7 +162,8 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice,
-      image: product.image
+      image: product.image,
+      stockLeft: product.stockLeft,
     }, 1)
   }
 
@@ -179,7 +181,8 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
         price: product.price,
         originalPrice: product.originalPrice,
         image: product.image,
-        category: product.category
+        category: product.category,
+        stockLeft: product.stockLeft,
       })
     }
   }

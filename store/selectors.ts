@@ -1,5 +1,5 @@
 import type { RootState } from '@/store'
-import type { Product } from '@/data/dummyProducts'
+import type { Product } from '@/types/product'
 import {
   getProductById,
   getProductsByCategory,
