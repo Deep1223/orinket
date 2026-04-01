@@ -13,7 +13,7 @@ export async function proxyOrinketBackendGet(
       {
         success: false,
         message:
-          "Set ORINKET_BACKEND_URL to your API origin (e.g. http://127.0.0.1:5000).",
+          "Set ORINKET_BACKEND_URL or NEXT_PUBLIC_API_URL (e.g. http://127.0.0.1:5000 or https://your-app.up.railway.app/api).",
       },
       { status: 500 }
     )
@@ -71,7 +71,7 @@ export async function proxyOrinketBackendPost(
       {
         success: false,
         message:
-          "Set ORINKET_BACKEND_URL to your API origin (e.g. http://127.0.0.1:5000).",
+          "Set ORINKET_BACKEND_URL or NEXT_PUBLIC_API_URL (e.g. http://127.0.0.1:5000 or https://your-app.up.railway.app/api).",
       },
       { status: 500 }
     )

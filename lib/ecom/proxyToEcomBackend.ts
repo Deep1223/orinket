@@ -11,7 +11,8 @@ export async function proxyEcom(
     return NextResponse.json(
       {
         success: false,
-        message: "Set ORINKET_BACKEND_URL (for example http://127.0.0.1:5000).",
+        message:
+          "Set ORINKET_BACKEND_URL or NEXT_PUBLIC_API_URL (e.g. http://127.0.0.1:5000 or https://your-app.up.railway.app/api).",
       },
       { status: 500 }
     )

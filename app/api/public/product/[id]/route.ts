@@ -68,7 +68,7 @@ export async function GET(
   const base = resolveOrinketBackendOrigin()
   if (!base) {
     return NextResponse.json(
-      { success: false, message: "Missing ORINKET_BACKEND_URL" },
+      { success: false, message: "Missing ORINKET_BACKEND_URL or NEXT_PUBLIC_API_URL" },
       { status: 500 }
     )
   }
