@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { fetchCmsFaqServer } from "@/lib/server/fetchCmsSupport"
 import { supportPagesBlock } from "@/lib/supportPagesFromCms"
 import { contactFromSettings } from "@/lib/contactFromSettings"
 import { HelpCircle, Sparkles } from "lucide-react"
@@ -16,8 +17,25 @@ export const metadata: Metadata = {
 type FaqItem = { q?: string; a?: string }
 type FaqGroup = { title?: string; items?: FaqItem[] }
 
+function faqGroupsFromCms(
+  rows: Array<{ groupTitle?: string; question?: string; answer?: string }>
+): FaqGroup[] {
+  const map = new Map<string, FaqItem[]>()
+  for (const row of rows) {
+    const q = row.question?.trim()
+    if (!q) continue
+    const key = (row.groupTitle || "").trim() || "__default"
+    if (!map.has(key)) map.set(key, [])
+    map.get(key)!.push({ q, a: row.answer || "" })
+  }
+  return [...map.entries()].map(([key, items]) => ({
+    title: key === "__default" ? "" : key,
+    items,
+  }))
+}
+
 export default async function FaqPage() {
-  const settings = await fetchStoreSettingsServer()
+  const [cmsRows, settings] = await Promise.all([fetchCmsFaqServer(), fetchStoreSettingsServer()])
   const contact = contactFromSettings(settings)
   const faq = supportPagesBlock(settings, "faqPage") as {
     title?: string
@@ -25,7 +43,9 @@ export default async function FaqPage() {
     groups?: FaqGroup[]
   } | null
 
-  const groups = Array.isArray(faq?.groups) ? faq.groups : []
+  const groupsFromDb = faqGroupsFromCms(cmsRows)
+  const groups =
+    groupsFromDb.length > 0 ? groupsFromDb : Array.isArray(faq?.groups) ? faq.groups : []
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -53,8 +73,8 @@ export default async function FaqPage() {
 
             {groups.length === 0 ? (
               <p className={`mt-10 text-sm text-muted-foreground ${fonts.body}`}>
-                FAQ content is not set yet. In the admin dashboard, open{" "}
-                <strong>General Settings</strong> → <strong>Storefront homepage</strong> → paste JSON with{" "}
+                FAQ content is not set yet. Add entries in the admin dashboard under{" "}
+                <strong>FAQ Master</strong>, or use General Settings → storefront JSON{" "}
                 <code className="text-xs bg-muted px-1 rounded">supportPages.faqPage</code>.
               </p>
             ) : (

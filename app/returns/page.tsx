@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { fetchCmsReturnsServer } from "@/lib/server/fetchCmsSupport"
 import { supportPagesBlock } from "@/lib/supportPagesFromCms"
 import { contactFromSettings } from "@/lib/contactFromSettings"
 import { RefreshCw, Sparkles, XCircle } from "lucide-react"
@@ -14,9 +15,9 @@ export const metadata: Metadata = {
 }
 
 export default async function ReturnsPage() {
-  const settings = await fetchStoreSettingsServer()
+  const [cms, settings] = await Promise.all([fetchCmsReturnsServer(), fetchStoreSettingsServer()])
   const contact = contactFromSettings(settings)
-  const p = supportPagesBlock(settings, "returnsPage") as {
+  const legacy = supportPagesBlock(settings, "returnsPage") as {
     title?: string
     subtitle?: string
     eligible?: string[]
@@ -24,9 +25,23 @@ export default async function ReturnsPage() {
     howTo?: string[]
   } | null
 
+  const p = cms
+    ? {
+        title: cms.title,
+        subtitle: cms.subtitle,
+        eligible: Array.isArray(cms.eligible) ? cms.eligible.map(String) : [],
+        notEligible: Array.isArray(cms.notEligible) ? cms.notEligible.map(String) : [],
+        howTo: Array.isArray(cms.howTo) ? cms.howTo.map(String) : [],
+        supportNote: cms.supportNote,
+        refundPolicyUrl: cms.refundPolicyUrl,
+      }
+    : { ...legacy, supportNote: undefined as string | undefined, refundPolicyUrl: undefined as string | undefined }
+
   const eligible = Array.isArray(p?.eligible) ? p!.eligible.map(String) : []
   const notEligible = Array.isArray(p?.notEligible) ? p!.notEligible.map(String) : []
   const howTo = Array.isArray(p?.howTo) ? p!.howTo.map(String) : []
+  const refundHref = (p as { refundPolicyUrl?: string }).refundPolicyUrl?.trim() || "/refund"
+  const supportNote = (p as { supportNote?: string }).supportNote?.trim()
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -52,8 +67,8 @@ export default async function ReturnsPage() {
 
             {!eligible.length && !notEligible.length ? (
               <p className={`mt-8 text-sm text-muted-foreground ${fonts.body}`}>
-                Add <code className="text-xs bg-muted px-1 rounded">supportPages.returnsPage</code> in your storefront
-                JSON.
+                Add content in Dashboard → <strong>Returns & exchanges</strong>, or{" "}
+                <code className="text-xs bg-muted px-1 rounded">supportPages.returnsPage</code> in storefront JSON.
               </p>
             ) : (
               <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -105,7 +120,9 @@ export default async function ReturnsPage() {
             ) : null}
 
             <p className={`mt-4 text-sm text-muted-foreground ${fonts.body}`}>
-              {contact.email ? (
+              {supportNote ? (
+                <span>{supportNote}</span>
+              ) : contact.email ? (
                 <>
                   Questions?{" "}
                   <a href={`mailto:${contact.email}`} className="text-foreground font-medium underline-offset-2 hover:underline">
@@ -113,8 +130,8 @@ export default async function ReturnsPage() {
                   </a>
                 </>
               ) : null}{" "}
-              ·{" "}
-              <Link href="/refund" className="text-foreground font-medium underline-offset-2 hover:underline">
+              {supportNote || contact.email ? " · " : null}
+              <Link href={refundHref} className="text-foreground font-medium underline-offset-2 hover:underline">
                 Refund policy
               </Link>
             </p>

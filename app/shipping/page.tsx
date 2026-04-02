@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { fetchStoreSettingsServer } from "@/lib/server/fetchStoreSettings"
+import { fetchCmsShippingServer } from "@/lib/server/fetchCmsSupport"
 import { supportPagesBlock } from "@/lib/supportPagesFromCms"
 import { contactFromSettings } from "@/lib/contactFromSettings"
 import { Truck, Package, Sparkles } from "lucide-react"
@@ -14,15 +15,25 @@ export const metadata: Metadata = {
 }
 
 export default async function ShippingPage() {
-  const settings = await fetchStoreSettingsServer()
+  const [cms, settings] = await Promise.all([fetchCmsShippingServer(), fetchStoreSettingsServer()])
   const contact = contactFromSettings(settings)
-  const p = supportPagesBlock(settings, "shippingPage") as {
+  const legacy = supportPagesBlock(settings, "shippingPage") as {
     title?: string
     subtitle?: string
     zones?: Array<{ name?: string; eta?: string; note?: string }>
     bullets?: string[]
     packaging?: string
   } | null
+
+  const p = cms
+    ? {
+        title: cms.title,
+        subtitle: cms.subtitle,
+        zones: Array.isArray(cms.zones) ? cms.zones : [],
+        bullets: Array.isArray(cms.bullets) ? cms.bullets.map(String) : [],
+        packaging: cms.packaging,
+      }
+    : legacy
 
   const zones = Array.isArray(p?.zones) ? p!.zones : []
   const bullets = Array.isArray(p?.bullets) ? p!.bullets.map(String) : []
@@ -51,8 +62,9 @@ export default async function ShippingPage() {
 
             {zones.length === 0 ? (
               <p className={`mt-8 text-sm text-muted-foreground ${fonts.body}`}>
-                Add <code className="text-xs bg-muted px-1 rounded">supportPages.shippingPage</code> in General
-                Settings → storefront JSON.
+                Add shipping zones in Dashboard → <strong>Shipping page</strong>, or{" "}
+                <code className="text-xs bg-muted px-1 rounded">supportPages.shippingPage</code> in General Settings
+                storefront JSON.
               </p>
             ) : (
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
