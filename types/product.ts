@@ -10,6 +10,8 @@ export interface Product {
   storefrontHomeSectionKeys?: string[]
   categoryId?: string
   category: string
+  categoryName?: string
+  isDefaultCategory?: boolean
   subcategory?: string
   image: string
   images?: string[]
@@ -25,6 +27,7 @@ export interface Product {
   plating?: string
   dimensions?: string
   weight?: string
+  gender?: 'Man' | 'Woman' | 'Both'
   videoUrl?: string
   view360Images?: string[]
   details: string[]

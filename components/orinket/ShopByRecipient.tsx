@@ -24,7 +24,12 @@ export default function ShopByRecipient() {
             const row = r && typeof r === "object" && !Array.isArray(r) ? (r as Record<string, unknown>) : null
             const rt = typeof row?.title === "string" ? row.title : ""
             const img = typeof row?.image === "string" ? row.image : ""
-            const href = typeof row?.href === "string" ? row.href : ""
+            let href = typeof row?.href === "string" ? row.href : ""
+            
+            // Legacy /gifts/* → common promo PLP with recipient filter
+            if (href.startsWith("/gifts/for-her")) href = "/promo?recipient=her"
+            if (href.startsWith("/gifts/for-him")) href = "/promo?recipient=him"
+            
             if (!rt.trim() || !img.trim() || !href.trim()) return null
             return (
               <Link

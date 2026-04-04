@@ -118,12 +118,38 @@ export function getProductsWithStorefrontSectionKey(products: Product[], key: st
   })
 }
 
-export function getGiftProductsForRecipient(
-  products: Product[],
-  recipient: 'her' | 'him'
-): Product[] {
-  if (recipient === 'him') {
-    return products.filter((p) => p.category === 'men')
-  }
-  return products.filter((p) => p.category !== 'men')
+/**
+ * Normalizes Product Master / API gender strings for recipient PLPs.
+ * Him → male-coded + both; Her → female-coded + both.
+ */
+function canonicalRecipientGender(gender: string | undefined): 'male' | 'female' | 'both' | 'other' {
+  const raw = String(gender ?? 'Both').trim().toLowerCase()
+  if (!raw || raw === 'both' || raw === 'unisex') return 'both'
+  if (raw === 'man' || raw === 'male' || raw === 'men') return 'male'
+  if (raw === 'woman' || raw === 'female' || raw === 'women') return 'female'
+  return 'other'
+}
+
+function productMatchesRecipient(product: Product, recipient: 'her' | 'him'): boolean {
+  const lane = canonicalRecipientGender(product.gender)
+  if (lane === 'both') return true
+  if (recipient === 'him') return lane === 'male'
+  return lane === 'female'
+}
+
+function isGiftCategoryProduct(p: Product): boolean {
+  const name = (p.categoryName?.trim() ?? '').toLowerCase()
+  const slug = (p.category?.trim() ?? '').toLowerCase()
+  return (
+    name === 'gifts' ||
+    name === 'gift' ||
+    slug === 'gifts' ||
+    slug === 'gift' ||
+    slugifyLabel(p.categoryName ?? '') === 'gifts'
+  )
+}
+
+/** Gifts category only; within that, male+Both (him) or female+Both (her). */
+export function getProductsForRecipient(products: Product[], recipient: 'her' | 'him'): Product[] {
+  return products.filter((p) => isGiftCategoryProduct(p) && productMatchesRecipient(p, recipient))
 }

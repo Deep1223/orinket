@@ -5,6 +5,7 @@ export type ApiCategoryRow = {
   _id: string
   categoryname: string
   description?: string
+  defaultdata?: boolean
 }
 
 export type ApiSubcategoryRow = {
@@ -32,6 +33,7 @@ export type ApiProductRow = {
   plating?: string
   dimensions?: string
   weight?: string
+  gender?: 'Man' | 'Woman' | 'Both'
   details?: string
   productdetails?: { details?: string }[]
 }
@@ -41,6 +43,7 @@ export type CatalogCategoryRow = {
   slug: string
   displayName: string
   description: string
+  isDefault?: boolean
 }
 
 export type CatalogSubcategoryRow = {
@@ -72,6 +75,7 @@ export function mapApiCategories(rows: ApiCategoryRow[]): CatalogCategoryRow[] {
       description:
         c.description?.trim() ||
         `Discover ${displayName.toLowerCase()} from our collection.`,
+      isDefault: c.defaultdata === true,
     }
   })
 }
@@ -146,6 +150,7 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
       : undefined,
     categoryId: doc.categoryid ? String(doc.categoryid) : undefined,
     category: categorySlug,
+    categoryName: rawCat || undefined,
     subcategory,
     image: primary,
     images: images.length ? images : undefined,
@@ -156,6 +161,7 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
     plating: doc.plating?.trim() || undefined,
     dimensions: doc.dimensions?.trim() || undefined,
     weight: doc.weight?.trim() || undefined,
+    gender: doc.gender || 'Both',
     details: detailLines.length ? detailLines : ["See description for details."],
   }
 }
@@ -165,7 +171,17 @@ export function mapApiProducts(
   categories: ApiCategoryRow[]
 ): Product[] {
   const nameById = categoryNameById(categories)
-  return rows.map((p) => mapOneProduct(p, nameById))
+  const isDefaultById = new Map<string, boolean>()
+  for (const c of categories) {
+    isDefaultById.set(String(c._id), c.defaultdata === true)
+  }
+  return rows.map((p) => {
+    const product = mapOneProduct(p, nameById)
+    if (product.categoryId) {
+      product.isDefaultCategory = isDefaultById.get(product.categoryId) || false
+    }
+    return product
+  })
 }
 
 /** Recompute derived nav + listing fields from raw API rows (call after any raw slice changes). */

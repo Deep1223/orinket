@@ -13,6 +13,7 @@ import {
 } from "@/components/orinket/ProductListingShell"
 import {
   getBuyOneGetOneProducts,
+  getProductsForRecipient,
   getProductsWithDiscountUpTo,
   getProductsWithStorefrontSectionKey,
 } from "@/lib/catalogQueries"
@@ -49,6 +50,7 @@ type PromoMode =
   | { kind: "bogo" }
   | { kind: "discount"; percent: number }
   | { kind: "section"; key: StorefrontSectionListingKey }
+  | { kind: "recipient"; key: "her" | "him" }
   | { kind: "invalid" }
 
 function parsePromoMode(searchParams: URLSearchParams): PromoMode {
@@ -66,6 +68,13 @@ function parsePromoMode(searchParams: URLSearchParams): PromoMode {
   const sectionRaw = String(searchParams.get("section") || "").trim()
   if (sectionRaw && isStorefrontSectionListingKey(sectionRaw)) {
     return { kind: "section", key: sectionRaw }
+  }
+
+  const recipientRaw = String(searchParams.get("recipient") || "")
+    .trim()
+    .toLowerCase()
+  if (recipientRaw === "her" || recipientRaw === "him") {
+    return { kind: "recipient", key: recipientRaw as "her" | "him" }
   }
 
   return { kind: "invalid" }
@@ -102,6 +111,7 @@ function PromoInner() {
     if (mode.kind === "bogo") return getBuyOneGetOneProducts(catalog)
     if (mode.kind === "discount") return getProductsWithDiscountUpTo(catalog, mode.percent)
     if (mode.kind === "section") return getProductsWithStorefrontSectionKey(catalog, mode.key)
+    if (mode.kind === "recipient") return getProductsForRecipient(catalog, mode.key)
     return []
   }, [shopReady, mode, catalog])
 
@@ -164,6 +174,14 @@ function PromoInner() {
         title: label,
         subtitle:
           "Discover our collection of 18k thick gold plated jewellery. Premium metals, lasting shine, and designs for every day.",
+      }
+    }
+    if (mode.kind === "recipient") {
+      return {
+        badge: "Gifts",
+        title: mode.key === "her" ? "Gifts For Her" : "Gifts For Him",
+        subtitle:
+          "Thoughtfully curated pieces perfect for that special someone. Explore our most loved giftable jewellery.",
       }
     }
     return {
@@ -298,7 +316,11 @@ function PromoInner() {
                 ? "No products are marked Buy 1 Get 1 Free yet. Enable it on each product in Product Master."
                 : mode.kind === "section"
                   ? `No products are tagged for “${titleForStorefrontSectionListingKey(mode.key)}” yet. Use Product Master → Marketing → Product Listed On, or run backend/scripts/backfill-storefront-section-products.js.`
-                  : `No on-sale products found up to ${mode.percent}% off. Ensure original price is above sale price in Product Master, or widen filters.`}
+                  : mode.kind === "recipient"
+                    ? mode.key === "him"
+                      ? "No Gifts-category products match “for him” yet (Man / Male / Men or Both). Assign Category = Gifts and Product For in Product Master, or clear filters."
+                      : "No Gifts-category products match “for her” yet (Woman / Female / Women or Both). Assign Category = Gifts and Product For in Product Master, or clear filters."
+                    : `No on-sale products found up to ${mode.percent}% off. Ensure original price is above sale price in Product Master, or widen filters.`}
             </p>
             <button
               type="button"

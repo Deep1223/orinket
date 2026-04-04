@@ -12,6 +12,7 @@ import {
   selectTopStylesError,
   selectTopStylesItems,
   selectTopStylesStatus,
+  selectTopStylesTotalCount,
 } from "@/store/selectors"
 import GridListShimmer from "@/components/orinket/GridListShimmer"
 import { fetchTopStyles } from "@/store/slices/topStylesSlice"
@@ -174,6 +175,8 @@ function useTopStylesPageSize(): number {
   return limit
 }
 
+const MIN_PRODUCTS_FOR_VIEW_ALL = 8
+
 export default function TopStyles() {
   const { formatPrice } = useCurrency()
   const dispatch = useAppDispatch()
@@ -185,6 +188,7 @@ export default function TopStyles() {
   const items = useAppSelector(selectTopStylesItems)
   const status = useAppSelector(selectTopStylesStatus)
   const error = useAppSelector(selectTopStylesError)
+  const topStylesTotalCount = useAppSelector(selectTopStylesTotalCount)
   const showGridShimmer = useAppSelector(selectShowGridListShimmer)
 
   const categories = useMemo(
@@ -312,15 +316,17 @@ export default function TopStyles() {
               ))}
             </div>
 
-            <div className="mt-12 text-center">
-              <Link
-                href={viewAllHref}
-                className={`animate-slideUp inline-block border border-foreground px-8 py-3 ${fonts.buttons} text-sm tracking-[0.2em] text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-lg`}
-                style={{ animationDelay: "600ms" }}
-              >
-                VIEW ALL
-              </Link>
-            </div>
+            {topStylesTotalCount >= MIN_PRODUCTS_FOR_VIEW_ALL ? (
+              <div className="mt-12 text-center">
+                <Link
+                  href={viewAllHref}
+                  className={`animate-slideUp inline-block border border-foreground px-8 py-3 ${fonts.buttons} text-sm tracking-[0.2em] text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-lg`}
+                  style={{ animationDelay: "600ms" }}
+                >
+                  VIEW ALL
+                </Link>
+              </div>
+            ) : null}
           </>
         )}
       </div>
