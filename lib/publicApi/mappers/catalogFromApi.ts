@@ -21,7 +21,10 @@ export type ApiProductRow = {
   price: number
   originalPrice: number
   buyOneGetOneFree?: boolean
+  showIn925SilverPost?: boolean
   storefrontHomeSectionKeys?: string[]
+  occasionids?: string[]
+  occasions?: string[]
   categoryid?: string
   category?: string
   subcategory?: string
@@ -145,8 +148,15 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
         ? Number(doc.originalPrice)
         : undefined,
     buyOneGetOneFree: doc.buyOneGetOneFree === true,
+    showIn925SilverPost: doc.showIn925SilverPost === true,
     storefrontHomeSectionKeys: Array.isArray(doc.storefrontHomeSectionKeys)
       ? doc.storefrontHomeSectionKeys.map((k) => String(k).trim()).filter(Boolean)
+      : undefined,
+    occasionIds: Array.isArray(doc.occasionids)
+      ? doc.occasionids.map((x) => String(x)).filter(Boolean)
+      : undefined,
+    occasions: Array.isArray(doc.occasions)
+      ? doc.occasions.map((x) => String(x).trim()).filter(Boolean)
       : undefined,
     categoryId: doc.categoryid ? String(doc.categoryid) : undefined,
     category: categorySlug,

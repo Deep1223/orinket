@@ -108,6 +108,17 @@ export function getBuyOneGetOneProducts(products: Product[]): Product[] {
 }
 
 /** Products tagged in Product Master → “Product Listed On” (`storefrontHomeSectionKeys`). */
+/** Products tagged with a given Occasion Master id in Product Master. */
+export function getProductsByOccasionId(products: Product[], occasionId: string): Product[] {
+  const id = String(occasionId || "").trim()
+  if (!id) return []
+  return products.filter((p) => {
+    const ids = p.occasionIds
+    if (!Array.isArray(ids) || ids.length === 0) return false
+    return ids.some((x) => String(x) === id)
+  })
+}
+
 export function getProductsWithStorefrontSectionKey(products: Product[], key: string): Product[] {
   const k = String(key || '').trim()
   if (!k) return []

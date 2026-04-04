@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { PackageOpen } from "lucide-react"
 import ProductCard from "@/components/orinket/ProductCard"
 import { useAppSelector } from "@/store/hooks"
-import { selectProducts } from "@/store/selectors"
+import { selectCatalogCategories, selectProducts } from "@/store/selectors"
 import { slugifyLabel } from "@/lib/slugify"
 import { fonts } from "@/lib/fonts"
 import { useCmsSection } from "@/hooks/useStorefrontCms"
@@ -13,21 +13,20 @@ import { useCmsSection } from "@/hooks/useStorefrontCms"
 export default function FineGold() {
   const [activeFilter, setActiveFilter] = useState("All")
   const catalog = useAppSelector(selectProducts)
-  const baseProducts = catalog.slice(0, 8)
+  const catalogCategories = useAppSelector(selectCatalogCategories)
+  const baseProducts = useMemo(
+    () => catalog.filter((p) => p.showIn925SilverPost === true),
+    [catalog]
+  )
   const raw = useCmsSection("fineGoldSection")
-  const title =
-    typeof raw?.title === "string" && raw.title.trim()
-      ? raw.title.trim()
-      : baseProducts.length > 0
-        ? "925 SILVER POST"
-        : ""
-  const description =
-    typeof raw?.description === "string" && raw.description.trim()
-      ? raw.description.trim()
-      : ""
-  const filters = Array.isArray(raw?.filters) && raw.filters.length > 0
-    ? raw.filters.map(String)
-    : ["All", "Necklaces", "Earrings", "Rings", "Bracelets", "Bridal Collection"]
+  const title = "925 SILVER POST"
+  const filters = useMemo(() => {
+    const names = catalogCategories
+      .map((c) => String(c.displayName || "").trim())
+      .filter(Boolean)
+    const unique = [...new Set(names)]
+    return ["All", ...unique]
+  }, [catalogCategories])
   const emptyRaw = raw?.emptyState
   const emptyState =
     emptyRaw && typeof emptyRaw === "object" && !Array.isArray(emptyRaw)
@@ -40,16 +39,15 @@ export default function FineGold() {
   const emptyFiltered =
     emptyState.descriptionFiltered?.trim() || "Try a different style using the filters above."
 
-  if (!title && baseProducts.length === 0) return null
+  if (baseProducts.length === 0) return null
 
   const activeFilterSlug = slugifyLabel(activeFilter)
   const filteredProducts =
     activeFilter === "All"
       ? baseProducts
       : baseProducts.filter((p) => {
-          const categorySlug = slugifyLabel(p.category || "")
-          const subcategorySlug = slugifyLabel(p.subcategory || "")
-          return categorySlug === activeFilterSlug || subcategorySlug === activeFilterSlug
+          const categorySlug = slugifyLabel(p.categoryName || p.category || "")
+          return categorySlug === activeFilterSlug
         })
   const collectionHref =
     filteredProducts[0]?.categoryId
@@ -73,57 +71,27 @@ export default function FineGold() {
       <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[#c4a574]/[0.06] blur-3xl sm:-left-24 sm:h-80 sm:w-80 sm:bg-[#c4a574]/[0.08]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-5 lg:px-6">
-        {/* Editorial header — premium card, scales on small screens */}
-        <div className="mb-7 sm:mb-8 md:mb-9 lg:mb-10">
-          <div className="relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white/75 shadow-[0_20px_56px_-24px_rgba(28,25,23,0.12)] ring-1 ring-stone-900/[0.04] backdrop-blur-sm sm:rounded-[1.75rem]">
-            <div
-              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full opacity-80 sm:h-64 sm:w-64"
-              style={{
-                background: `radial-gradient(circle at center, color-mix(in oklab, var(--gold) 10%, transparent) 0%, transparent 70%)`,
-              }}
-              aria-hidden
-            />
-
-            <div className="relative px-5 py-5 text-center sm:px-8 sm:py-7 md:px-12 md:py-8 lg:px-14 lg:py-9">
-              <div className="mx-auto mb-4 flex max-w-2xl flex-col items-center sm:mb-5">
-                <p
-                  className={`text-[9px] font-medium uppercase tracking-[0.42em] text-stone-400 sm:text-[10px] sm:tracking-[0.45em] ${fonts.labels}`}
-                >
-                  Collection
-                </p>
-                <span
-                  className="mt-3 h-px w-10 bg-gradient-to-r from-transparent via-stone-300 to-transparent sm:mt-3.5 sm:w-12"
-                  aria-hidden
-                />
-              </div>
-              <h2
-                id="fine-gold-heading"
-                className={`mx-auto max-w-[22ch] text-[1.75rem] font-medium leading-[1.08] tracking-[0.02em] text-stone-800 sm:max-w-none sm:text-[2.125rem] sm:leading-[1.06] sm:tracking-[0.03em] md:text-5xl md:leading-[1.05] lg:text-[2.875rem] ${fonts.headings}`}
-              >
-                {title}
-              </h2>
-              {description ? (
-                <p
-                  className={`mx-auto mt-4 max-w-md text-[14px] font-light leading-[1.7] tracking-[0.02em] text-stone-500 sm:mt-5 sm:max-w-lg sm:text-[15px] sm:leading-[1.75] md:mt-6 md:max-w-xl md:text-base ${fonts.body}`}
-                >
-                  {description}
-                </p>
-              ) : null}
+        {/* Simple heading (same style direction as For Every You) */}
+        <div className="mb-4">
+          <div className="text-center">
+            <div className="mx-auto mb-3 flex items-center justify-center gap-3">
+              <span className="h-px w-12 bg-gold/50" aria-hidden />
+              <p className={`text-[10px] uppercase tracking-[0.42em] text-gold-dark/90 ${fonts.labels}`}>
+                Collection
+              </p>
+              <span className="h-px w-12 bg-gold/50" aria-hidden />
             </div>
+            <h2
+              id="fine-gold-heading"
+              className={`text-3xl md:text-4xl font-light tracking-[0.1em] mb-0 text-center font-[family-name:var(--font-nunito)]`}
+            >
+              {title}
+            </h2>
           </div>
         </div>
 
         {/* Filters: horizontal scroll on narrow viewports, centered wrap on larger */}
         <div className="mb-6 sm:mb-7 md:mb-8">
-          <p
-            className={`mb-2 hidden text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-400 sm:mb-3 sm:block ${fonts.labels}`}
-          >
-            Shop by style
-          </p>
           <div className="relative">
             <div
               className="flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-hidden pb-2 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:justify-center sm:gap-2.5 sm:overflow-x-visible sm:pb-0 md:gap-3 [&::-webkit-scrollbar]:hidden"

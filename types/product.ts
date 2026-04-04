@@ -6,8 +6,14 @@ export interface Product {
   originalPrice?: number
   /** Product Master: included in /promo?offer=bogo listing */
   buyOneGetOneFree?: boolean
+  /** Product Master: include product in 925 SILVER POST section */
+  showIn925SilverPost?: boolean
   /** Product Master: Orinket homepage section keys (merchandising) */
   storefrontHomeSectionKeys?: string[]
+  /** Product Master → Occasion Master (multi-select) */
+  occasionIds?: string[]
+  /** Denormalized occasion names (same order as ids when present) */
+  occasions?: string[]
   categoryId?: string
   category: string
   categoryName?: string

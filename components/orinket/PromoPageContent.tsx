@@ -13,10 +13,12 @@ import {
 } from "@/components/orinket/ProductListingShell"
 import {
   getBuyOneGetOneProducts,
+  getProductsByOccasionId,
   getProductsForRecipient,
   getProductsWithDiscountUpTo,
   getProductsWithStorefrontSectionKey,
 } from "@/lib/catalogQueries"
+import { slugifyLabel } from "@/lib/slugify"
 import {
   isStorefrontSectionListingKey,
   titleForStorefrontSectionListingKey,
@@ -38,6 +40,8 @@ import ProductListingPagination from "@/components/orinket/ProductListingPaginat
 
 const PRODUCTS_PER_PAGE = 9
 
+const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/
+
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevance" },
   { value: "price-low", label: "Price: Low to High" },
@@ -51,6 +55,7 @@ type PromoMode =
   | { kind: "discount"; percent: number }
   | { kind: "section"; key: StorefrontSectionListingKey }
   | { kind: "recipient"; key: "her" | "him" }
+  | { kind: "occasion"; key: string }
   | { kind: "invalid" }
 
 function parsePromoMode(searchParams: URLSearchParams): PromoMode {
@@ -77,6 +82,9 @@ function parsePromoMode(searchParams: URLSearchParams): PromoMode {
     return { kind: "recipient", key: recipientRaw as "her" | "him" }
   }
 
+  const occasionKey = String(searchParams.get("occasion") || "").trim()
+  if (occasionKey) return { kind: "occasion", key: occasionKey }
+
   return { kind: "invalid" }
 }
 
@@ -86,6 +94,61 @@ function PromoInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const mode = useMemo(() => parsePromoMode(searchParams), [searchParams])
+
+  const [occasionMeta, setOccasionMeta] = useState<{ id: string; name: string } | null>(null)
+  const [occasionResolved, setOccasionResolved] = useState(false)
+
+  useEffect(() => {
+    if (mode.kind !== "occasion") {
+      setOccasionMeta(null)
+      setOccasionResolved(true)
+      return
+    }
+    setOccasionResolved(false)
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/public/occasions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: "{}",
+        })
+        const j = (await res.json()) as {
+          success?: boolean
+          data?: { _id: string; occasionname?: string; slug?: string }[]
+        }
+        if (cancelled) return
+        if (!res.ok || !j.success || !Array.isArray(j.data)) {
+          setOccasionMeta(null)
+          setOccasionResolved(true)
+          return
+        }
+        const key = mode.key
+        const row = OBJECT_ID_RE.test(key)
+          ? j.data.find((r) => String(r._id) === key)
+          : j.data.find(
+              (r) =>
+                slugifyLabel(String(r.slug || "")) === slugifyLabel(key) ||
+                String(r.slug || "").toLowerCase() === key.toLowerCase()
+            )
+        if (row) {
+          setOccasionMeta({
+            id: String(row._id),
+            name: String(row.occasionname || "").trim() || "Occasion",
+          })
+        } else {
+          setOccasionMeta(null)
+        }
+      } catch {
+        if (!cancelled) setOccasionMeta(null)
+      } finally {
+        if (!cancelled) setOccasionResolved(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [mode])
 
   const shopReady = useAppSelector(selectCatalogShopReady)
   const shopLoading = useAppSelector(selectCatalogShopLoading)
@@ -112,8 +175,12 @@ function PromoInner() {
     if (mode.kind === "discount") return getProductsWithDiscountUpTo(catalog, mode.percent)
     if (mode.kind === "section") return getProductsWithStorefrontSectionKey(catalog, mode.key)
     if (mode.kind === "recipient") return getProductsForRecipient(catalog, mode.key)
+    if (mode.kind === "occasion") {
+      if (!occasionMeta) return []
+      return getProductsByOccasionId(catalog, occasionMeta.id)
+    }
     return []
-  }, [shopReady, mode, catalog])
+  }, [shopReady, mode, catalog, occasionMeta])
 
   const filterOptions = useMemo(
     () => getFilterOptions(catalog, formatPrice),
@@ -184,13 +251,24 @@ function PromoInner() {
           "Thoughtfully curated pieces perfect for that special someone. Explore our most loved giftable jewellery.",
       }
     }
+    if (mode.kind === "occasion") {
+      return {
+        badge: "Shop by occasion",
+        title: !occasionResolved ? "Loading…" : occasionMeta?.name || "Occasion not found",
+        subtitle: !occasionResolved
+          ? "Resolving occasion…"
+          : occasionMeta
+            ? "Pieces tagged with this occasion in Product Master (Occasions, multi-select)."
+            : "Check the link or pick another occasion from the homepage carousel.",
+      }
+    }
     return {
       badge: "Promotions",
       title: "Promotion link",
       subtitle:
-        "Use a valid URL, for example /promo?offer=bogo, /promo?discount=50, or /promo?section=demiFineJewelleryProducts.",
+        "Use a valid URL, for example /promo?offer=bogo, /promo?discount=50, /promo?section=demiFineJewelleryProducts, or /promo?occasion={occasionId}.",
     }
-  }, [mode])
+  }, [mode, occasionMeta, occasionResolved])
 
   const handleListSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -320,7 +398,11 @@ function PromoInner() {
                     ? mode.key === "him"
                       ? "No Gifts-category products match “for him” yet (Man / Male / Men or Both). Assign Category = Gifts and Product For in Product Master, or clear filters."
                       : "No Gifts-category products match “for her” yet (Woman / Female / Women or Both). Assign Category = Gifts and Product For in Product Master, or clear filters."
-                    : `No on-sale products found up to ${mode.percent}% off. Ensure original price is above sale price in Product Master, or widen filters.`}
+                    : mode.kind === "occasion"
+                      ? !occasionMeta
+                        ? "This occasion is inactive or the link is invalid."
+                        : "No in-stock products are tagged with this occasion yet. Use Product Master → Category tab → Occasions (multi-select)."
+                      : `No on-sale products found up to ${mode.percent}% off. Ensure original price is above sale price in Product Master, or widen filters.`}
             </p>
             <button
               type="button"
