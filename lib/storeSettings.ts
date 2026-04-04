@@ -10,6 +10,8 @@ export type HeroSlide = {
   caption?: string
   cta?: string
   href?: string
+  buyOneGetOneFree?: boolean | number
+  discountUpTo?: number
 }
 
 export type StoreSettings = {

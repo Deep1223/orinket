@@ -94,6 +94,16 @@ export default function Header() {
     setActiveSuggestionIndex(-1)
   }, [searchQuery, searchOpen])
 
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)")
+    const closeMenuIfDesktop = () => {
+      if (mq.matches) setMobileMenuOpen(false)
+    }
+    closeMenuIfDesktop()
+    mq.addEventListener("change", closeMenuIfDesktop)
+    return () => mq.removeEventListener("change", closeMenuIfDesktop)
+  }, [])
+
   return (
     <header className="w-full relative z-40 bg-white">
       {/* Top Banner */}
@@ -115,10 +125,10 @@ export default function Header() {
       <div className="bg-white border-b border-border sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="relative flex items-center justify-between py-3 sm:py-4">
-            {/* Mobile: menu opens sidebar (search, cart, etc.). Desktop: hidden. */}
+            {/* Mobile: menu opens sidebar. lg+ same as desktop nav — hide control (.touch-target display:flex was overriding lg:hidden). */}
             <button
               type="button"
-              className="z-10 shrink-0 p-2.5 touch-target lg:hidden"
+              className="z-10 flex h-12 w-12 shrink-0 items-center justify-center p-2.5 lg:!hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             >
@@ -136,7 +146,7 @@ export default function Header() {
             </Link>
 
             {/* Balance hamburger width so logo stays visually centered */}
-            <div className="w-11 shrink-0 lg:hidden" aria-hidden />
+            <div className="h-12 w-12 shrink-0 lg:!hidden" aria-hidden />
 
             {/* Right Icons — desktop / tablet lg+ only */}
             <div className="hidden items-center gap-1 sm:gap-2 md:gap-4 lg:flex">
@@ -284,7 +294,7 @@ export default function Header() {
 
       {/* Mobile sidebar — search, shop actions, categories, account */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-white pt-2 lg:hidden">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-white pt-2 lg:!hidden">
           <div className="p-4 sm:p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className={`text-2xl font-semibold tracking-widest sm:text-3xl ${font('headings')}`}>

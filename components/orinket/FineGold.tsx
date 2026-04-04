@@ -19,7 +19,7 @@ export default function FineGold() {
     typeof raw?.title === "string" && raw.title.trim()
       ? raw.title.trim()
       : baseProducts.length > 0
-        ? "Featured collection"
+        ? "925 SILVER POST"
         : ""
   const description =
     typeof raw?.description === "string" && raw.description.trim()

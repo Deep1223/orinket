@@ -1,107 +1,65 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import type { Product } from "@/types/product"
-import {
-  mapApiProducts,
-  type ApiProductRow,
-} from "@/lib/publicApi/mappers/catalogFromApi"
-import { STOREFRONT_PUBLIC_API } from "@/lib/publicApi/storefrontRoutes"
-import { setLoadings } from "@/store/slices/uiSlice"
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import type { Product } from '@/types/product'
+import { postPublicListing } from '@/lib/publicApi/client/listingPublicClient'
+import { mapApiProducts, type ApiProductRow } from '@/lib/publicApi/mappers/catalogFromApi'
 
-export type FetchTopStylesArg = {
-  tab: string
-  limit: number
-  pageno?: number
-  /** Dashboard-style sort: `{ field, order }` or `{}` for default (newest first). */
-  sort?: Record<string, unknown>
-  searchtext?: string
-  /** When set (max 50), backend loads these Product Master IDs in order (curated Top Styles). */
-  productIds?: string[]
+interface TopStylesState {
+  items: Product[]
+  status: 'idle' | 'loading' | 'succeeded' | 'failed'
+  error: string | null
+  totalCount: number
 }
 
-function buildTopStylesPayload(arg: FetchTopStylesArg) {
-  const hasCurated =
-    Array.isArray(arg.productIds) && arg.productIds.length > 0
-  return {
-    paginationinfo: {
-      filter: {
-        tab: arg.tab,
-        ...(hasCurated ? { productIds: arg.productIds } : {}),
-      },
-      pageno: arg.pageno ?? 1,
-      pagelimit: arg.limit,
-      sort: arg.sort ?? {},
-    },
-    searchtext: arg.searchtext ?? "",
-  }
+const initialState: TopStylesState = {
+  items: [],
+  status: 'idle',
+  error: null,
+  totalCount: 0,
 }
 
 export const fetchTopStyles = createAsyncThunk(
-  "topStyles/fetchTopStyles",
-  async (arg: FetchTopStylesArg, { dispatch, rejectWithValue }) => {
-    dispatch(setLoadings({ showGridListShimmer: true }))
-    try {
-      const res = await fetch(STOREFRONT_PUBLIC_API.topStyles, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(buildTopStylesPayload(arg)),
-        cache: "no-store",
-      })
-      const json = (await res.json()) as {
-        success?: boolean
-        data?: ApiProductRow[]
-        totalCount?: number
-        tab?: string
-        message?: string
-      }
-      if (!res.ok || json.success === false || !Array.isArray(json.data)) {
-        return rejectWithValue(json.message || `top-styles HTTP ${res.status}`)
-      }
-      const products = mapApiProducts(json.data, [])
-      return {
-        products,
-        totalCount: json.totalCount ?? products.length,
-        tab: json.tab ?? arg.tab,
-      }
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : "top_styles_fetch_failed"
-      )
-    } finally {
-      dispatch(setLoadings({ showGridListShimmer: false }))
+  'topStyles/fetchTopStyles',
+  async (params: { categoryid?: string; pageno?: number; pagelimit?: number } = {}) => {
+    const filter: Record<string, unknown> = {
+      status: 1,
+      storefrontHomeSectionKeys: ['topStylesProducts'],
+    }
+    if (params.categoryid) {
+      filter.categoryid = params.categoryid
+    }
+
+    const result = await postPublicListing<ApiProductRow[]>('products', {
+      paginationinfo: {
+        filter,
+        pageno: params.pageno || 1,
+        pagelimit: params.pagelimit || 8,
+      },
+      searchtext: '',
+    })
+    return {
+      items: mapApiProducts(result.data || [], []),
+      totalCount: result.totalCount,
     }
   }
 )
 
 const topStylesSlice = createSlice({
-  name: "topStyles",
-  initialState: {
-    items: [] as Product[],
-    totalCount: 0,
-    status: "idle" as "idle" | "loading" | "succeeded" | "failed",
-    error: null as string | null,
-    lastTab: "" as string,
-    lastLimit: 0,
-  },
+  name: 'topStyles',
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTopStyles.pending, (state) => {
-        state.status = "loading"
-        state.error = null
+        state.status = 'loading'
       })
       .addCase(fetchTopStyles.fulfilled, (state, action) => {
-        state.status = "succeeded"
-        state.items = action.payload.products
+        state.status = 'succeeded'
+        state.items = action.payload.items
         state.totalCount = action.payload.totalCount
-        state.lastTab = action.payload.tab
-        state.lastLimit = action.meta.arg.limit
       })
       .addCase(fetchTopStyles.rejected, (state, action) => {
-        state.status = "failed"
-        state.error =
-          typeof action.payload === "string"
-            ? action.payload
-            : action.error.message ?? "failed"
+        state.status = 'failed'
+        state.error = action.error.message || 'Something went wrong'
       })
   },
 })

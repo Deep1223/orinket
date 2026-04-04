@@ -13,7 +13,11 @@ export default function DiscountBanner() {
   const title = typeof b?.title === "string" ? b.title : ""
   const description = typeof b?.description === "string" ? b.description : ""
   const cta = typeof b?.cta === "string" ? b.cta : ""
-  const href = typeof b?.href === "string" ? b.href : ""
+  const discountRaw = Number(b?.discountUpTo)
+  const discountUpTo = Number.isFinite(discountRaw)
+    ? Math.max(0, Math.min(99, Math.floor(discountRaw)))
+    : 0
+  const href = discountUpTo > 0 ? `/promo?discount=${discountUpTo}` : ""
 
   if (!image.trim()) return null
 
@@ -31,7 +35,7 @@ export default function DiscountBanner() {
         {description.trim() ? (
           <p className={`text-lg md:text-xl mb-8 ${fonts.body} font-light`}>{description}</p>
         ) : null}
-        {cta.trim() && href.trim() ? (
+        {cta.trim() && href ? (
           <Link
             href={href}
             className={`px-8 py-3 bg-white text-foreground text-sm tracking-[0.2em] hover:bg-gold hover:text-white transition-all ${fonts.buttons}`}

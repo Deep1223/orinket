@@ -8,9 +8,10 @@ import {
   ProductListingHero,
   ProductListingToolbar,
 } from "@/components/orinket/ProductListingShell"
+import ProductListingPagination from "@/components/orinket/ProductListingPagination"
 import type { Product } from "@/types/product"
 import { getProductsByCategory } from "@/lib/catalogQueries"
-import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import { X } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import { getFilterOptions, filterProducts, FilterState } from "@/lib/productFilters"
 import { useCurrency } from "@/context/CurrencyContext"
@@ -309,52 +310,11 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
         <>
           <ProductGrid products={currentProducts} viewMode={viewMode} />
 
-          {totalPages > 1 && (
-            <div className="mt-10 flex justify-center sm:mt-14">
-              <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-stone-200/60 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`flex items-center gap-2 rounded-xl border border-stone-200/80 bg-white px-4 py-2.5 ${fonts.buttons} text-sm text-stone-800 transition-colors hover:border-gold/40 hover:bg-cream/50 disabled:cursor-not-allowed disabled:opacity-45`}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Previous</span>
-                </button>
-
-                <div className="hidden items-center gap-1 sm:flex">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      type="button"
-                      onClick={() => handlePageChange(page)}
-                      className={`h-10 w-10 rounded-xl ${fonts.buttons} text-sm tabular-nums transition-all ${
-                        currentPage === page
-                          ? "bg-gradient-to-br from-gold to-gold-dark font-semibold text-white shadow-md"
-                          : "border border-stone-200/80 bg-white text-stone-700 hover:border-gold/35 hover:bg-cream/40"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-
-                <div className={`rounded-xl border border-stone-200/80 bg-cream/30 px-3 py-2 ${fonts.body} text-sm text-stone-600 sm:hidden`}>
-                  Page {currentPage} of {totalPages}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`flex items-center gap-2 rounded-xl border border-stone-200/80 bg-white px-4 py-2.5 ${fonts.buttons} text-sm text-stone-800 transition-colors hover:border-gold/40 hover:bg-cream/50 disabled:cursor-not-allowed disabled:opacity-45`}
-                >
-                  <span>Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
+          <ProductListingPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       ) : (
         <div className="rounded-2xl border border-stone-200/70 bg-white/70 py-20 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-sm">

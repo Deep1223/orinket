@@ -18,7 +18,6 @@ import ShopWithConfidence from "@/components/orinket/ShopWithConfidence"
 import BrandStory from "@/components/orinket/BrandStory"
 import Reviews from "@/components/orinket/Reviews"
 import CTABanner from "@/components/orinket/CTABanner"
-import VisitStores from "@/components/orinket/VisitStores"
 
 export type HomeSectionAnimation = "fadeIn" | "slideUp" | "slideInLeft" | "slideInRight" | "scaleIn"
 
@@ -52,7 +51,6 @@ export const storefrontHomeCmsSectionsAfterEcom: StorefrontHomeCmsSectionDef[] =
   { id: "brand-story", cmsKey: "brandStory", Component: BrandStory, animation: "fadeIn", delay: 550 },
   { id: "reviews", cmsKey: "reviews", Component: Reviews, animation: "slideInLeft", delay: 600 },
   { id: "cta-banner", cmsKey: "ctaBanner", Component: CTABanner, animation: "scaleIn", delay: 650 },
-  { id: "visit-stores", cmsKey: "visitStores", Component: VisitStores, animation: "fadeIn", delay: 680 },
 ]
 
 /** All 14 JSON section keys in render order (for docs / validation). */

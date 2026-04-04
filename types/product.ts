@@ -4,6 +4,10 @@ export interface Product {
   name: string
   price: number
   originalPrice?: number
+  /** Product Master: included in /promo?offer=bogo listing */
+  buyOneGetOneFree?: boolean
+  /** Product Master: Orinket homepage section keys (merchandising) */
+  storefrontHomeSectionKeys?: string[]
   categoryId?: string
   category: string
   subcategory?: string

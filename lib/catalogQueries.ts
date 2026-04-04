@@ -77,6 +77,47 @@ export function getSaleProducts(products: Product[]): Product[] {
   return products.filter((p) => p.originalPrice != null && p.originalPrice > p.price)
 }
 
+/** Rounded % off from list price vs original (same idea as product cards). */
+export function productDiscountPercent(product: Product): number | null {
+  const orig = product.originalPrice
+  if (orig == null || orig <= 0) return null
+  if (product.price >= orig) return null
+  return Math.round((1 - product.price / orig) * 100)
+}
+
+/** Rounded discount must equal `percent` (e.g. only exactly 50% off). */
+export function getProductsWithDiscountPercent(products: Product[], percent: number): Product[] {
+  if (!Number.isFinite(percent) || percent < 1 || percent > 99) return []
+  return products.filter((p) => productDiscountPercent(p) === percent)
+}
+
+/**
+ * “Up to {maxPercent}% off” — any on-sale item whose rounded % off is between 1 and maxPercent inclusive.
+ * Matches typical hero/marketing copy; avoids empty PLPs when discounts are e.g. 15%, 30%, 45% instead of exactly 50%.
+ */
+export function getProductsWithDiscountUpTo(products: Product[], maxPercent: number): Product[] {
+  if (!Number.isFinite(maxPercent) || maxPercent < 1 || maxPercent > 99) return []
+  return products.filter((p) => {
+    const d = productDiscountPercent(p)
+    return d != null && d >= 1 && d <= maxPercent
+  })
+}
+
+export function getBuyOneGetOneProducts(products: Product[]): Product[] {
+  return products.filter((p) => p.buyOneGetOneFree === true)
+}
+
+/** Products tagged in Product Master → “Product Listed On” (`storefrontHomeSectionKeys`). */
+export function getProductsWithStorefrontSectionKey(products: Product[], key: string): Product[] {
+  const k = String(key || '').trim()
+  if (!k) return []
+  return products.filter((p) => {
+    const keys = p.storefrontHomeSectionKeys
+    if (!Array.isArray(keys) || keys.length === 0) return false
+    return keys.some((x) => String(x).trim() === k)
+  })
+}
+
 export function getGiftProductsForRecipient(
   products: Product[],
   recipient: 'her' | 'him'

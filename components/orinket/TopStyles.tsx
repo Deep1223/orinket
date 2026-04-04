@@ -33,6 +33,7 @@ function TopStyleProductTile({
   index: number
   formatPrice: (n: number) => string
 }) {
+  const tileImageSrc = typeof product.image === "string" ? product.image.trim() : ""
   const formatTilePrice = (price: number | undefined) => {
     if (price == null || price <= 0) return formatPrice(0)
     return formatPrice(price)
@@ -54,7 +55,7 @@ function TopStyleProductTile({
         name: product.name,
         price: product.price,
         originalPrice: product.originalPrice,
-        image: product.image,
+        image: tileImageSrc,
         category: product.category,
         stockLeft: product.stockLeft,
       })
@@ -74,7 +75,7 @@ function TopStyleProductTile({
       name: product.name,
       price: product.price,
       originalPrice: product.originalPrice,
-      image: product.image,
+      image: tileImageSrc,
       stockLeft: product.stockLeft,
     })
     setBagAdded(true)
@@ -87,12 +88,16 @@ function TopStyleProductTile({
       style={{ animationDelay: `${index * 75}ms` }}
     >
       <div className="relative mb-4 aspect-square overflow-hidden bg-gray-50 rounded-lg shadow-md">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {tileImageSrc ? (
+          <Image
+            src={tileImageSrc}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full w-full bg-gray-100" aria-hidden />
+        )}
 
         <button
           type="button"
@@ -172,7 +177,7 @@ function useTopStylesPageSize(): number {
 export default function TopStyles() {
   const { formatPrice } = useCurrency()
   const dispatch = useAppDispatch()
-  const { settings, cms } = useStorefrontCms()
+  const { settings } = useStorefrontCms()
   const catalogCategoryRows = useAppSelector(selectCatalogCategories)
   const [activeCategory, setActiveCategory] = useState("ALL")
   const visibleLimit = useTopStylesPageSize()
@@ -182,49 +187,15 @@ export default function TopStyles() {
   const error = useAppSelector(selectTopStylesError)
   const showGridShimmer = useAppSelector(selectShowGridListShimmer)
 
-  const ts = cms.topStylesSection as
-    | {
-        title?: string
-        categories?: string[]
-        discount?: number
-        categoryid?: string
-        category?: string
-        productIds?: string[]
-      }
-    | undefined
-
-  const curatedProductIds = useMemo(() => {
-    const raw = ts?.productIds
-    if (!Array.isArray(raw)) return [] as string[]
-    return raw.map((id) => String(id || "").trim()).filter(Boolean)
-  }, [ts?.productIds])
-  const isCurated = curatedProductIds.length > 0
-  const curatedIdsKey = curatedProductIds.join(",")
-
-  const categoriesFromCatalog = useMemo(
+  const categories = useMemo(
     () => ["ALL", ...catalogCategoryRows.map((c) => c.displayName.toUpperCase())],
     [catalogCategoryRows]
   )
 
-  const categories = useMemo(() => {
-    if (Array.isArray(ts?.categories) && ts.categories.length > 0) {
-      return ts.categories.map((c) => String(c).toUpperCase())
-    }
-    return categoriesFromCatalog
-  }, [ts?.categories, categoriesFromCatalog])
-
   const sectionTitle = useMemo(() => {
-    const t = ts?.title?.trim()
-    if (t) return t
     const name = settings?.storeName?.trim() || "Shop"
     return `${name.toUpperCase()} TOP STYLES`
-  }, [ts?.title, settings?.storeName])
-
-  const discountPct = useMemo(() => {
-    const d = ts?.discount
-    if (typeof d === "number" && Number.isFinite(d) && d >= 0) return Math.round(d)
-    return 0
-  }, [ts?.discount])
+  }, [settings?.storeName])
 
   useEffect(() => {
     if (categories.length && !categories.includes(activeCategory)) {
@@ -233,36 +204,34 @@ export default function TopStyles() {
   }, [categories, activeCategory])
 
   const tab = topStyleLabelToTab(activeCategory)
+  const activeCategoryId = useMemo(() => {
+    if (activeCategory === "ALL") return undefined
+    return catalogCategoryRows.find(
+      (c) => c.displayName.toUpperCase() === activeCategory.toUpperCase()
+    )?.id
+  }, [activeCategory, catalogCategoryRows])
 
   useEffect(() => {
-    if (isCurated) return
-    dispatch(fetchTopStyles({ tab, limit: visibleLimit, pageno: 1 }))
-  }, [dispatch, isCurated, tab, visibleLimit])
-
-  useEffect(() => {
-    if (!isCurated) return
     dispatch(
       fetchTopStyles({
-        tab: "all",
-        limit: 50,
+        categoryid: activeCategoryId,
         pageno: 1,
-        productIds: curatedProductIds,
+        pagelimit: visibleLimit,
       })
     )
-  }, [dispatch, isCurated, curatedIdsKey])
-
-  const itemsForTab = useMemo(() => {
-    if (!isCurated) return items
-    if (tab === "all") return items
-    return items.filter((p) => p.category === tab)
-  }, [items, isCurated, tab])
+  }, [dispatch, activeCategoryId, visibleLimit])
 
   const rowProducts = useMemo((): RowProduct[] => {
-    return itemsForTab.map((product) => ({
-      ...product,
-      discount: discountPct,
-    }))
-  }, [itemsForTab, discountPct])
+    return items
+      .filter((product) => {
+        const keys = product.storefrontHomeSectionKeys
+        return Array.isArray(keys) && keys.includes("topStylesProducts")
+      })
+      .map((product) => ({
+        ...product,
+        discount: 0, // Discount managed per-product or fixed at 0 since master is gone
+      }))
+  }, [items])
 
   const viewAllHref = useMemo(() => {
     if (activeCategory === "ALL") return "/category/all"
@@ -313,7 +282,7 @@ export default function TopStyles() {
 
         {(showGridShimmer || status === "loading") && (
           <div className="py-2">
-            <GridListShimmer count={isCurated ? Math.min(50, visibleLimit) : visibleLimit} />
+            <GridListShimmer count={visibleLimit} />
           </div>
         )}
 
@@ -335,7 +304,7 @@ export default function TopStyles() {
             <div className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
               {rowProducts.map((product: RowProduct, index: number) => (
                 <TopStyleProductTile
-                  key={product.id}
+                  key={product.id ? `${product.id}-${index}` : `top-style-${index}`}
                   product={product}
                   index={index}
                   formatPrice={formatPrice}
