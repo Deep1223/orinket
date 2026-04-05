@@ -8,56 +8,94 @@ export interface StoredReview {
   verified?: boolean
 }
 
-const STORAGE_KEY = "orinket_user_reviews"
+type ReviewApiRow = {
+  _id?: string
+  reviewerName?: string
+  rating?: number
+  title?: string
+  text?: string
+  createdAt?: string
+}
 
-function readAll(): Record<string, StoredReview[]> {
-  if (typeof window === "undefined") return {}
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return {}
-    const data = JSON.parse(raw) as Record<string, StoredReview[]>
-    return data && typeof data === "object" ? data : {}
-  } catch {
-    return {}
+function mapRow(row: ReviewApiRow): StoredReview {
+  return {
+    id: String(row._id || ""),
+    author: String(row.reviewerName || "Customer"),
+    rating: Number(row.rating || 0),
+    title: row.title ? String(row.title) : undefined,
+    text: String(row.text || ""),
+    date: String(row.createdAt || new Date().toISOString()),
+    verified: false,
   }
 }
 
-function writeAll(data: Record<string, StoredReview[]>) {
+export async function getUserReviewsForProduct(productId: string): Promise<StoredReview[]> {
+  if (!productId) return []
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    const res = await fetch("/api/public/product-reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        paginationinfo: {
+          pageno: 1,
+          pagelimit: 100,
+          filter: { productId },
+          sort: { createdAt: -1 },
+        },
+        searchtext: "",
+      }),
+      cache: "no-store",
+    })
+    const json = (await res.json().catch(() => null)) as {
+      success?: boolean
+      data?: ReviewApiRow[]
+    } | null
+    if (!res.ok || !json?.success || !Array.isArray(json.data)) return []
+    return json.data.map(mapRow).filter((r) => r.id && r.text && r.author)
   } catch {
-    /* ignore */
+    return []
   }
 }
 
-export function getUserReviewsForProduct(productId: string): StoredReview[] {
-  const all = readAll()
-  return Array.isArray(all[productId]) ? all[productId] : []
-}
-
-export function addUserReview(
+export async function addUserReview(
   productId: string,
   input: {
+    productName?: string
     author: string
     rating: number
     title?: string
     text: string
   }
-): StoredReview {
-  const review: StoredReview = {
-    id: `ur_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-    author: input.author.trim().slice(0, 80),
-    rating: Math.min(5, Math.max(1, Math.round(input.rating))),
-    title: input.title?.trim().slice(0, 120),
-    text: input.text.trim().slice(0, 2000),
-    date: new Date().toISOString(),
-    verified: false,
+): Promise<StoredReview | null> {
+  if (!productId) return null
+  try {
+    const res = await fetch("/api/public/product-reviews/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        productId,
+        productName: input.productName || "",
+        reviewerName: input.author,
+        rating: input.rating,
+        title: input.title || "",
+        text: input.text,
+      }),
+    })
+    const json = (await res.json().catch(() => null)) as {
+      success?: boolean
+      data?: ReviewApiRow
+    } | null
+    if (!res.ok || !json?.success || !json.data) return null
+    return mapRow(json.data)
+  } catch {
+    return null
   }
-  const all = readAll()
-  const list = Array.isArray(all[productId]) ? all[productId] : []
-  all[productId] = [review, ...list]
-  writeAll(all)
-  return review
 }
 
 export function averageRating(reviews: { rating: number }[]): number {

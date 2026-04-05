@@ -58,10 +58,18 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const catalogProduct = useMemo(() => getProductById(catalog, id), [catalog, id])
   const [remoteProduct, setRemoteProduct] = useState<Product | null>(null)
+  const [reviewSummary, setReviewSummary] = useState({ avg: 0, count: 0 })
   /** False until catalog+remote lookup settles (avoids flashing “not found” before fetch). */
   const [remoteFetchDone, setRemoteFetchDone] = useState(false)
 
   const product = catalogProduct ?? remoteProduct
+
+  useEffect(() => {
+    setReviewSummary({
+      avg: Number(product?.rating || 0),
+      count: Number(product?.reviews || 0),
+    })
+  }, [product?.id, product?.rating, product?.reviews])
 
   useEffect(() => {
     setRemoteProduct(null)
@@ -148,6 +156,46 @@ export default function ProductPage({ params }: ProductPageProps) {
       setRecentIds([])
     }
   }, [product])
+
+  useEffect(() => {
+    if (!product?.id) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/public/product-reviews", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          cache: "no-store",
+          body: JSON.stringify({
+            paginationinfo: {
+              pageno: 1,
+              pagelimit: 1,
+              filter: { productId: product.id },
+              sort: { createdAt: -1 },
+            },
+            searchtext: "",
+          }),
+        })
+        const json = (await res.json().catch(() => null)) as
+          | { success?: boolean; totalCount?: number; averageRating?: number }
+          | null
+        if (!cancelled && res.ok && json?.success) {
+          setReviewSummary({
+            avg: Number(json.averageRating || 0),
+            count: Number(json.totalCount || 0),
+          })
+        }
+      } catch {
+        // keep fallback summary from product payload
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [product?.id])
 
   useEffect(() => {
     if (!lightboxOpen) return
@@ -487,7 +535,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                       <Star
                         key={i}
                         className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
-                          i < Math.floor(product.rating || 0) ? "text-gold fill-gold" : "text-gray-300"
+                          i < Math.floor(reviewSummary.avg || 0) ? "text-gold fill-gold" : "text-gray-300"
                         }`}
                       />
                     ))}
@@ -496,9 +544,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                     href="#reviews"
                     className={`text-xs sm:text-sm text-muted-foreground tabular-nums transition-colors hover:text-gold-dark ${font('body')}`}
                   >
-                    <span className="text-foreground font-medium">{product.rating ?? 0}</span>
+                    <span className="text-foreground font-medium">{reviewSummary.avg || 0}</span>
                     <span className="mx-1 opacity-40">·</span>
-                    {product.reviews ?? 0} reviews
+                    {reviewSummary.count} reviews
                   </a>
                 </div>
               </div>

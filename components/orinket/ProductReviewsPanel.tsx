@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Star, X, PenLine } from "lucide-react"
 import type { Product } from "@/types/product"
-import { getMockReviews } from "@/lib/productDetailMock"
 import {
   addUserReview,
   averageRating,
@@ -22,16 +21,11 @@ type Combined = {
   text: string
   date: string
   verified?: boolean
-  kind: "featured" | "customer"
+  kind: "customer"
 }
 
 interface ProductReviewsPanelProps {
   product: Product
-}
-
-function parseSeedDate(d: string): number {
-  const t = Date.parse(d)
-  return Number.isNaN(t) ? 0 : t
 }
 
 export default function ProductReviewsPanel({ product }: ProductReviewsPanelProps) {
@@ -47,25 +41,16 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
   const [formError, setFormError] = useState<string | null>(null)
   const [toastSuccess, setToastSuccess] = useState<string | null>(null)
 
-  const refreshUser = useCallback(() => {
-    setUserReviews(getUserReviewsForProduct(product.id))
+  const refreshUser = useCallback(async () => {
+    const rows = await getUserReviewsForProduct(product.id)
+    setUserReviews(rows)
   }, [product.id])
 
   useEffect(() => {
-    refreshUser()
+    void refreshUser()
   }, [refreshUser])
 
-  const seedReviews = useMemo(() => getMockReviews(product.name, product.reviews ?? 0), [product])
-
   const combined: Combined[] = useMemo(() => {
-    const featured: Combined[] = seedReviews.map((r) => ({
-      id: `seed_${r.id}`,
-      author: r.author,
-      rating: r.rating,
-      text: r.text,
-      date: r.date,
-      kind: "featured" as const,
-    }))
     const customer: Combined[] = userReviews.map((r) => ({
       id: r.id,
       author: r.author,
@@ -76,38 +61,43 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
       verified: r.verified,
       kind: "customer" as const,
     }))
-    const merged = [...customer, ...featured]
+    const merged = [...customer]
     merged.sort((a, b) => {
-      const ta = a.kind === "customer" ? new Date(a.date).getTime() : parseSeedDate(a.date)
-      const tb = b.kind === "customer" ? new Date(b.date).getTime() : parseSeedDate(b.date)
+      const ta = new Date(a.date).getTime()
+      const tb = new Date(b.date).getTime()
       return tb - ta
     })
     return merged
-  }, [seedReviews, userReviews])
+  }, [userReviews])
 
   const filtered = useMemo(() => {
     if (filterStar === "all") return combined
-    return combined.filter((r) => Math.round(r.rating) === filterStar)
+    return combined.filter((r) => Math.floor(r.rating) === filterStar)
   }, [combined, filterStar])
 
   const avg = averageRating(combined)
   const totalCount = combined.length
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormError(null)
     if (!form.author.trim() || !form.text.trim()) {
       setFormError("Please add your name and review text.")
       return
     }
-    addUserReview(product.id, {
+    const saved = await addUserReview(product.id, {
+      productName: product.name,
       author: form.author,
       title: form.title || undefined,
       text: form.text,
       rating: form.rating,
     })
+    if (!saved) {
+      setFormError("Could not submit review right now. Please try again.")
+      return
+    }
     setForm({ author: "", title: "", text: "", rating: 5 })
-    refreshUser()
+    await refreshUser()
     setWriteOpen(false)
     setToastSuccess("Thanks — your review was posted.")
     setTimeout(() => setToastSuccess(null), 5000)
@@ -179,11 +169,6 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
                   <span className={`text-sm font-semibold text-foreground ${font('headings')}`}>
                     {r.author}
                   </span>
-                  {r.kind === "featured" && (
-                    <span className={`rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-dark ${font('labels')}`}>
-                      Featured
-                    </span>
-                  )}
                   {r.kind === "customer" && (
                     <span className={`rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-900 ${font('labels')}`}>
                       Customer
@@ -192,9 +177,9 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
                 </div>
                 <time
                   className={`text-xs text-muted-foreground ${font('body')}`}
-                  dateTime={r.kind === "customer" ? r.date : undefined}
+                  dateTime={r.date}
                 >
-                  {r.kind === "customer" ? formatReviewDate(r.date) : r.date}
+                  {formatReviewDate(r.date)}
                 </time>
               </div>
               {r.title && (
@@ -202,15 +187,24 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
                   {r.title}
                 </p>
               )}
-              <div className="mb-2 flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-3.5 w-3.5 ${
-                      i < Math.floor(r.rating) ? "fill-gold text-gold" : "text-border"
-                    }`}
-                  />
-                ))}
+              <div className="mb-2 flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const full = r.rating >= n
+                  const half = !full && r.rating >= n - 0.5
+                  return (
+                    <span key={n} className="relative inline-block h-3.5 w-3.5">
+                      <Star className="h-3.5 w-3.5 text-border" />
+                      {full && <Star className="absolute inset-0 h-3.5 w-3.5 fill-gold text-gold" />}
+                      {half && (
+                        <Star
+                          className="absolute inset-0 h-3.5 w-3.5 fill-gold text-gold"
+                          style={{ clipPath: "inset(0 50% 0 0)" }}
+                        />
+                      )}
+                    </span>
+                  )
+                })}
+                <span className={`text-xs text-muted-foreground ${font('body')}`}>{r.rating.toFixed(1)}</span>
               </div>
               <p className={`text-sm leading-relaxed text-muted-foreground ${font('body')}`}>
                 {r.text}
@@ -273,22 +267,42 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
                 <span className={`mb-1 block text-[11px] font-semibold uppercase tracking-wider text-foreground ${font('labels')}`}>
                   Rating
                 </span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, rating: n }))}
-                      className="p-1"
-                      aria-label={`${n} stars`}
-                    >
-                      <Star
-                        className={`h-8 w-8 ${
-                          n <= form.rating ? "fill-gold text-gold" : "text-border"
-                        }`}
-                      />
-                    </button>
-                  ))}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => {
+                      const full = form.rating >= n
+                      const half = !full && form.rating >= n - 0.5
+                      return (
+                        <div key={n} className="relative h-8 w-8">
+                          <Star className="h-8 w-8 text-border" />
+                          {full && (
+                            <Star className="absolute inset-0 h-8 w-8 fill-gold text-gold" />
+                          )}
+                          {half && (
+                            <Star
+                              className="absolute inset-0 h-8 w-8 fill-gold text-gold"
+                              style={{ clipPath: "inset(0 50% 0 0)" }}
+                            />
+                          )}
+                          <button
+                            type="button"
+                            className="absolute left-0 top-0 h-8 w-4 cursor-pointer bg-transparent p-0"
+                            aria-label={`${n - 0.5} stars`}
+                            onClick={() => setForm((f) => ({ ...f, rating: n - 0.5 }))}
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-0 top-0 h-8 w-4 cursor-pointer bg-transparent p-0"
+                            aria-label={`${n} stars`}
+                            onClick={() => setForm((f) => ({ ...f, rating: n }))}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <p className={`text-xs text-muted-foreground ${font('body')}`}>
+                    Selected rating: <span className="font-semibold text-foreground">{form.rating.toFixed(1)}</span>
+                  </p>
                 </div>
               </div>
               <div>

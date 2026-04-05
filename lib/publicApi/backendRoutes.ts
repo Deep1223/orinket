@@ -5,6 +5,8 @@ export const ORINKET_BACKEND_PUBLIC = {
   products: "/api/public/products",
   topStyles: "/api/public/top-styles",
   storeSettings: "/api/public/store-settings",
+  productReviews: "/api/public/product-reviews",
+  submitProductReview: "/api/public/product-reviews/submit",
 } as const
 
 export const ORINKET_BACKEND_ECOM = {

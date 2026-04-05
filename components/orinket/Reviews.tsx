@@ -6,28 +6,59 @@ import { fonts } from "@/lib/fonts"
 import { useCmsSection } from "@/hooks/useStorefrontCms"
 
 type ReviewRow = {
-  id?: string
+  _id?: string
   rating?: number
   text?: string
-  name?: string
-  location?: string
-  product?: string
+  reviewerName?: string
+  productName?: string
 }
 
 export default function Reviews() {
   const raw = useCmsSection("reviews")
   const title = typeof raw?.title === "string" ? raw.title : ""
   const subtitle = typeof raw?.subtitle === "string" ? raw.subtitle : ""
-  const list = useMemo((): ReviewRow[] => {
-    const r = raw?.reviews
-    if (!Array.isArray(r)) return []
-    return r
-      .map((x) => (x && typeof x === "object" && !Array.isArray(x) ? (x as ReviewRow) : null))
-      .filter(Boolean) as ReviewRow[]
-  }, [raw?.reviews])
+  const [list, setList] = useState<ReviewRow[]>([])
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [itemsPerView, setItemsPerView] = useState(3)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/public/product-reviews", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          cache: "no-store",
+          body: JSON.stringify({
+            paginationinfo: {
+              pageno: 1,
+              pagelimit: 30,
+              filter: {},
+              sort: { createdAt: -1 },
+            },
+            searchtext: "",
+          }),
+        })
+        const json = (await res.json().catch(() => null)) as
+          | { success?: boolean; data?: ReviewRow[] }
+          | null
+        if (!cancelled && res.ok && json?.success && Array.isArray(json.data)) {
+          setList(json.data)
+        } else if (!cancelled) {
+          setList([])
+        }
+      } catch {
+        if (!cancelled) setList([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {
@@ -47,12 +78,11 @@ export default function Reviews() {
   const reviewsData = useMemo(() => {
     return list
       .map((r, i) => ({
-        id: r.id || `r-${i}`,
-        rating: Math.min(5, Math.max(1, Math.floor(Number(r.rating) || 5))),
+        id: r._id || `r-${i}`,
+        rating: Math.min(5, Math.max(1, Math.round((Number(r.rating) || 5) * 2) / 2)),
         text: String(r.text || ""),
-        name: String(r.name || ""),
-        location: String(r.location || ""),
-        product: String(r.product || ""),
+        name: String(r.reviewerName || "Customer"),
+        product: String(r.productName || ""),
       }))
       .filter((r) => r.text.trim())
   }, [list])
@@ -116,10 +146,24 @@ export default function Reviews() {
                   className="flex-none w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-cream p-6 md:p-8"
                 >
                   <Quote className="w-8 h-8 text-gold mb-4" />
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-gold text-gold" />
-                    ))}
+                  <div className="flex items-center gap-1 mb-4">
+                    {[1, 2, 3, 4, 5].map((n) => {
+                      const full = review.rating >= n
+                      const half = !full && review.rating >= n - 0.5
+                      return (
+                        <span key={n} className="relative inline-block h-4 w-4">
+                          <Star className="h-4 w-4 text-border" />
+                          {full && <Star className="absolute inset-0 h-4 w-4 fill-gold text-gold" />}
+                          {half && (
+                            <Star
+                              className="absolute inset-0 h-4 w-4 fill-gold text-gold"
+                              style={{ clipPath: "inset(0 50% 0 0)" }}
+                            />
+                          )}
+                        </span>
+                      )
+                    })}
+                    <span className={`text-xs text-muted-foreground ${fonts.body}`}>{review.rating.toFixed(1)}</span>
                   </div>
                   <p className={`text-foreground mb-6 ${fonts.body} leading-relaxed text-sm`}>
                     &quot;{review.text}&quot;
@@ -127,8 +171,7 @@ export default function Reviews() {
                   <div className="border-t border-border pt-4">
                     <p className={`${fonts.body} text-lg`}>{review.name}</p>
                     <p className={`text-sm text-muted-foreground ${fonts.body}`}>
-                      {review.location}
-                      {review.product ? ` | ${review.product}` : ""}
+                      {review.product || "Product review"}
                     </p>
                   </div>
                 </div>
