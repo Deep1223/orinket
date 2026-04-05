@@ -130,6 +130,9 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
 
   const images = Array.isArray(doc.images) ? doc.images.filter((u) => u && String(u).trim()) : []
   const primary = images[0] || PLACEHOLDER_IMAGE
+  const sectionKeys = Array.isArray(doc.storefrontHomeSectionKeys)
+    ? doc.storefrontHomeSectionKeys.map((k) => String(k).trim()).filter(Boolean)
+    : []
 
   const rawQty =
     typeof doc.availableQty === "number" && Number.isFinite(doc.availableQty)
@@ -148,10 +151,8 @@ function mapOneProduct(doc: ApiProductRow, nameByCatId: Map<string, string>): Pr
         ? Number(doc.originalPrice)
         : undefined,
     buyOneGetOneFree: doc.buyOneGetOneFree === true,
-    showIn925SilverPost: doc.showIn925SilverPost === true,
-    storefrontHomeSectionKeys: Array.isArray(doc.storefrontHomeSectionKeys)
-      ? doc.storefrontHomeSectionKeys.map((k) => String(k).trim()).filter(Boolean)
-      : undefined,
+    showIn925SilverPost: sectionKeys.includes("showIn925SilverPost") || doc.showIn925SilverPost === true,
+    storefrontHomeSectionKeys: sectionKeys.length ? sectionKeys : undefined,
     occasionIds: Array.isArray(doc.occasionids)
       ? doc.occasionids.map((x) => String(x)).filter(Boolean)
       : undefined,

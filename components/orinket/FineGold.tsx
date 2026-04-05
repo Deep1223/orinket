@@ -15,7 +15,11 @@ export default function FineGold() {
   const catalog = useAppSelector(selectProducts)
   const catalogCategories = useAppSelector(selectCatalogCategories)
   const baseProducts = useMemo(
-    () => catalog.filter((p) => p.showIn925SilverPost === true),
+    () =>
+      catalog.filter((p) => {
+        const keys = Array.isArray(p.storefrontHomeSectionKeys) ? p.storefrontHomeSectionKeys : []
+        return keys.includes("showIn925SilverPost")
+      }),
     [catalog]
   )
   const raw = useCmsSection("fineGoldSection")

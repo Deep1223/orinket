@@ -11,6 +11,7 @@ import { useStoreSettings } from "@/context/StoreSettingsContext"
 import { useAppSelector } from "@/store/hooks"
 import { selectCatalogCategories, selectProducts } from "@/store/selectors"
 import { font } from "@/lib/fonts"
+import SidebarDrawerMenu from "@/components/orinket/SidebarDrawerMenu"
 
 export default function Header() {
   const { settings } = useStoreSettings()
@@ -292,103 +293,7 @@ export default function Header() {
         </div>
       )}
 
-      {/* Mobile sidebar — search, shop actions, categories, account */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-white pt-2 lg:!hidden">
-          <div className="p-4 sm:p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className={`text-2xl font-semibold tracking-widest sm:text-3xl ${font('headings')}`}>
-                {storeName}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-                className="touch-target p-2"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-1 border-b border-gray-200 pb-4">
-              <button
-                type="button"
-                className={`flex items-center gap-3 rounded-lg px-2 py-3.5 text-left text-base transition-colors hover:bg-gray-50 ${font('navigation')}`}
-                onClick={() => {
-                  setMobileMenuOpen(false)
-                  setSearchOpen(true)
-                }}
-              >
-                <Search className="h-6 w-6 shrink-0" />
-                <span>Search</span>
-              </button>
-              <Link
-                href="/compare"
-                className={`flex items-center gap-3 rounded-lg px-2 py-3.5 text-base transition-colors hover:bg-gray-50 ${font('navigation')}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <GitCompare className="h-6 w-6 shrink-0" />
-                <span>Compare</span>
-                {compareCount > 0 && (
-                  <span className="ml-auto rounded-full bg-foreground px-2.5 py-1 text-xs font-bold text-white">
-                    {compareCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/cart"
-                className={`flex items-center gap-3 rounded-lg px-2 py-3.5 text-base transition-colors hover:bg-gray-50 ${font('navigation')}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <ShoppingBag className="h-6 w-6 shrink-0" />
-                <span>Cart</span>
-                {cartCount > 0 && (
-                  <span className="ml-auto rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/wishlist"
-                className={`flex items-center gap-3 rounded-lg px-2 py-3.5 text-base transition-colors hover:bg-gray-50 ${font('navigation')}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Heart className="h-6 w-6 shrink-0" />
-                <span>Wishlist</span>
-                {wishlistItems.length > 0 && (
-                  <span className="ml-auto rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-white">
-                    {wishlistItems.length}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/account"
-                className={`flex items-center gap-3 rounded-lg px-2 py-3.5 text-base transition-colors hover:bg-gray-50 ${font('navigation')}`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User className="h-6 w-6 shrink-0" />
-                <span>Account</span>
-              </Link>
-            </div>
-
-            <p className={`mb-2 mt-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground ${font('labels')}`}>
-              Shop
-            </p>
-            <nav className="flex flex-col gap-0">
-              {categories.map((category) => (
-                <Link
-                  key={category.href}
-                  href={category.href}
-                  className={`border-b border-gray-200 px-2 py-3.5 text-base tracking-wide transition-colors hover:bg-gray-50 sm:text-lg ${font('navigation')}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
-      )}
+      <SidebarDrawerMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} logoText={storeName} />
     </header>
   )
 }

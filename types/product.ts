@@ -6,7 +6,7 @@ export interface Product {
   originalPrice?: number
   /** Product Master: included in /promo?offer=bogo listing */
   buyOneGetOneFree?: boolean
-  /** Product Master: include product in 925 SILVER POST section */
+  /** Derived from Product Listed On -> `showIn925SilverPost` section key. */
   showIn925SilverPost?: boolean
   /** Product Master: Orinket homepage section keys (merchandising) */
   storefrontHomeSectionKeys?: string[]

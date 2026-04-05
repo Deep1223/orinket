@@ -8,6 +8,7 @@ export const STOREFRONT_SECTION_LISTING_KEYS = [
   'trendingProducts',
   'recommendedProducts',
   'fineGoldProducts',
+  'showIn925SilverPost',
 ] as const
 
 export type StorefrontSectionListingKey = (typeof STOREFRONT_SECTION_LISTING_KEYS)[number]
@@ -18,6 +19,7 @@ const SECTION_LISTING_LABELS: Record<StorefrontSectionListingKey, string> = {
   trendingProducts: 'Trending',
   recommendedProducts: 'Recommended for you',
   fineGoldProducts: 'Fine gold',
+  showIn925SilverPost: '925 Silver Post',
 }
 
 export function isStorefrontSectionListingKey(s: string): s is StorefrontSectionListingKey {
