@@ -597,3 +597,49 @@
     width: 100% !important;
   }
 }
+
+/* Spin-to-win result modal — confetti burst + prize reveal */
+@keyframes spin-confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+@keyframes spin-result-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes spin-result-shine {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.spin-result-pop {
+  animation: spin-result-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.spin-result-pop-delay {
+  opacity: 0;
+  animation: spin-result-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.spin-firework-flash {
+  animation: spin-result-shine 1.4s ease-in-out infinite;
+}

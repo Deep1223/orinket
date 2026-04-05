@@ -19,10 +19,7 @@ import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import { useCart } from "@/store/useCart"
 import type { CartItem } from "@/types/cart"
-import {
-  calculatePromoDiscount,
-  findPromoCode,
-} from "@/data/promoCodes"
+import { validatePromoCode } from "@/lib/ecom/validatePromo"
 import { useCurrency } from "@/context/CurrencyContext"
 import { fonts } from "@/lib/fonts"
 import { ecomFetch } from "@/lib/ecom/client"
@@ -122,13 +119,17 @@ function CartLineRow({ item }: { item: CartItem }) {
 }
 
 export default function CartPage() {
-  const { formatPrice, formatPromoLine } = useCurrency()
+  const { formatPrice } = useCurrency()
   const { cartItems, cartTotal, clearCart, addToCart } = useCart()
 
+  const totalQty = cartItems.reduce((s, i) => s + i.quantity, 0)
+
   const [promoInput, setPromoInput] = useState("")
+  const [promoBusy, setPromoBusy] = useState(false)
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string
     discount: number
+    description?: string
   } | null>(null)
   const [promoFeedback, setPromoFeedback] = useState<{
     type: "success" | "error"
@@ -148,25 +149,35 @@ export default function CartPage() {
   const shipping = cartTotal >= 2999 ? 0 : 99
   const total = subtotalAfterDiscount + shipping
 
-  const handleApplyPromo = () => {
-    const promo = findPromoCode(promoInput)
-    if (!promo) {
+  const handleApplyPromo = async () => {
+    const trimmed = promoInput.trim()
+    if (!trimmed) {
       setAppliedPromo(null)
-      setPromoFeedback({ type: "error", text: "Invalid or expired code" })
+      setPromoFeedback({ type: "error", text: "Enter a promo code" })
       return
     }
-    const result = calculatePromoDiscount(cartTotal, promo)
-    if (!result.ok) {
-      setAppliedPromo(null)
-      setPromoFeedback({ type: "error", text: result.error })
-      return
+    setPromoBusy(true)
+    try {
+      const result = await validatePromoCode(trimmed, cartTotal, totalQty)
+      if (!result.ok) {
+        setAppliedPromo(null)
+        setPromoFeedback({ type: "error", text: result.message })
+        return
+      }
+      setAppliedPromo({
+        code: result.code,
+        discount: result.discount,
+        description: result.description,
+      })
+      setPromoInput(result.code)
+      const label = result.description || result.code
+      setPromoFeedback({
+        type: "success",
+        text: `${label} · Save ${formatPrice(result.discount)}`,
+      })
+    } finally {
+      setPromoBusy(false)
     }
-    setAppliedPromo({ code: promo.code, discount: result.discount })
-    setPromoInput(promo.code)
-    setPromoFeedback({
-      type: "success",
-      text: `${formatPromoLine(promo)} · Save ${formatPrice(result.discount)}`,
-    })
   }
 
   const handleRemovePromo = () => {
@@ -178,7 +189,6 @@ export default function CartPage() {
   const appliedPromoRef = useRef(appliedPromo)
   appliedPromoRef.current = appliedPromo
 
-  // Only depend on cartTotal (stable length). Read latest promo via ref to avoid object in deps.
   useEffect(() => {
     const applied = appliedPromoRef.current
     if (!applied) return
@@ -188,30 +198,40 @@ export default function CartPage() {
       setPromoFeedback(null)
       return
     }
-    const promo = findPromoCode(applied.code)
-    if (!promo) {
-      setAppliedPromo(null)
-      setPromoInput("")
-      return
+    let cancelled = false
+    ;(async () => {
+      const result = await validatePromoCode(applied.code, cartTotal, totalQty)
+      if (cancelled) return
+      if (!result.ok) {
+        setAppliedPromo(null)
+        setPromoInput("")
+        setPromoFeedback({
+          type: "error",
+          text: `${result.message} Coupon removed.`,
+        })
+        return
+      }
+      if (
+        result.discount !== applied.discount ||
+        result.code !== applied.code ||
+        result.description !== applied.description
+      ) {
+        setAppliedPromo({
+          code: result.code,
+          discount: result.discount,
+          description: result.description,
+        })
+        const label = result.description || result.code
+        setPromoFeedback({
+          type: "success",
+          text: `${label} · Save ${formatPrice(result.discount)}`,
+        })
+      }
+    })()
+    return () => {
+      cancelled = true
     }
-    const result = calculatePromoDiscount(cartTotal, promo)
-    if (!result.ok) {
-      setAppliedPromo(null)
-      setPromoInput("")
-      setPromoFeedback({
-        type: "error",
-        text: `${result.error} Coupon removed.`,
-      })
-      return
-    }
-    if (result.discount !== applied.discount) {
-      setAppliedPromo({ code: promo.code, discount: result.discount })
-      setPromoFeedback({
-        type: "success",
-        text: `${formatPromoLine(promo)} · Save ${formatPrice(result.discount)}`,
-      })
-    }
-  }, [cartTotal, formatPrice, formatPromoLine])
+  }, [cartTotal, totalQty, formatPrice])
 
   useEffect(() => {
     const loadUpsell = async () => {
@@ -371,7 +391,7 @@ export default function CartPage() {
                           }
                         }}
                         placeholder="Enter code"
-                        disabled={!!appliedPromo}
+                        disabled={!!appliedPromo || promoBusy}
                         className={`min-w-0 flex-1 rounded-xl border border-[#dfd4bf] bg-[#faf6ee] px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 disabled:opacity-60 ${fonts.body}`}
                       />
                       {appliedPromo ? (
@@ -385,10 +405,11 @@ export default function CartPage() {
                       ) : (
                         <button
                           type="button"
-                          onClick={handleApplyPromo}
-                          className={`shrink-0 rounded-xl border border-gold bg-transparent px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-gold-dark transition-colors hover:bg-gold hover:text-white ${fonts.buttons}`}
+                          onClick={() => void handleApplyPromo()}
+                          disabled={promoBusy}
+                          className={`shrink-0 rounded-xl border border-gold bg-transparent px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-gold-dark transition-colors hover:bg-gold hover:text-white disabled:opacity-50 ${fonts.buttons}`}
                         >
-                          Apply
+                          {promoBusy ? "…" : "Apply"}
                         </button>
                       )}
                     </div>
@@ -403,7 +424,8 @@ export default function CartPage() {
                     )}
                     {!appliedPromo && (
                       <p className={`mt-2 text-[10px] leading-relaxed text-muted-foreground ${fonts.body}`}>
-                        Try <span className="text-foreground/80">ORINKET10</span>,{" "}
+                        Spin wheel codes or try{" "}
+                        <span className="text-foreground/80">ORINKET10</span>,{" "}
                         <span className="text-foreground/80">WELCOME15</span>
                       </p>
                     )}

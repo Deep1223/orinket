@@ -6,6 +6,7 @@ import { CurrencyProvider } from '@/context/CurrencyContext'
 import { StoreSettingsProvider } from '@/context/StoreSettingsContext'
 import { fonts } from '@/lib/fonts'
 import BackToTop from '@/components/orinket/BackToTop'
+import SpinToWinPopup from '@/components/orinket/SpinToWinPopup'
 import { resolveOrinketBackendOrigin } from '@/lib/publicApi/server/resolveBackendOrigin'
 import './globals.css'
 
@@ -71,6 +72,7 @@ export default function RootLayout({
               <CompareProvider>
                 {children}
                 <BackToTop />
+                <SpinToWinPopup />
               </CompareProvider>
             </StoreProvider>
           </CurrencyProvider>

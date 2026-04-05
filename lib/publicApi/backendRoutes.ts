@@ -7,6 +7,10 @@ export const ORINKET_BACKEND_PUBLIC = {
   storeSettings: "/api/public/store-settings",
   productReviews: "/api/public/product-reviews",
   submitProductReview: "/api/public/product-reviews/submit",
+  checkSpin: "/api/check-spin",
+  spin: "/api/spin",
+  promoValidate: "/api/promo/validate",
+  settings: "/api/settings",
 } as const
 
 export const ORINKET_BACKEND_ECOM = {
