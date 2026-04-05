@@ -65,6 +65,7 @@ export type StoreSettings = {
   facebookUrl: string
   twitterUrl: string
   youtubeUrl: string
+  pinterestUrl: string
   paymentVisa: number
   paymentMastercard: number
   paymentUpi: number

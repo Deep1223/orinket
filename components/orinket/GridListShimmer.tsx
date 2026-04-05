@@ -15,7 +15,7 @@ export default function GridListShimmer({ count, className = "" }: GridListShimm
   const safe = Math.min(Math.max(count, 1), 24)
   return (
     <div
-      className={`grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8 lg:grid-cols-4 ${className}`}
+      className={`grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-4 2xl:grid-cols-5 ${className}`}
       aria-busy
       aria-label="Loading products"
     >

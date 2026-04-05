@@ -26,10 +26,12 @@ import {
   Clock,
   ChevronDown,
   GitCompare,
+  MoveHorizontal,
 } from "lucide-react"
 import Header from "@/components/orinket/Header"
 import Footer from "@/components/orinket/Footer"
 import ProductVideoAnd360 from "@/components/orinket/ProductVideoAnd360"
+import Product360View from "@/components/orinket/Product360View"
 import ProductReviewsPanel from "@/components/orinket/ProductReviewsPanel"
 import type { Product } from "@/types/product"
 import { getProductById } from "@/lib/catalogQueries"
@@ -123,6 +125,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   }>({ similar: [], frequentlyBought: [], completeLook: [] })
 
   const [selectedImage, setSelectedImage] = useState(0)
+  const [show360, setShow360] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("specifications")
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -300,6 +303,12 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const inWishlist = isInWishlist(product.id)
   const images = product.images || [product.image]
+  const view360Frames =
+    product.view360Images && product.view360Images.length >= 2
+      ? product.view360Images
+      : images.length >= 2
+        ? [...images, ...images].slice(0, 12)
+        : []
 
   const handleAddToCart = () => {
     addToCart({
@@ -409,9 +418,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <button
                     key={index}
                     type="button"
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => {
+                      setSelectedImage(index)
+                      setShow360(false)
+                    }}
                     className={`relative w-[4.5rem] h-[4.5rem] shrink-0 rounded-xl overflow-hidden transition-all duration-300 ring-offset-2 ring-offset-background ${
-                      selectedImage === index
+                      !show360 && selectedImage === index
                         ? "ring-2 ring-gold shadow-md scale-[1.02]"
                         : "ring-1 ring-border/60 hover:ring-gold/40 opacity-90 hover:opacity-100"
                     }`}
@@ -425,30 +437,53 @@ export default function ProductPage({ params }: ProductPageProps) {
                     />
                   </button>
                 ))}
+                
+                {/* 360 View Toggle (Desktop) */}
+                {view360Frames.length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setShow360(true)}
+                    className={`relative w-[4.5rem] h-[4.5rem] shrink-0 rounded-xl overflow-hidden transition-all duration-300 ring-offset-2 ring-offset-background flex flex-col items-center justify-center bg-cream/30 gap-1 ${
+                      show360
+                        ? "ring-2 ring-gold shadow-md scale-[1.02]"
+                        : "ring-1 ring-border/60 hover:ring-gold/40 opacity-90 hover:opacity-100"
+                    }`}
+                  >
+                    <MoveHorizontal className={`h-6 w-6 ${show360 ? "text-gold-dark" : "text-muted-foreground"}`} />
+                    <span className={`text-[10px] font-bold ${font('labels')} ${show360 ? "text-gold-dark" : "text-muted-foreground"}`}>360°</span>
+                  </button>
+                )}
               </div>
 
               {/* Main Image */}
               <div className="flex-1 order-1 md:order-2 min-w-0">
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-cream-dark via-cream to-cream-dark shadow-[0_28px_56px_-18px_rgba(25,18,14,0.18)] ring-1 ring-black/[0.06]">
-                  <button
-                    type="button"
-                    onClick={() => setLightboxOpen(true)}
-                    className="absolute inset-0 z-[1] cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                    aria-label="View larger image"
-                  />
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)] pointer-events-none z-[1]" />
-                  <Image
-                    src={images[selectedImage]}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover object-top pointer-events-none"
-                    priority
-                  />
-                  <div className={`pointer-events-none absolute bottom-5 right-5 z-[2] flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-foreground shadow-md ring-1 ring-black/5 backdrop-blur-sm ${font('labels')}`}>
-                    <ZoomIn className="h-3.5 w-3.5 text-gold-dark" strokeWidth={2} />
-                    Tap to zoom
-                  </div>
+                  {show360 ? (
+                    <Product360View frames={view360Frames} productName={product.name} />
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setLightboxOpen(true)}
+                        className="absolute inset-0 z-[1] cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                        aria-label="View larger image"
+                      />
+                      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)] pointer-events-none z-[1]" />
+                      <Image
+                        src={images[selectedImage]}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover object-top pointer-events-none"
+                        priority
+                      />
+                      <div className={`pointer-events-none absolute bottom-5 right-5 z-[2] flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-foreground shadow-md ring-1 ring-black/5 backdrop-blur-sm ${font('labels')}`}>
+                        <ZoomIn className="h-3.5 w-3.5 text-gold-dark" strokeWidth={2} />
+                        Tap to zoom
+                      </div>
+                    </>
+                  )}
+                  
                   <div className="pointer-events-none absolute top-5 left-5 z-[3] flex flex-col gap-2">
                     {product.isNew && (
                       <span className={`bg-foreground/95 text-white text-[10px] sm:text-xs px-3 py-1.5 tracking-[0.2em] shadow-lg ${font('labels')}`}>
@@ -478,9 +513,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                     <button
                       key={index}
                       type="button"
-                      onClick={() => setSelectedImage(index)}
+                      onClick={() => {
+                        setSelectedImage(index)
+                        setShow360(false)
+                      }}
                       className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden transition-all ${
-                        selectedImage === index
+                        !show360 && selectedImage === index
                           ? "ring-2 ring-gold shadow"
                           : "ring-1 ring-border/50 opacity-80"
                       }`}
@@ -488,6 +526,22 @@ export default function ProductPage({ params }: ProductPageProps) {
                       <Image src={img} alt="" width={64} height={64} className="h-full w-full object-cover object-top" />
                     </button>
                   ))}
+                  
+                  {/* 360 View Toggle (Mobile) */}
+                  {view360Frames.length >= 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setShow360(true)}
+                      className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden transition-all flex flex-col items-center justify-center bg-cream/30 gap-1 ${
+                        show360
+                          ? "ring-2 ring-gold shadow"
+                          : "ring-1 ring-border/50 opacity-80"
+                      }`}
+                    >
+                      <MoveHorizontal className={`h-5 w-5 ${show360 ? "text-gold-dark" : "text-muted-foreground"}`} />
+                      <span className={`text-[9px] font-bold ${font('labels')} ${show360 ? "text-gold-dark" : "text-muted-foreground"}`}>360°</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -914,7 +968,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          <ProductVideoAnd360 product={product} galleryImages={images} />
+          <ProductVideoAnd360 product={product} />
         </div>
 
         <div className="max-w-7xl mx-auto space-y-12 border-t border-border/50 px-4 pb-8 pt-12 md:space-y-16 md:pb-10 md:pt-16 sm:px-6">

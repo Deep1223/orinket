@@ -1,10 +1,22 @@
 "use client"
 
 import Link from "next/link"
-import { Instagram, Facebook, Twitter, Youtube } from "lucide-react"
+import { Instagram, Facebook, Youtube } from "lucide-react"
 import { useStoreSettings } from "@/context/StoreSettingsContext"
 import { font } from "@/lib/fonts"
 import type { StoreSettings } from "@/lib/storeSettings"
+
+const XIcon = (props: React.ComponentProps<"svg">) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+  </svg>
+)
+
+const PinterestIcon = (props: React.ComponentProps<"svg">) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M12.017 0C5.396 0 0 5.397 0 12.017c0 5.087 3.16 9.426 7.633 11.174-.105-.945-.199-2.396.041-3.428.216-.931 1.395-5.91 1.395-5.91s-.355-.71-.355-1.76c0-1.648.955-2.878 2.146-2.878 1.012 0 1.503.759 1.503 1.67 0 1.017-.647 2.538-.98 3.947-.282 1.187.592 2.155 1.761 2.155 2.112 0 3.737-2.227 3.737-5.441 0-2.845-2.044-4.832-4.961-4.832-3.38 0-5.364 2.536-5.364 5.157 0 1.022.394 2.118.884 2.715.097.118.111.222.082.343-.09.375-.291 1.186-.33 1.348-.052.214-.17.259-.393.156-1.464-.68-2.379-2.813-2.379-4.529 0-3.688 2.679-7.076 7.728-7.076 4.057 0 7.21 2.891 7.21 6.756 0 4.032-2.54 7.276-6.066 7.276-1.184 0-2.3-.615-2.68-1.34l-.73 2.78c-.263 1.01-.976 2.275-1.455 3.054a12.01 12.01 0 003.546.526c6.621 0 12.017-5.396 12.017-12.017C24.034 5.397 18.638 0 12.017 0z" />
+  </svg>
+)
 
 type LinkItem = { name: string; href: string }
 
@@ -66,7 +78,7 @@ export default function Footer() {
   const supportLinks = staticColumnLinks(settings, STATIC_SUPPORT)
   const legalLinks = staticColumnLinks(settings, STATIC_LEGAL)
 
-  const builtSocial: Array<{ icon: typeof Instagram; href: string; label: string }> = []
+  const builtSocial: Array<{ icon: any; href: string; label: string }> = []
   if (settings?.instagramUrl?.trim()) {
     builtSocial.push({ icon: Instagram, href: settings.instagramUrl.trim(), label: "Instagram" })
   }
@@ -74,10 +86,13 @@ export default function Footer() {
     builtSocial.push({ icon: Facebook, href: settings.facebookUrl.trim(), label: "Facebook" })
   }
   if (settings?.twitterUrl?.trim()) {
-    builtSocial.push({ icon: Twitter, href: settings.twitterUrl.trim(), label: "Twitter" })
+    builtSocial.push({ icon: XIcon, href: settings.twitterUrl.trim(), label: "X (Twitter)" })
   }
   if (settings?.youtubeUrl?.trim()) {
     builtSocial.push({ icon: Youtube, href: settings.youtubeUrl.trim(), label: "YouTube" })
+  }
+  if (settings?.pinterestUrl?.trim()) {
+    builtSocial.push({ icon: PinterestIcon, href: settings.pinterestUrl.trim(), label: "Pinterest" })
   }
 
   const socialToRender = builtSocial
@@ -103,7 +118,7 @@ export default function Footer() {
       {/* Newsletter Section */}
       {newsletterOn && (nlTitle || nlDesc) && (
         <div className="border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="flex-1">
                 {nlTitle ? (
@@ -118,12 +133,12 @@ export default function Footer() {
                   <input
                     type="email"
                     placeholder={nlPlaceholder}
-                    className={`w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:border-gold rounded-lg text-sm transition-colors ${font("body")}`}
+                    className={`w-full rounded-lg border border-white/20 bg-white/10 py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/50 transition-colors focus:border-[#628292] focus:outline-none focus:ring-2 focus:ring-[#628292]/35 ${font("body")}`}
                   />
                 </div>
                 <button
                   type="submit"
-                  className={`px-6 py-3 bg-gold text-white text-xs sm:text-sm font-semibold tracking-wider hover:bg-gold-dark transition-colors rounded-lg touch-target ${font("buttons")}`}
+                  className={`touch-target rounded-lg bg-[#40555f] px-6 py-3 text-xs font-semibold tracking-wider text-white transition-colors hover:bg-[#577381] active:bg-[#35464e] sm:text-sm ${font("buttons")}`}
                 >
                   {nlButton}
                 </button>

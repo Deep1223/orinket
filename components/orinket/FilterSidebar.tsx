@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, ChevronDown, ChevronUp, Star, DollarSign, Package, Shield } from 'lucide-react'
 import { font } from '@/lib/fonts'
 
@@ -25,6 +25,15 @@ interface FilterSidebarProps {
 }
 
 export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClose }: FilterSidebarProps) {
+  useEffect(() => {
+    if (!isOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [isOpen])
+
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     price: true,
@@ -146,55 +155,47 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
 
   return (
     <>
-      {/* Mobile Overlay - Only show when isOpen and on mobile */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden animate-fadeIn" onClick={onClose} aria-label="Close filters" />
-      )}
-      
-      {/* Sidebar - Responsive behavior with smooth animation */}
-      <div className={`
-        fixed left-0 top-0 z-50 h-screen w-80 max-w-[90vw] overflow-y-auto bg-white shadow-2xl shadow-stone-900/10
-        md:relative md:z-auto md:h-auto md:w-full md:max-w-none md:overflow-visible md:rounded-2xl md:border md:border-stone-200/80 md:bg-gradient-to-b md:from-white md:to-cream/30 md:shadow-[0_12px_40px_-16px_rgba(28,25,23,0.12)] md:ring-1 md:ring-stone-900/[0.04]
-        ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100'}
-        transition-all duration-300 ease-in-out transform
-      `}>
-        {/* Header: sticky only on mobile drawer; desktop uses static to avoid nested sticky + page scroll jank */}
-        <div className="sticky top-0 z-10 border-b border-stone-200/70 bg-white/95 p-4 backdrop-blur-md sm:p-5 md:rounded-t-2xl">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-gold-dark shadow-md">
-                <Package className="h-4 w-4 text-white" />
-              </div>
-              <h2 className={`text-lg font-bold tracking-tight text-stone-900 ${font('headings')}`}>Refine</h2>
-            </div>
-            <div className="ml-auto flex items-center gap-1">
-              {getActiveFilterCount() > 0 && (
-                <button
-                  onClick={clearAllFilters}
-                  className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 sm:text-sm touch-target"
-                >
-                  Clear
-                </button>
-              )}
+      <div
+        className="fixed inset-0 z-40 animate-fadeIn bg-black/50"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      <div
+        className="fixed left-0 top-0 z-50 flex h-[100dvh] w-full max-w-[min(20rem,92vw)] flex-col bg-white shadow-2xl shadow-stone-900/15 sm:max-w-[22rem]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="filter-drawer-title"
+      >
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-stone-200/80 bg-white px-4 py-4 sm:px-5">
+          <h2
+            id="filter-drawer-title"
+            className={`text-base font-semibold tracking-wide text-stone-900 ${font('headings')}`}
+          >
+            Filters
+          </h2>
+          <div className="flex items-center gap-2">
+            {getActiveFilterCount() > 0 && (
               <button
-                onClick={onClose}
-                className="rounded-lg p-2.5 transition-colors hover:bg-stone-100 touch-target md:hidden"
-                aria-label="Close filters"
+                type="button"
+                onClick={clearAllFilters}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50"
               >
-                <X className="h-5 w-5 text-stone-600" />
+                Clear all
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-2 text-stone-600 transition-colors hover:bg-stone-100"
+              aria-label="Close filters"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          {getActiveFilterCount() > 0 && (
-            <div className="mt-3">
-              <span className={`inline-flex items-center rounded-full border border-gold/30 bg-gold-light/40 px-2.5 py-1 text-xs font-semibold text-gold-dark ${font('labels')}`}>
-                {getActiveFilterCount()} active
-              </span>
-            </div>
-          )}
         </div>
 
-        <div className="space-y-3 p-3 sm:p-4 md:space-y-3.5 md:pb-5">
+        <div className="min-h-0 flex-1 overflow-y-auto space-y-3 p-3 sm:p-4 sm:space-y-3.5 sm:pb-6">
           {/* Categories */}
           <div className="rounded-xl border border-stone-200/70 bg-white/80 p-3 shadow-sm backdrop-blur-sm">
             <button className="group flex w-full items-center justify-between rounded-lg px-1 py-2 transition-colors hover:bg-stone-50/80" onClick={() => toggleSection('categories')}>

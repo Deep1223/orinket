@@ -1,7 +1,8 @@
 "use client"
 
-import { Search, ChevronDown, X, Grid3x3, List, Filter, Sparkles } from "lucide-react"
+import { Search, ChevronDown, X, Grid3x3, List, Filter, Sparkles, Check } from "lucide-react"
 import type { ReactNode } from "react"
+import { useState, useEffect, useRef } from "react"
 import { fonts } from "@/lib/fonts"
 
 /** Hero strip — same visual language as /search */
@@ -61,6 +62,95 @@ const DEFAULT_SORT_OPTIONS = [
   { value: "newest", label: "Newest First" },
 ]
 
+function SortSelect({
+  value,
+  onChange,
+  options,
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  const current = options.find((o) => o.value === value) ?? options[0]
+
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (e: MouseEvent | PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [open])
+
+  return (
+    <div ref={rootRef} className="relative min-w-0 flex-1">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Sort products by: ${current.label}`}
+        onClick={() => setOpen((o) => !o)}
+        className={`flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-transparent px-2 py-1 text-left transition-colors hover:border-stone-200/60 hover:bg-white ${fonts.body} text-sm font-medium text-stone-900 focus:outline-none focus-visible:border-gold/40 focus-visible:ring-2 focus-visible:ring-gold/25`}
+      >
+        <span className="min-w-0 truncate">{current.label}</span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+
+      {open ? (
+        <ul
+          role="listbox"
+          aria-label="Sort options"
+          className={`absolute left-0 right-0 top-full z-[60] mt-1.5 max-h-[min(20rem,calc(100dvh-10rem))] overflow-auto rounded-xl border border-stone-200/90 bg-white py-1.5 shadow-[0_16px_48px_-12px_rgba(28,25,23,0.22)] ring-1 ring-stone-900/[0.06] ${fonts.body}`}
+        >
+          {options.map((o) => {
+            const selected = o.value === value
+            return (
+              <li key={o.value} role="presentation" className="px-1.5">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(o.value)
+                    setOpen(false)
+                  }}
+                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                    selected
+                      ? "bg-gradient-to-r from-gold-light/45 to-cream/90 font-semibold text-stone-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                      : "font-medium text-stone-700 hover:bg-stone-50"
+                  }`}
+                >
+                  <span className="flex min-w-0 flex-1 leading-snug">{o.label}</span>
+                  {selected ? (
+                    <Check className="h-4 w-4 shrink-0 text-gold-dark" strokeWidth={2.5} aria-hidden />
+                  ) : (
+                    <span className="h-4 w-4 shrink-0" aria-hidden />
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      ) : null}
+    </div>
+  )
+}
+
 /** Toolbar — product count, optional search field, sort, grid/list (matches /search) */
 export function ProductListingToolbar({
   productCount,
@@ -95,13 +185,13 @@ export function ProductListingToolbar({
   extraCountSlot?: ReactNode
 }) {
   return (
-    <div className="mb-5 rounded-2xl border border-stone-200/80 bg-white/90 p-3 shadow-[0_8px_40px_-14px_rgba(28,25,23,0.12)] backdrop-blur-sm ring-1 ring-stone-900/[0.04] sm:mb-7 sm:p-5">
+    <div className="relative z-20 mb-5 overflow-visible rounded-2xl border border-stone-200/80 bg-white/90 p-3 shadow-[0_8px_40px_-14px_rgba(28,25,23,0.12)] backdrop-blur-sm ring-1 ring-stone-900/[0.04] sm:mb-7 sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onOpenFiltersMobile}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 px-4 py-2.5 text-white shadow-md transition-all duration-300 hover:shadow-lg lg:hidden"
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 px-4 py-2.5 text-white shadow-md transition-all duration-300 hover:shadow-lg"
           >
             <Filter className="h-4 w-4" />
             <span className="text-sm font-medium">Filters</span>
@@ -134,13 +224,14 @@ export function ProductListingToolbar({
                   aria-hidden
                 />
                 <input
-                  type="search"
+                  type="text"
                   name="q"
                   enterKeyHint="search"
+                  autoComplete="off"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder="Necklaces, earrings, rings…"
-                  className={`h-10 w-full min-w-0 rounded-xl border border-stone-200/90 bg-white py-2 pl-9 pr-8 ${fonts.body} text-sm text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20`}
+                  className={`h-10 w-full min-w-0 rounded-xl border border-stone-200/90 bg-white py-2 pl-9 pr-9 ${fonts.body} text-sm text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20`}
                 />
                 {searchQuery ? (
                   <button
@@ -156,24 +247,11 @@ export function ProductListingToolbar({
             </form>
           )}
 
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-stone-200/70 bg-white/80 px-2 py-1.5 sm:min-w-[200px] sm:flex-none lg:min-w-[240px]">
-            <span className="shrink-0 px-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
+          <div className="flex min-w-0 flex-1 items-stretch gap-2 rounded-xl border border-stone-200/70 bg-white/80 px-2 py-1 sm:min-w-[220px] sm:flex-none lg:min-w-[260px]">
+            <span className="flex shrink-0 items-center px-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
               Sort
             </span>
-            <div className="relative min-w-0 flex-1">
-              <select
-                value={sortBy}
-                onChange={(e) => onSortChange(e.target.value)}
-                className={`w-full min-w-0 appearance-none bg-transparent py-0.5 pr-8 ${fonts.body} text-sm font-medium text-stone-900 focus:outline-none`}
-              >
-                {sortOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
-            </div>
+            <SortSelect value={sortBy} onChange={onSortChange} options={sortOptions} />
           </div>
 
           <div className="flex items-center gap-0.5 rounded-xl border border-stone-200/70 bg-stone-100/80 p-1">
@@ -208,20 +286,18 @@ export function ProductListingToolbar({
   )
 }
 
-/** Outer wrapper: gradient + max width + hero + sidebar row (same as /search) */
+/** Outer wrapper: gradient + max width + hero + main column; filter opens as a fixed drawer (see filterDrawer) */
 export function ProductListingShell({
   hero,
-  desktopSidebar,
-  mobileFilterOverlay,
+  filterDrawer,
   children,
 }: {
   hero: ReactNode
-  desktopSidebar: ReactNode
-  mobileFilterOverlay: ReactNode
+  filterDrawer: ReactNode
   children: ReactNode
 }) {
   return (
-    <div className="relative flex-1 overflow-hidden bg-gradient-to-b from-cream via-background to-cream-dark/50">
+    <div className="relative min-w-0 flex-1 bg-gradient-to-b from-cream via-background to-cream-dark/50">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         style={{
@@ -231,12 +307,11 @@ export function ProductListingShell({
       <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-8 md:pb-12 md:pt-10">
         {hero}
 
-        <div className="mx-auto flex w-full max-w-[1400px] gap-4 xl:gap-8">
-          <div className="hidden lg:block lg:w-72 lg:flex-shrink-0">{desktopSidebar}</div>
-          <div className="lg:hidden">{mobileFilterOverlay}</div>
-          <div className="min-w-0 flex-1">{children}</div>
+        <div className="mx-auto w-full max-w-[1400px] overflow-visible">
+          <div className="min-w-0 overflow-visible">{children}</div>
         </div>
       </div>
+      {filterDrawer}
     </div>
   )
 }

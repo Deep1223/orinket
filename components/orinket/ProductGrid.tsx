@@ -200,7 +200,13 @@ export default function ProductGrid({ products, loading = false, viewMode = 'gri
           </div>
         </div>
       ) : (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 lg:gap-7' : 'space-y-4 sm:space-y-5'}>
+        <div
+          className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-4 2xl:grid-cols-5'
+              : 'space-y-4 sm:space-y-5'
+          }
+        >
           {products.map((product, idx) => {
             const isInWishlist = wishlistItems.some(item => item.id === product.id)
 

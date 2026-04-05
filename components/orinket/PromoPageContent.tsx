@@ -344,15 +344,7 @@ function PromoInner() {
             subtitle={hero.subtitle}
           />
         }
-        desktopSidebar={
-          <FilterSidebar
-            filters={filterOptions}
-            onFiltersChange={setActiveFilters}
-            isOpen
-            onClose={() => {}}
-          />
-        }
-        mobileFilterOverlay={
+        filterDrawer={
           <FilterSidebar
             filters={filterOptions}
             onFiltersChange={setActiveFilters}

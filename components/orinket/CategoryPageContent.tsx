@@ -270,18 +270,10 @@ export default function CategoryPageContent({ slug }: CategoryPageContentProps) 
         <ProductListingHero
           badge="Collection"
           title={category.displayName}
-          subtitle={`${category.description} Use filters on the left to narrow results.`}
+          subtitle={`${category.description} Tap Filters to narrow results.`}
         />
       }
-      desktopSidebar={
-        <FilterSidebar
-          filters={filterOptions}
-          onFiltersChange={handleFiltersChange}
-          isOpen
-          onClose={() => {}}
-        />
-      }
-      mobileFilterOverlay={
+      filterDrawer={
         <FilterSidebar
           filters={filterOptions}
           onFiltersChange={handleFiltersChange}

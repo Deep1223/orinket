@@ -78,16 +78,7 @@ function SearchContent() {
     router.replace("/search")
   }
 
-  const desktopSidebar = (
-    <FilterSidebar
-      filters={filterOptions}
-      onFiltersChange={setActiveFilters}
-      isOpen
-      onClose={() => {}}
-    />
-  )
-
-  const mobileFilter = (
+  const filterDrawer = (
     <FilterSidebar
       filters={filterOptions}
       onFiltersChange={setActiveFilters}
@@ -118,13 +109,12 @@ function SearchContent() {
             }
             subtitle={
               searchQuery
-                ? "Use filters on the left to narrow results."
+                ? "Use Filters to narrow results."
                 : "Explore every piece in our catalog — refined metals, timeless silhouettes."
             }
           />
         }
-        desktopSidebar={desktopSidebar}
-        mobileFilterOverlay={mobileFilter}
+        filterDrawer={filterDrawer}
       >
         <ProductListingToolbar
           productCount={filteredResults.length}

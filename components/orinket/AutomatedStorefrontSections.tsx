@@ -75,18 +75,21 @@ export default function AutomatedStorefrontSections() {
   if (!displaySections.length) return null
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-0 pb-8 md:pb-10">
+    <section className="mx-auto max-w-7xl px-4 pb-8 pt-0 md:pb-10">
       {displaySections.map((section) => (
         <div key={section.key} className="mb-6 md:mb-8 last:mb-0">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <div>
-              <h3 className={`text-2xl text-foreground ${fonts.headings}`}>
-                {section.key === "trending" ? "Trending Now" : "Recommended For You"}
-              </h3>
-            </div>
-            <p className={`text-xs text-muted-foreground ${fonts.body}`}>
-              {section.tooltip || "Based on recent activity"}
-            </p>
+          <div
+            className={`text-center ${
+              section.key === "recommended"
+                ? "mb-10 mt-10 md:mb-12 md:mt-12"
+                : "mb-6 mt-4 md:mb-8 md:mt-6"
+            }`}
+          >
+            <h2
+              className={`text-3xl font-light tracking-[0.1em] text-foreground md:text-4xl ${fonts.headings}`}
+            >
+              {section.key === "trending" ? "TRENDING NOW" : "RECOMMENDED FOR YOU"}
+            </h2>
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {section.products.slice(0, 8).map((p) => (
