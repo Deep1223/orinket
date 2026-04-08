@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Copy, Gift, Sparkles, X } from "lucide-react"
 import { font } from "@/lib/fonts"
+import { useAuth } from "@/context/AuthContext"
 
 type CheckSpinResponse = {
   success?: boolean
@@ -54,8 +55,11 @@ function phoneValid(value: string) {
 }
 
 export default function SpinToWinPopup() {
+  const { isLoggedIn } = useAuth()
   const [open, setOpen] = useState(false)
   const [checking, setChecking] = useState(true)
+  const [apiSaysShow, setApiSaysShow] = useState(false)
+  const [showAfterScroll, setShowAfterScroll] = useState(false)
   const [spinning, setSpinning] = useState(false)
   const [spun, setSpun] = useState(false)
   const [rotation, setRotation] = useState(0)
@@ -111,10 +115,10 @@ export default function SpinToWinPopup() {
         })
         const json = (await res.json().catch(() => ({}))) as CheckSpinResponse
         if (!active) return
-        setOpen(Boolean(json?.show_popup))
+        setApiSaysShow(Boolean(json?.show_popup))
       } catch {
         if (!active) return
-        setOpen(false)
+        setApiSaysShow(false)
       } finally {
         if (active) setChecking(false)
       }
@@ -124,6 +128,26 @@ export default function SpinToWinPopup() {
       active = false
     }
   }, [])
+
+  // Re-evaluate when auth resolves — isLoggedIn starts false, then flips after hydration
+  useEffect(() => {
+    setShowAfterScroll(apiSaysShow && isLoggedIn)
+  }, [apiSaysShow, isLoggedIn])
+
+  useEffect(() => {
+    if (!showAfterScroll || open) return
+
+    const minScrollYToShow = 120
+    const onScroll = () => {
+      if (window.scrollY < minScrollYToShow) return
+      setOpen(true)
+      setShowAfterScroll(false)
+      window.removeEventListener("scroll", onScroll)
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [showAfterScroll, open])
 
   async function handleSpin() {
     setError("")
@@ -177,9 +201,9 @@ export default function SpinToWinPopup() {
   return (
     <>
     {open ? (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/50 backdrop-blur-[1px] px-3 py-5 sm:px-4 sm:py-7">
+    <div className="spin-backdrop-in fixed inset-0 z-[100] overflow-y-auto bg-black/50 backdrop-blur-[1px] px-3 py-5 sm:px-4 sm:py-7">
       <div className="flex min-h-full items-center justify-center">
-        <div className="relative w-full max-w-[460px] rounded-2xl bg-gradient-to-r from-[#f9eaea] to-[#f6cfd3] px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5 shadow-2xl my-auto">
+        <div className="spin-modal-in relative w-full max-w-[460px] rounded-2xl bg-gradient-to-r from-[#f9eaea] to-[#f6cfd3] px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5 shadow-2xl my-auto">
         <button
           type="button"
           aria-label="Close spin popup"

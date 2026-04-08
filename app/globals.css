@@ -187,6 +187,28 @@
   body {
     @apply bg-background text-foreground overflow-x-hidden min-w-0;
   }
+
+  /* Cursor pointer for all interactive elements */
+  button:not(:disabled),
+  a,
+  [role="button"],
+  [role="tab"],
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"]:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  label {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input[type="submit"]:disabled,
+  input[type="button"]:disabled,
+  input[type="reset"]:disabled {
+    cursor: not-allowed;
+  }
   
   /* Hide scrollbar completely */
   ::-webkit-scrollbar {
@@ -642,4 +664,24 @@
 
 .spin-firework-flash {
   animation: spin-result-shine 1.4s ease-in-out infinite;
+}
+
+/* Spin popup entrance */
+@keyframes spin-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes spin-modal-in {
+  0%   { opacity: 0; transform: translateY(48px) scale(0.92); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.spin-backdrop-in {
+  animation: spin-backdrop-in 0.28s ease forwards;
+}
+
+.spin-modal-in {
+  animation: spin-modal-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

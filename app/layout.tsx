@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { StoreProvider } from '@/store/StoreProvider'
+import { AuthProvider } from '@/context/AuthContext'
 import { CompareProvider } from '@/context/CompareContext'
 import { CurrencyProvider } from '@/context/CurrencyContext'
 import { StoreSettingsProvider } from '@/context/StoreSettingsContext'
 import { fonts } from '@/lib/fonts'
 import BackToTop from '@/components/orinket/BackToTop'
 import SpinToWinPopup from '@/components/orinket/SpinToWinPopup'
+import CartUserSync from '@/components/orinket/CartUserSync'
 import { resolveOrinketBackendOrigin } from '@/lib/publicApi/server/resolveBackendOrigin'
 import './globals.css'
 
@@ -67,15 +69,18 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body className={`${fonts.mainVar} font-sans antialiased overflow-x-hidden min-w-0`}>
         <StoreSettingsProvider>
+          <AuthProvider>
           <CurrencyProvider>
             <StoreProvider>
               <CompareProvider>
                 {children}
+                <CartUserSync />
                 <BackToTop />
                 <SpinToWinPopup />
               </CompareProvider>
             </StoreProvider>
           </CurrencyProvider>
+          </AuthProvider>
         </StoreSettingsProvider>
         <Analytics />
       </body>

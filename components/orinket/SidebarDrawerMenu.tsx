@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { X, User, LogOut } from "lucide-react"
 import styles from "./SidebarDrawerMenu.module.css"
+import { useAuth } from "@/context/AuthContext"
 
 type SidebarTab = {
   id: string
@@ -74,6 +76,8 @@ const FALLBACK_FOOTER: SidebarFooterLink[] = [
 ]
 
 export default function SidebarDrawerMenu({ open, onClose, logoText }: SidebarDrawerMenuProps) {
+  const { user, isLoggedIn, logout } = useAuth()
+  const router = useRouter()
   const [activeTabId, setActiveTabId] = useState<string>("")
   const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(new Set())
   const [menuData, setMenuData] = useState<SidebarMenuPayload | null>(null)
@@ -184,6 +188,36 @@ export default function SidebarDrawerMenu({ open, onClose, logoText }: SidebarDr
             <X size={20} />
           </button>
         </div>
+
+        {/* User strip */}
+        {isLoggedIn && user ? (
+          <div className={styles.userStrip}>
+            <div className={styles.userAvatar}>
+              {user.firstname?.[0]?.toUpperCase() ?? <User size={16} />}
+            </div>
+            <div className={styles.userInfo}>
+              <span className={styles.userName}>{user.firstname} {user.lastname}</span>
+              <span className={styles.userEmail}>{user.email}</span>
+            </div>
+            <button
+              type="button"
+              className={styles.signOutBtn}
+              onClick={async () => {
+                onClose()
+                await logout()
+                router.refresh()
+              }}
+              aria-label="Sign out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : (
+          <Link href="/account" className={styles.signInLink} onClick={onClose}>
+            <User size={15} />
+            Sign In / Register
+          </Link>
+        )}
 
         <div className={styles.tabRow}>
           {tabs.map((tab) => (

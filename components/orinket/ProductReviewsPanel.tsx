@@ -224,7 +224,7 @@ export default function ProductReviewsPanel({ product }: ProductReviewsPanelProp
 
       {writeOpen && (
         <div
-          className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-4 sm:items-center cursor-pointer"
           role="dialog"
           aria-modal="true"
           aria-labelledby="write-review-title"

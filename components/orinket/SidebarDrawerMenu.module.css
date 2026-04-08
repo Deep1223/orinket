@@ -10,6 +10,7 @@
 .overlayOpen {
   background: rgba(0, 0, 0, 0.52);
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .drawer {
@@ -55,6 +56,92 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.userStrip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #ececec;
+  background: #fafafa;
+}
+
+.userAvatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f0e8d8;
+  color: #8a6a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid #ddd0b0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1b1b1b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signOutBtn {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.signOutBtn:hover {
+  background: #fdecea;
+}
+
+.signInLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1b1b1b;
+  text-decoration: none;
+  border-bottom: 1px solid #ececec;
+  background: #fafafa;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.signInLink:hover {
+  background: #f0e8d8;
 }
 
 .tabRow {

@@ -156,7 +156,7 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
   return (
     <>
       <div
-        className="fixed inset-0 z-40 animate-fadeIn bg-black/50"
+        className="fixed inset-0 z-40 animate-fadeIn bg-black/50 cursor-pointer"
         onClick={onClose}
         aria-hidden
       />

@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, Heart, ShoppingBag, User, Menu, X, GitCompare } from "lucide-react"
+import { Search, Heart, ShoppingBag, User, Menu, X, GitCompare, LogOut, ChevronDown } from "lucide-react"
 import { useCart } from "@/store/useCart"
 import { useCompare } from "@/context/CompareContext"
 import { useCurrency } from "@/context/CurrencyContext"
 import { useStoreSettings } from "@/context/StoreSettingsContext"
+import { useAuth } from "@/context/AuthContext"
 import { useAppSelector } from "@/store/hooks"
 import { selectCatalogCategories, selectProducts } from "@/store/selectors"
 import { font } from "@/lib/fonts"
@@ -35,7 +36,9 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const router = useRouter()
+  const { user, isLoggedIn, logout } = useAuth()
   const { cartCount, wishlistItems } = useCart()
   const { compareCount } = useCompare()
   const catalog = useAppSelector(selectProducts)
@@ -182,9 +185,65 @@ export default function Header() {
                   </span>
                 )}
               </Link>
-              <Link href="/account" className="p-2.5 hover:text-gold-dark transition-all duration-300 touch-target hidden md:block">
-                <User className="w-5 h-5 sm:w-6 sm:h-6" />
-              </Link>
+              {/* User icon / dropdown */}
+              <div className="relative hidden md:block">
+                {isLoggedIn && user ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setUserMenuOpen((o) => !o)}
+                      className="flex items-center gap-1.5 p-2.5 hover:text-gold-dark transition-all duration-300 touch-target"
+                      aria-label="Account menu"
+                    >
+                      <span className={`flex h-7 w-7 items-center justify-center rounded-full bg-gold/15 text-[11px] font-bold text-gold-dark ring-1 ring-gold/25 ${font('labels')}`}>
+                        {user.firstname?.[0]?.toUpperCase() ?? <User className="h-4 w-4" />}
+                      </span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {userMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} aria-hidden />
+                        <div className="absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-border/60 bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04]">
+                          <div className="border-b border-border/50 px-4 py-3">
+                            <p className={`text-xs font-semibold text-foreground truncate ${font('labels')}`}>
+                              {user.firstname} {user.lastname}
+                            </p>
+                            <p className={`mt-0.5 text-[11px] text-muted-foreground truncate ${font('body')}`}>
+                              {user.email}
+                            </p>
+                          </div>
+                          <div className="p-1.5">
+                            <Link
+                              href="/account"
+                              onClick={() => setUserMenuOpen(false)}
+                              className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-cream hover:text-foreground ${font('body')}`}
+                            >
+                              <User className="h-4 w-4 shrink-0" />
+                              My Account
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                setUserMenuOpen(false)
+                                await logout()
+                                router.refresh()
+                              }}
+                              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 ${font('body')}`}
+                            >
+                              <LogOut className="h-4 w-4 shrink-0" />
+                              Sign Out
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <Link href="/account" className="p-2.5 hover:text-gold-dark transition-all duration-300 touch-target">
+                    <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </Link>
+                )}
+              </div>
               <Link href="/cart" className="p-2.5 hover:text-gold-dark transition-all duration-300 touch-target relative">
                 <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
                 {cartCount > 0 && (
